@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Workspace>
+  <ConfigDictionary>
+    
+  <CurrentConfigs><Project>project/Debug</Project></CurrentConfigs></ConfigDictionary>
+  <Desktop>
+    <Static>
+      <Build>
+        
+        
+        
+        
+      <ColumnWidth0>20</ColumnWidth0><ColumnWidth1>846</ColumnWidth1><ColumnWidth2>287</ColumnWidth2><ColumnWidth3>68</ColumnWidth3></Build>
+      <Workspace>
+        <ColumnWidths>
+          
+          
+          
+          
+        <Column0>229</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
+      </Workspace>
+    </Static>
+    <Windows>
+      
+      
+    <Wnd0>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-15952-1047</Identity>
+            <TabName>Build</TabName>
+            <Factory>Build</Factory>
+            <Session/>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd0><Wnd1>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-26700-1050</Identity>
+            <TabName>Workspace</TabName>
+            <Factory>Workspace</Factory>
+            <Session>
+              
+            <NodeDict><ExpandedNode>project</ExpandedNode><ExpandedNode>project/StdPeriph_Driver</ExpandedNode></NodeDict></Session>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd1></Windows>
+    <Editor>
+      
+      
+      
+      
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\rtconfig.h</Filename><XPos>0</XPos><YPos>60</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\COMPONENTS\NET\LWIP\SRC\API\api_lib.c</Filename><XPos>0</XPos><YPos>30</YPos><SelStart>1650</SelStart><SelEnd>1650</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\COMPONENTS\NET\LWIP\SRC\INCLUDE\LWIP\opt.h</Filename><XPos>0</XPos><YPos>37</YPos><SelStart>1732</SelStart><SelEnd>1732</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\stm32f10x_it.c</Filename><XPos>0</XPos><YPos>66</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\LIBRARIES\CMSIS\CM3\DEVICESUPPORT\ST\STM32F10X\stm32f10x.h</Filename><XPos>0</XPos><YPos>8286</YPos><SelStart>624918</SelStart><SelEnd>624938</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\LIBRARIES\STM32F10X_STDPERIPH_DRIVER\SRC\misc.c</Filename><XPos>0</XPos><YPos>88</YPos><SelStart>2684</SelStart><SelEnd>2684</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\LIBRARIES\STM32F10X_STDPERIPH_DRIVER\INC\misc.h</Filename><XPos>0</XPos><YPos>24</YPos><SelStart>1316</SelStart><SelEnd>1325</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\stm32f10x_conf.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>2</SelStart><SelEnd>2</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\application.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>392</SelStart><SelEnd>392</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>C:\Program Files\Common Files\IAR Systems\License\lms.log</Filename><XPos>0</XPos><YPos>338</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\sdcard.c</Filename><XPos>0</XPos><YPos>189</YPos><SelStart>8045</SelStart><SelEnd>8045</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\VTDR\SOFTWARE\BSP\VTDR\startup.c</Filename><XPos>0</XPos><YPos>125</YPos><SelStart>2851</SelStart><SelEnd>2851</SelEnd></Tab><ActiveTab>11</ActiveTab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-00a5a040><key>iaridepm.enu1</key></Toolbar-00a5a040></Sizes></Row0></Top><Left><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>414</Bottom><Right>320</Right><x>-2</x><y>-2</y><xscreen>200</xscreen><yscreen>200</yscreen><sizeHorzCX>139082</sizeHorzCX><sizeHorzCY>268817</sizeHorzCY><sizeVertCX>223922</sizeVertCX><sizeVertCY>559140</sizeVertCY></Rect></Wnd1></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd0><Rect><Top>-2</Top><Left>-2</Left><Bottom>285</Bottom><Right>1440</Right><x>-2</x><y>-2</y><xscreen>1442</xscreen><yscreen>287</yscreen><sizeHorzCX>1002782</sizeHorzCX><sizeHorzCY>385753</sizeHorzCY><sizeVertCX>139082</sizeVertCX><sizeVertCY>268817</sizeVertCY></Rect></Wnd0></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+  </Desktop>
+</Workspace>
+
+

@@ -1,0 +1,7 @@
+#Mon Jul 30 22:48:17 CST 2012
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.base.1303656655/PATH/delimiter=\:
+environment/project/cdt.managedbuild.toolchain.gnu.base.1303656655/PATH/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.base.1303656655/PATH/value=/opt/arm-2012.03/bin\:/usr/lib/lightdm/lightdm\:/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/usr/games
+environment/project/cdt.managedbuild.toolchain.gnu.base.1303656655/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.base.1303656655/appendContributed=true

@@ -1,0 +1,103 @@
+import rtconfig
+Import('RTT_ROOT')
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+src = Split("""
+CMSIS/Device/ST/STM32F10x/Source/Templates/system_stm32f10x.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_crc.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_wwdg.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_pwr.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_bkp.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_adc.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_dac.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_rtc.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_fsmc.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_iwdg.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_sdio.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_dbgmcu.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_can.c
+STM32F10x_StdPeriph_Driver/src/stm32f10x_cec.c
+STM32F10x_StdPeriph_Driver/src/misc.c
+STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_bot.c
+STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_scsi.c
+STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_core.c
+STM32_USB_HOST_Library/Core/src/usbh_core.c
+STM32_USB_HOST_Library/Core/src/usbh_hcs.c
+STM32_USB_HOST_Library/Core/src/usbh_stdreq.c
+STM32_USB_HOST_Library/Core/src/usbh_ioreq.c
+STM32_USB_OTG_Driver/src/usb_hcd.c
+STM32_USB_OTG_Driver/src/usb_hcd_int.c
+STM32_USB_OTG_Driver/src/usb_core.c
+""")
+
+# USB/OTG device driver
+#STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_fatfs.c
+#STM32_USB_OTG_Driver/src/usb_dcd.c
+#STM32_USB_OTG_Driver/src/usb_dcd_int.c
+#STM32_USB_OTG_Driver/src/usb_otg.c
+#STM32_USB_Device_Library/Class/msc/src/usbd_msc_core.c
+#STM32_USB_Device_Library/Class/msc/src/usbd_msc_data.c
+#STM32_USB_Device_Library/Class/msc/src/usbd_msc_bot.c
+#STM32_USB_Device_Library/Class/msc/src/usbd_msc_scsi.c
+#STM32_USB_Device_Library/Class/dfu/src/usbd_flash_if.c
+#STM32_USB_Device_Library/Class/dfu/src/usbd_otp_if.c
+#STM32_USB_Device_Library/Class/dfu/src/usbd_dfu_core.c
+#STM32_USB_Device_Library/Class/dfu/src/usbd_dfu_mal.c
+#STM32_USB_Device_Library/Class/hid/src/usbd_hid_core.c
+#STM32_USB_Device_Library/Core/src/usbd_req.c
+#STM32_USB_Device_Library/Core/src/usbd_core.c
+#STM32_USB_Device_Library/Core/src/usbd_ioreq.c
+
+# starupt scripts for each STM32 kind
+startup_scripts = {}
+startup_scripts['STM32F10X_CL']     = 'startup_stm32f10x_cl.s'
+startup_scripts['STM32F10X_HD']     = 'startup_stm32f10x_hd.s'
+startup_scripts['STM32F10X_HD_VL']  = 'startup_stm32f10x_hd_vl.s'
+startup_scripts['STM32F10X_LD']     = 'startup_stm32f10x_ld.s'
+startup_scripts['STM32F10X_LD_VL']  = 'startup_stm32f10x_ld_vl.s'
+startup_scripts['STM32F10X_MD']     = 'startup_stm32f10x_md.s'
+startup_scripts['STM32F10X_MD_VL']  = 'startup_stm32f10x_md_vl.s'
+startup_scripts['STM32F10X_XL']	    = 'startup_stm32f10x_xl.s'
+
+# add for startup script 
+if rtconfig.CROSS_TOOL == 'gcc':
+    src = src + ['CMSIS/Device/ST/STM32F10x/Source/Templates/gcc_ride7/' + startup_scripts[rtconfig.STM32_TYPE]]
+elif rtconfig.CROSS_TOOL == 'keil':
+    src = src + ['CMSIS/Device/ST/STM32F10x/Source/Templates/arm/' + startup_scripts[rtconfig.STM32_TYPE]]
+elif rtconfig.CROSS_TOOL == 'iar':
+    src = src + ['CMSIS/Device/ST/STM32F10x/Source/Templates/iar/' + startup_scripts[rtconfig.STM32_TYPE]]
+
+
+path = [cwd + '/STM32F10x_StdPeriph_Driver/inc', 
+    cwd + '/CMSIS/Include',
+    cwd + '/CMSIS/Device/ST/STM32F10x/Include',
+    cwd + '/STM32_USB_Device_Library/Core/inc' ,
+    cwd + '/STM32_USB_HOST_Library/Core/inc' ,
+    cwd + '/STM32_USB_OTG_Driver/inc',
+    cwd + '/STM32_USB_HOST_Library/Class/HID/inc',
+    cwd + '/STM32_USB_HOST_Library/Class/MSC/inc',
+    cwd + '/STM32_USB_HOST_Library/Core/inc',
+    cwd + '/STM32_USB_Device_Library/Class/cdc/inc',
+    cwd + '/STM32_USB_Device_Library/Class/msc/inc',
+    cwd + '/STM32_USB_Device_Library/Class/audio/inc',
+    cwd + '/STM32_USB_Device_Library/Class/dfu/inc',
+    cwd + '/STM32_USB_Device_Library/Class/hid/inc',
+    cwd + '/STM32_USB_Device_Library/Core/inc']
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER', rtconfig.STM32_TYPE]
+group = DefineGroup('STM32_StdPeriph', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

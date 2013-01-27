@@ -1,0 +1,10 @@
+.svn
+.metadata
+building.pyc
+.sconsign.dblite
+software/bsp/vtdr/build/
+software/bsp/vtdr/rtconfig.pyc
+software/bsp/vtdr/rtthread-stm32.axf
+software/bsp/vtdr/rtthread-stm32.map
+software/bsp/vtdr/rtthread.bin
+

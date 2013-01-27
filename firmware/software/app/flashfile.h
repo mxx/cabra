@@ -10,7 +10,7 @@
 
 struct flashfile
 {
-	char type;
+	char file_id;
 	unsigned char start_block;
 	unsigned char total_block;
 	unsigned char block_limit;

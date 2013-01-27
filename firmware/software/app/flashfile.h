@@ -28,7 +28,7 @@ struct block_info block_map[256];
 
 struct record_block_head
 {
-	unsigned int StartTimeTage;
+	unsigned int StartTimeTag;
 	unsigned short RecorderNumber;
 };
 

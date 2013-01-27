@@ -19,12 +19,15 @@ struct flashfile
 
 struct block_info
 {
-	char type;
-	unsigned char next_block;
+	unsigned short file_id:4;
+	unsigned short first_write_size:12;
+	unsigned char prev_block;
 	unsigned char write_count;
 };
 
-struct block_info block_map[256];
+typedef struct block_info FlashBlockHead;
+
+
 
 struct record_block_head
 {
@@ -32,12 +35,9 @@ struct record_block_head
 	unsigned short RecorderNumber;
 };
 
-/*Insert a record
- *
- */
-int insert_record(char type, const char* pData, short size);
-
-int query_record(char type, unsigned int start_time, unsigned int number, char* pBuffer);
-
+int flashfile_system_init(void);
+int flashfile_append(const char file_id,const char* ptrData,const int size);
+int flashfile_read(const char file_id, const int offset, char* ptrData,const int size);
+int flashfile_get_first_write_size(const char file_id);
 
 #endif /* FLASHFILE_H_ */

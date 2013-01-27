@@ -8,20 +8,12 @@
 #ifndef FLASHFILE_H_
 #define FLASHFILE_H_
 
-typedef struct flashfile {
-	unsigned char file_id;
-	unsigned char start_block;
-	unsigned char total_block;
-	unsigned char block_limit;
-	unsigned int write_pos;
-} FlashFile;
 
-typedef struct block_info {
-	unsigned short file_id :4;
-	unsigned short first_write_size :12;
-	unsigned char prev_block;
-	unsigned char write_count;
-} FlashBlockHead;
+typedef struct _time_tag
+{
+	unsigned int time_tag;
+	unsigned short next_time_tag_offset;
+} TimeTag;
 
 typedef enum _FlashFileID
 {

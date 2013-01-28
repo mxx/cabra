@@ -9,12 +9,6 @@
 #define FLASHFILE_H_
 
 
-typedef struct _time_tag
-{
-	unsigned int time_tag;
-	unsigned short next_time_tag_offset;
-} TimeTag;
-
 typedef enum _FlashFileID
 {
 	RealTimeFile,

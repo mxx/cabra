@@ -197,6 +197,16 @@ int flashfile_alloc_block(const FlashFileID file_id)
 
 	return block;
 }
+int flashfile_read(const unsigned char block,const int offset, char* ptrData,const int size)
+{
+	return 0;
+}
+
+int flashfile_write(const unsigned char block,const int offset, const char* ptrData,const int size)
+{
+	return 0;
+}
+
 // return the time_tag structure offset from block head;
 int flashfile_get_first_time_tag(const unsigned char block)
 {
@@ -207,24 +217,23 @@ int flashfile_get_next_time_tag(const unsigned char block, const int offset)
 {
 	TimeTag tag;
 	flash_read(block, offset, &tag, sizeof(tag));
-	return offset + tag.next_time_tag_offset;
+	return tag.next_time_tag_offset;
 }
 
-int flashfile_get_last_time_tag(const unsigned char block, int* next_offset)
+int flashfile_get_last_time_tag(const unsigned char block)
 {
 	int offset = flashfile_get_first_time_tag(block);
 	while (offset < 0xFFF)
 	{
 		int new_offset;
-		new_offset = flashfile_get_next_time_tag(block,offset);
-		if (new_offset > 0x1000)
+		new_offset = flashfile_get_next_time_tag(block, offset);
+		if (new_offset == 0xFFF)
 		{
-			*next_offset = new_offset - offset;
 			return offset;
 		}
-		offset = new_offset;
+		offset += new_offset;
 	}
-	return -1;
+	return offset;
 }
 
 int flashfile_append_time_tag(const FlashFileID file_id,
@@ -233,20 +242,14 @@ int flashfile_append_time_tag(const FlashFileID file_id,
 	unsigned char block;
 	TimeTag timeTag;
 	timeTag.next_time_tag_offset = 0;
-	if (flashFile[file_id].total_block)
+	if (!flashFile[file_id].total_block)
 	{
-		block = flashFile[file_id].last_write_block;
-
-		int start_offset = block_map[block].first_time_tag_offset;
-		int offset = start_offset + timeTag.next_time_tag_offset;
-		while (offset < BLOCK_SIZE)
-		{
-			flash_read(block, offset, &timeTag, sizeof(timeTag));
-			if (!(timeTag.time_tag + 1))
-				break;
-			offset += timeTag.next_time_tag_offset;
-		};
+		flashfile_alloc_block(file_id);
 	}
+
+	block = flashFile[file_id].last_write_block;
+	int offset = 0;
+	offset = flashfile_get_last_time_tag(block);
 
 	if (offset > BLOCK_SIZE)
 	{

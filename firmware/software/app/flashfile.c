@@ -6,6 +6,13 @@
  */
 #include "flashfile.h"
 #include "flash_dev.h"
+
+typedef struct _time_tag
+{
+	unsigned int time_tag;
+	unsigned short next_time_tag_offset;
+} TimeTag;
+
 typedef struct flashfile
 {
 	unsigned char file_id;
@@ -13,18 +20,12 @@ typedef struct flashfile
 	unsigned char total_block;
 	unsigned char block_limit;
 	unsigned char last_write_block;
-	unsigned int last_time_tag;
-	int time_tag_offset;
+	TimeTag last_time_tag;
+	int time_tag_offset;			//last time tag offset from block head
 	int record_size;				//bytes per record
 	int time_tag_unit;              //one record for how may seconds
 	int time_tag_interval;			//how many seconds on tag placed
 } FlashFile;
-
-typedef struct _time_tag
-{
-	unsigned int time_tag;
-	unsigned short next_time_tag_offset;
-} TimeTag;
 
 typedef struct block_info
 {
@@ -64,7 +65,7 @@ void flashfile_memset(char* ptr, char value, int size)
 		ptr[i] = c;
 }
 
-void flashfile_scan_fileblock(FlashFileID file_id)
+void flashfile_scan_file_block(FlashFileID file_id)
 {
 	for (int i = 0; i < BLOCK_NUMBER; i++)
 	{
@@ -91,6 +92,9 @@ void flashfile_scan_fileblock(FlashFileID file_id)
 		}
 		flashFile[file_id].last_write_block = nextBlock;
 	}
+
+	flashFile[file_id].time_tag_offset = flashfile_get_last_time_tag(
+			flashFile[file_id].last_write_block);
 }
 
 void flashfile_init_file_struct(FlashFileID file_id)
@@ -100,7 +104,8 @@ void flashfile_init_file_struct(FlashFileID file_id)
 	flashFile[file_id].block_limit = flashFileBlockLimite[file_id];
 	flashFile[file_id].start_block = 0;
 	flashFile[file_id].time_tag_interval = 60;
-	flashFile[file_id].time_tag_offset = flashfile_scan_file_block(file_id);
+	flashFile[file_id].time_tag_offset = 0;
+	flashfile_scan_file_block(file_id);
 }
 
 int flashfile_update_blockmap(void)
@@ -166,9 +171,15 @@ void flashfile_append_file_tail_block(const FlashFileID file_id,
 {
 	block_map[block].file_id = file_id;
 	block_map[block].prev_block = flashFile[file_id].last_write_block;
+	block_map[block].first_time_tag_offset =
+			flashFile[file_id].last_time_tag.next_time_tag_offset
+					+ flashFile[file_id].time_tag_offset - BLOCK_SIZE
+					+ sizeof(FlashBlockHead);
+
 	nextBlockChain[flashFile[file_id].last_write_block] = block;
 	flashFile[file_id].last_write_block = block;
 	flashFile[file_id].total_block++;
+	flashfile_block_write(block, 0, &block_map[block], sizeof(FlashBlockHead));
 }
 
 void flashfile_round_file_struct(const FlashFileID file_id,
@@ -233,6 +244,7 @@ int flashfile_write(const unsigned char block, const int offset,
 		return size;
 
 	write_block = flashfile_alloc_block(block_map[block].file_id);
+
 	if (write_block > 255)
 		return -1;
 
@@ -253,7 +265,8 @@ int flashfile_get_next_time_tag(const unsigned char block, const int offset)
 	return tag.next_time_tag_offset;
 }
 
-int flashfile_get_last_time_tag(const unsigned char block)
+//TODO: should return tiem tag itself
+int flashfile_get_last_time_tag(const unsigned char block, TimeTag* ptrTag)
 {
 	int offset = flashfile_get_first_time_tag(block);
 	while (offset < 0xFFF)
@@ -286,6 +299,14 @@ int flashfile_record_offset_to_time_tag(const FlashFileID file_id,
 	return offset;
 }
 
+void flashfile_store_last_time_tag(const FlashFileID file_id,
+		const TimeTag* ptrTag)
+{
+	flashFile[file_id].last_time_tag.time_tag = ptrTag->time_tag;
+	flashFile[file_id].last_time_tag.next_time_tag_offset =
+			ptrTag->next_time_tag_offset;
+}
+
 int flashfile_init_record(const FlashFileID file_id,
 		const unsigned int time_tag, const char* ptrData)
 {
@@ -300,6 +321,9 @@ int flashfile_init_record(const FlashFileID file_id,
 	tag.time_tag = (time_tag / interval) * interval;
 	tag.next_time_tag_offset = flashfile_time_tag_offset(file_id);
 	flashfile_write(block, sizeof(block_map[block]), &tag, sizeof(tag));
+
+	flashfile_store_last_time_tag(file_id, &tag);
+
 	int offset = sizeof(block_map[block]) + sizeof(tag);
 	offset += flashfile_record_offset_to_time_tag(file_id, &tag, time_tag);
 	flashfile_write(block, offset, ptrData, flashFile[file_id].time_tag_unit);
@@ -317,7 +341,7 @@ int flashfile_append_time_tag(const FlashFileID file_id,
 	block = flashFile[file_id].last_write_block;
 	int offset = 0;
 	offset = flashfile_get_last_time_tag(block);
-
+	flashfile_store_last_time_tag(file_id, &timeTag);
 	return flashfile_write(block, offset, &timeTag, sizeof(timeTag));
 }
 

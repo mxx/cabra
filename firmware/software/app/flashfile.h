@@ -8,6 +8,9 @@
 #ifndef FLASHFILE_H_
 #define FLASHFILE_H_
 
+#define FLASH_SIZE 1024*1024
+#define BLOCK_NUMBER 256
+#define BLOCK_SIZE FLASH_SIZE/BLOCK_NUMBER
 
 typedef enum _FlashFileID
 {

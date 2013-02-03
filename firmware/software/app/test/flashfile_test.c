@@ -9,6 +9,17 @@
 #include "../flashfile.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
+int flash_erase_block(const int block)
+{
+	char buf[BLOCK_SIZE];
+	memset(buf,0xFF,BLOCK_SIZE);
+	return flash_write(block,0,buf,BLOCK_SIZE);
+}
+
 
 int flash_read_raw(FILE* fp, const int offset, char* ptrData, int size)
 {
@@ -39,7 +50,7 @@ int flash_write(const int block, const int offset, const char* ptrData,
 			perror("seek");
 			return -1;
 		}
-		char* ptrRaw = malloc(size);
+		char* ptrRaw = (char*)malloc(size);
 		if (flash_read_raw(fp, abs_offset, ptrRaw, size))
 		{
 			perror("read raw");
@@ -55,6 +66,8 @@ int flash_write(const int block, const int offset, const char* ptrData,
 			perror("write");
 			rt = -1;
 		}
+		if (ptrRaw)
+			free(ptrRaw);
 		fclose(fp);
 		return rt;
 	}
@@ -85,4 +98,29 @@ int flash_read(const int block, const int offset, const char* ptrData,
 		return rt;
 	}
 	return -1;
+}
+
+void flash_build(void)
+{
+	char buf[BLOCK_SIZE];
+	memset(buf,0xFF,BLOCK_SIZE);
+	for(int i =0;i < 256;i++)
+	{
+		flash_write(i,0,buf,BLOCK_SIZE);
+	}
+}
+
+int main(int argc,char** argv)
+{
+	flash_build();
+	flashfile_system_init();
+	char buf[64];
+	memset(buf,0x55,63);
+	buf[63]=0;
+	while(1)
+	{
+		flashfile_append_record(SpeedFile,time(NULL),buf);
+		sleep(1);
+	};
+
 }

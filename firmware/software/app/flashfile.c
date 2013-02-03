@@ -62,7 +62,7 @@ const unsigned char flashFileBlockLimite[FileIDMax] =
 void flashfile_memset(char* ptr, char value, int size)
 {
 	for (int i = 0; i < size; i++)
-		ptr[i] = c;
+		ptr[i] = value;
 }
 
 int flashfile_scan_last_block(FlashFileID file_id)
@@ -88,9 +88,8 @@ void flashfile_scan_file_block(FlashFileID file_id)
 		{
 			nextBlockChain[prev] = i;
 			flashFile[file_id].total_block++;
-
 			if (block_map[prev].file_id != file_id
-					|| block_map[block_map[i].prev_block] == i)
+					|| block_map[i].prev_block == i)
 				flashFile[file_id].start_block = i;
 		}
 	}

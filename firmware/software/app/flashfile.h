@@ -26,15 +26,14 @@ typedef enum _FlashFileID
 	NoFile = 0x0F
 } FlashFileID;
 
-struct record_block_head {
+struct record_block_head
+{
 	unsigned int StartTimeTag;
 	unsigned short RecorderNumber;
 };
 
 int flashfile_system_init(void);
-int flashfile_append(const char file_id, const char* ptrData, const int size);
-int flashfile_read(const char file_id, const int offset, char* ptrData,
-		const int size);
-int flashfile_get_first_write_size(const char file_id);
+int flashfile_append_record(const FlashFileID file_id,
+		const unsigned int time_tag, const char* ptrData);
 
 #endif /* FLASHFILE_H_ */

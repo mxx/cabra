@@ -175,7 +175,7 @@ int flashfile_find_first_freeblock(void)
 	{
 		if (block_map[i].file_id == NoFile)
 		{
-			if ((block_map[i].write_count + 1) < found_write_count)
+			if ((unsigned char)(block_map[i].write_count + 1) < found_write_count)
 			{
 				found_block = i;
 				found_write_count = block_map[i].write_count + 1;
@@ -345,7 +345,7 @@ int flashfile_init_record(const FlashFileID file_id,
 
 	flashfile_store_last_time_tag(file_id, &tag);
 
-	int offset = sizeof(block_map[block]) + sizeof(tag);
+	int offset = sizeof(block_map[block]) ;
 	offset += flashfile_record_offset_to_time_tag(file_id, &tag, time_tag);
 	flashfile_write(block, offset, ptrData, flashFile[file_id].record_size);
 	return 0;

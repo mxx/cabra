@@ -22,7 +22,7 @@ int flash_erase_block(const int block)
 
 int flash_read_raw(FILE* fp, const int offset, char* ptrData, int size)
 {
-	if (fseek(fp, SEEK_SET, offset))
+	if (fseek(fp, offset, SEEK_SET))
 	{
 		perror("seek");
 		return -1;
@@ -46,7 +46,7 @@ int flash_write(const int block, const int offset, const char* ptrData,
 	while (fp)
 	{
 
-		if (fseek(fp, SEEK_SET, abs_offset))
+		if (fseek(fp, abs_offset, SEEK_SET))
 		{
 			perror("seek");
 			rt = -1;
@@ -88,15 +88,14 @@ int flash_read(const int block, const int offset, char* ptrData, const int size)
 	if (fp)
 	{
 		int rt = 0;
-		if (fseek(fp, SEEK_SET, abs_offset))
+		if (fseek(fp, abs_offset, SEEK_SET))
 		{
 			perror("seek");
 			return -1;
 		}
 
-		if (fread(ptrData, size, 1, fp) != 1)
+		if ((rt = fread(ptrData, 1, size, fp)) < 0)
 		{
-			perror("read");
 			rt = -1;
 		}
 		fclose(fp);
@@ -112,7 +111,7 @@ void flash_build(void)
 	FILE* fp = fopen("test.dat", "wb");
 	for (int i = 0; i < 256; i++)
 	{
-		fwrite(buf,BLOCK_SIZE, 1, fp);
+		fwrite(buf, BLOCK_SIZE, 1, fp);
 	}
 	fclose(fp);
 }
@@ -121,7 +120,7 @@ int main(int argc, char** argv)
 {
 	flash_build();
 	flashfile_system_init();
-	flashfile_set_param(SpeedFile,64,60,1);
+	flashfile_set_param(SpeedFile, 64, 1, 60);
 	char buf[64];
 	memset(buf, 0x55, 63);
 	buf[63] = 0;

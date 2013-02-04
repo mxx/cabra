@@ -16,10 +16,9 @@
 int flash_erase_block(const int block)
 {
 	char buf[BLOCK_SIZE];
-	memset(buf,0xFF,BLOCK_SIZE);
-	return flash_write(block,0,buf,BLOCK_SIZE);
+	memset(buf, 0xFF, BLOCK_SIZE);
+	return flash_write(block, 0, buf, BLOCK_SIZE);
 }
-
 
 int flash_read_raw(FILE* fp, const int offset, char* ptrData, int size)
 {
@@ -42,19 +41,23 @@ int flash_write(const int block, const int offset, const char* ptrData,
 {
 	int abs_offset = block * BLOCK_SIZE + offset;
 	FILE* fp = fopen("test.dat", "a+b");
-	if (fp)
+	char* ptrRaw = (char*) malloc(size);
+	int rt = 0;
+	while (fp)
 	{
-		int rt = 0;
+
 		if (fseek(fp, SEEK_SET, abs_offset))
 		{
 			perror("seek");
-			return -1;
+			rt = -1;
+			break;
 		}
-		char* ptrRaw = (char*)malloc(size);
+
 		if (flash_read_raw(fp, abs_offset, ptrRaw, size))
 		{
 			perror("read raw");
 			rt = -1;
+			break;
 		}
 		for (int i = 0; i < size; i++)
 		{
@@ -65,17 +68,19 @@ int flash_write(const int block, const int offset, const char* ptrData,
 		{
 			perror("write");
 			rt = -1;
+			break;
 		}
-		if (ptrRaw)
-			free(ptrRaw);
-		fclose(fp);
+
 		return rt;
 	}
-	return -1;
+	if (ptrRaw)
+		free(ptrRaw);
+	if (fp)
+		fclose(fp);
+	return rt;
 }
 
-int flash_read(const int block, const int offset, const char* ptrData,
-		const int size)
+int flash_read(const int block, const int offset, char* ptrData, const int size)
 {
 	FILE* fp = fopen("test.dat", "rb");
 	int abs_offset = block * BLOCK_SIZE + offset;
@@ -83,15 +88,15 @@ int flash_read(const int block, const int offset, const char* ptrData,
 	if (fp)
 	{
 		int rt = 0;
-		if (fseek(fp, SEEK_SET,abs_offset))
+		if (fseek(fp, SEEK_SET, abs_offset))
 		{
 			perror("seek");
 			return -1;
 		}
 
-		if (fwrite(ptrData, size, 1, fp) != 1)
+		if (fread(ptrData, size, 1, fp) != 1)
 		{
-			perror("write");
+			perror("read");
 			rt = -1;
 		}
 		fclose(fp);
@@ -103,23 +108,26 @@ int flash_read(const int block, const int offset, const char* ptrData,
 void flash_build(void)
 {
 	char buf[BLOCK_SIZE];
-	memset(buf,0xFF,BLOCK_SIZE);
-	for(int i =0;i < 256;i++)
+	memset(buf, 0xFF, BLOCK_SIZE);
+	FILE* fp = fopen("test.dat", "wb");
+	for (int i = 0; i < 256; i++)
 	{
-		flash_write(i,0,buf,BLOCK_SIZE);
+		fwrite(buf,BLOCK_SIZE, 1, fp);
 	}
+	fclose(fp);
 }
 
-int main(int argc,char** argv)
+int main(int argc, char** argv)
 {
 	flash_build();
 	flashfile_system_init();
+	flashfile_set_param(SpeedFile,64,60,1);
 	char buf[64];
-	memset(buf,0x55,63);
-	buf[63]=0;
-	while(1)
+	memset(buf, 0x55, 63);
+	buf[63] = 0;
+	while (1)
 	{
-		flashfile_append_record(SpeedFile,time(NULL),buf);
+		flashfile_append_record(SpeedFile, time(NULL), buf);
 		sleep(1);
 	};
 

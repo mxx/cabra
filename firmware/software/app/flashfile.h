@@ -33,6 +33,7 @@ struct record_block_head
 };
 
 int flashfile_system_init(void);
+int flashfile_set_param(const FlashFileID file_id,int record_size, int time_unit, int time_interval);
 int flashfile_append_record(const FlashFileID file_id,
 		const unsigned int time_tag, const char* ptrData);
 

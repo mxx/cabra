@@ -12,6 +12,9 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 int flash_erase_block(const int block)
 {
@@ -20,15 +23,15 @@ int flash_erase_block(const int block)
 	return flash_write(block, 0, buf, BLOCK_SIZE);
 }
 
-int flash_read_raw(FILE* fp, const int offset, char* ptrData, int size)
+int flash_read_raw(int fp, const int offset, char* ptrData, int size)
 {
-	if (fseek(fp, offset, SEEK_SET))
+	if (lseek(fp, offset, SEEK_SET) < 0)
 	{
 		perror("seek");
 		return -1;
 	}
 
-	if (fread(ptrData, size, 1, fp) != 1)
+	if (read(fp, ptrData, size) < 0)
 	{
 		perror("read");
 		return -1;
@@ -40,19 +43,11 @@ int flash_write(const int block, const int offset, const char* ptrData,
 		const int size)
 {
 	int abs_offset = block * BLOCK_SIZE + offset;
-	FILE* fp = fopen("test.dat", "a+b");
+	int fp = open("test.dat", O_CREAT|O_RDWR);
 	char* ptrRaw = (char*) malloc(size);
 	int rt = 0;
-	while (fp)
+	while (fp > 0)
 	{
-
-		if (fseek(fp, abs_offset, SEEK_SET))
-		{
-			perror("seek");
-			rt = -1;
-			break;
-		}
-
 		if (flash_read_raw(fp, abs_offset, ptrRaw, size))
 		{
 			perror("read raw");
@@ -63,42 +58,48 @@ int flash_write(const int block, const int offset, const char* ptrData,
 		{
 			ptrRaw[i] &= ptrData[i];
 		}
-
-		if (!rt && (fwrite(ptrRaw, size, 1, fp) != 1))
+		if (lseek(fp, abs_offset, SEEK_SET))
+		{
+			perror("seek");
+			rt = -1;
+			break;
+		}
+		if (!rt && ((rt = write(fp, ptrRaw, size)) != size))
 		{
 			perror("write");
 			rt = -1;
 			break;
 		}
 
-		return rt;
+		break;
 	}
 	if (ptrRaw)
 		free(ptrRaw);
 	if (fp)
-		fclose(fp);
+		close(fp);
 	return rt;
 }
 
 int flash_read(const int block, const int offset, char* ptrData, const int size)
 {
-	FILE* fp = fopen("test.dat", "rb");
+	int fp = open("test.dat", O_RDWR);
 	int abs_offset = block * BLOCK_SIZE + offset;
 
 	if (fp)
 	{
 		int rt = 0;
-		if (fseek(fp, abs_offset, SEEK_SET))
+		if (lseek(fp, abs_offset, SEEK_SET))
 		{
 			perror("seek");
+			close(fp);
 			return -1;
 		}
 
-		if ((rt = fread(ptrData, 1, size, fp)) < 0)
+		if ((rt = read(fp, ptrData, size)) < 0)
 		{
 			rt = -1;
 		}
-		fclose(fp);
+		close(fp);
 		return rt;
 	}
 	return -1;
@@ -126,7 +127,7 @@ int main(int argc, char** argv)
 	buf[63] = 0;
 	while (1)
 	{
-		flashfile_append_record(SpeedFile, time(NULL), buf);
+		flashfile_append_record(SpeedFile, time(NULL ), buf);
 		sleep(1);
 	};
 

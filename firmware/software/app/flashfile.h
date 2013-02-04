@@ -24,13 +24,9 @@ typedef enum _FlashFileID
 	InstallFile,
 	FileIDMax,
 	NoFile = 0x0F
-} FlashFileID;
+} __attribute__ ((packed)) FlashFileID;
 
-struct record_block_head
-{
-	unsigned int StartTimeTag;
-	unsigned short RecorderNumber;
-};
+
 
 int flashfile_system_init(void);
 int flashfile_set_param(const FlashFileID file_id,int record_size, int time_unit, int time_interval);

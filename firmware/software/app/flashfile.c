@@ -11,7 +11,7 @@ typedef struct _time_tag
 {
 	unsigned int time_tag;
 	unsigned short next_time_tag_offset;
-} TimeTag;
+} __attribute__ ((packed)) TimeTag;
 
 typedef struct flashfile
 {
@@ -25,7 +25,7 @@ typedef struct flashfile
 	int record_size;				//bytes per record .
 	int time_tag_unit;              //one record stand for how may seconds
 	int time_tag_interval;			//how many seconds between time tags
-} FlashFile;
+} __attribute__ ((packed)) FlashFile;
 
 typedef struct block_info
 {
@@ -33,7 +33,7 @@ typedef struct block_info
 	unsigned short first_time_tag_offset :12;
 	unsigned char prev_block;
 	unsigned char write_count;
-} FlashBlockHead;
+} __attribute__ ((packed)) FlashBlockHead;
 
 #define FLASH_SIZE 1024*1024
 #define BLOCK_NUMBER 256

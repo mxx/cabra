@@ -58,7 +58,7 @@ int flash_write(const int block, const int offset, const char* ptrData,
 		{
 			ptrRaw[i] &= ptrData[i];
 		}
-		if (lseek(fp, abs_offset, SEEK_SET))
+		if (lseek(fp, abs_offset, SEEK_SET)<0)
 		{
 			perror("seek");
 			rt = -1;
@@ -88,7 +88,7 @@ int flash_read(const int block, const int offset, char* ptrData, const int size)
 	if (fp)
 	{
 		int rt = 0;
-		if (lseek(fp, abs_offset, SEEK_SET))
+		if (lseek(fp, abs_offset, SEEK_SET)<0)
 		{
 			perror("seek");
 			close(fp);
@@ -127,7 +127,9 @@ int main(int argc, char** argv)
 	buf[63] = 0;
 	while (1)
 	{
-		flashfile_append_record(SpeedFile, time(NULL ), buf);
+		time_t now = time(NULL );
+		printf("Insert 0x%08x\n", (unsigned int)now);
+		flashfile_append_record(SpeedFile, now, buf);
 		sleep(1);
 	};
 

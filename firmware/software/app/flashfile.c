@@ -98,10 +98,11 @@ int flashfile_get_last_time_tag(const unsigned char block, TimeTag* ptrTag)
 		int new_offset;
 		TimeTag tag;
 		new_offset = flashfile_get_next_time_tag(block, offset, &tag);
-		if (new_offset == 0xFFF)
+		if ((new_offset + offset) > 0xFFF)
 		{
-			return offset;
+			return offset - ptrTag->next_time_tag_offset;
 		}
+
 		offset += new_offset;
 		ptrTag->time_tag = tag.time_tag;
 		ptrTag->next_time_tag_offset = new_offset;
@@ -371,15 +372,12 @@ int flashfile_append_data(const FlashFileID file_id,
 		const unsigned int time_tag, const char* ptrData)
 {
 	unsigned char block;
-	TimeTag timeTag;
-	timeTag.time_tag = time_tag;
-	timeTag.next_time_tag_offset = flashfile_time_tag_offset(file_id);
 
 	block = flashFile[file_id].last_write_block;
 	int offset = 0;
 	TimeTag lastTag;
 	offset = flashfile_get_last_time_tag(block,&lastTag);
-	offset += flashfile_record_offset_to_time_tag(file_id, &timeTag, time_tag);
+	offset += flashfile_record_offset_to_time_tag(file_id, &lastTag, time_tag);
 
 	return flashfile_write(block, offset, ptrData,
 			flashFile[file_id].time_tag_unit);

@@ -375,12 +375,23 @@ int flashfile_append_data(const FlashFileID file_id,
 
 	block = flashFile[file_id].last_write_block;
 	int offset = 0;
+	int relative_offset=0;
 	TimeTag lastTag;
 	offset = flashfile_get_last_time_tag(block,&lastTag);
-	offset += flashfile_record_offset_to_time_tag(file_id, &lastTag, time_tag);
+	relative_offset = flashfile_record_offset_to_time_tag(file_id, &lastTag, time_tag);
+	if (relative_offset >= flashfile_time_tag_offset(file_id))
+	{
+		int new_tag = time_tag / flashFile[file_id].time_tag_interval;
+		new_tag *= flashFile[file_id].time_tag_interval;
+		flashfile_append_time_tag(file_id,new_tag);
+		offset = flashfile_get_last_time_tag(block,&lastTag);
+		relative_offset = flashfile_record_offset_to_time_tag(file_id, &lastTag, time_tag);
+	}
+
+	offset += relative_offset;
 
 	return flashfile_write(block, offset, ptrData,
-			flashFile[file_id].time_tag_unit);
+			flashFile[file_id].record_size);
 }
 
 int flashfile_append_record(const FlashFileID file_id,

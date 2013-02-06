@@ -12,6 +12,13 @@
 #define BLOCK_NUMBER 256
 #define BLOCK_SIZE FLASH_SIZE/BLOCK_NUMBER
 
+#ifdef _DEBUG_TEST_
+#include <stdio.h>
+#define TRACE(args...)  printf(args)
+#else
+#define TRACE(args...)
+#endif
+
 typedef enum _FlashFileID
 {
 	RealTimeFile,

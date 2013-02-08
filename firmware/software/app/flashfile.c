@@ -288,7 +288,7 @@ int flashfile_block_write(const unsigned char block, const int offset,
 	if (offset > BLOCK_SIZE)
 		return -1;
 
-	FlashFile* ptrFile = & flashFile[block_map[block].file_id];
+	FlashFile* ptrFile = &flashFile[block_map[block].file_id];
 	ptrFile->last_write_block = block;
 	ptrFile->last_write_offset = offset;
 	return flash_write(block, offset, ptrData, size);
@@ -338,32 +338,31 @@ int flashfile_time_tag_offset(const FlashFileID file_id)
 	return sizeof(TimeTag) + (interval / unit) * rec_size;
 }
 
-int flashfile_record_offset_to_time_tag(const FlashFileID file_id,
-		const TimeTag* ptrTag, const unsigned int record_time_tag)
-{
-	TRACE("Time offset:%d\n",record_time_tag - ptrTag->time_tag);
-	int offset = sizeof(TimeTag);
-	offset += ((record_time_tag - ptrTag->time_tag)
-			/ flashFile[file_id].time_tag_unit)
-			* flashFile[file_id].record_size;
-	return offset;
-}
-
 void flashfile_store_last_time_tag(const FlashFileID file_id,
 		const TimeTag* ptrTag)
 {
-	FlashFile* ptrFile = & flashFile[file_id];
+	FlashFile* ptrFile = &flashFile[file_id];
 	ptrFile->last_time_tag.time_tag = ptrTag->time_tag;
-	ptrFile->last_time_tag.next_time_tag_offset =
-			ptrTag->next_time_tag_offset;
+	ptrFile->last_time_tag.next_time_tag_offset = ptrTag->next_time_tag_offset;
 	ptrFile->last_time_tag_block = ptrFile->last_write_block;
 	ptrFile->last_time_tag_offset = ptrFile->last_write_offset;
+}
+
+int flashfile_append_data_offset_to_last_time_tag(const FlashFileID file_id,
+		const unsigned int time_tag)
+{
+	int offset = sizeof(TimeTag);
+	offset += ((time_tag - flashFile[file_id].last_time_tag.time_tag)
+			/ flashFile[file_id].time_tag_unit)
+			* flashFile[file_id].record_size;
+	return offset;
 }
 
 int flashfile_init_record(const FlashFileID file_id,
 		const unsigned int time_tag, const char* ptrData)
 {
 	unsigned int block = flashfile_alloc_block(file_id);
+	FlashFile* ptrFile = &flashFile[file_id];
 	if (block > 256)
 		return -1;
 	block_map[block].first_time_tag_offset = sizeof(FlashBlockHead);
@@ -371,15 +370,14 @@ int flashfile_init_record(const FlashFileID file_id,
 	flashfile_write(block, 0, (char*) &block_map[block],
 			sizeof(block_map[block]));
 	TimeTag tag;
-	int interval = flashFile[file_id].time_tag_interval;
+	int interval = ptrFile->time_tag_interval;
 	tag.time_tag = (time_tag / interval) * interval;
 	tag.next_time_tag_offset = flashfile_time_tag_offset(file_id);
 	flashfile_write(block, sizeof(block_map[block]), (char*) &tag, sizeof(tag));
-
 	flashfile_store_last_time_tag(file_id, &tag);
 
 	int offset = sizeof(block_map[block]);
-	offset += flashfile_record_offset_to_time_tag(file_id, &tag, time_tag);
+	offset += flashfile_append_data_offset_to_last_time_tag(file_id, time_tag);
 	flashfile_write(block, offset, ptrData, flashFile[file_id].record_size);
 	return 0;
 }
@@ -400,20 +398,11 @@ int flashfile_append_time_tag(const FlashFileID file_id,
 	offset += lastTag.next_time_tag_offset;
 	flashFile[file_id].last_time_tag_offset = offset;
 	TRACE("new Tag @ %d\n",offset);
-	if (flashfile_write(block, offset, (const char*) &timeTag,
-			sizeof(timeTag)) < 0)
+	if (flashfile_write(block, offset, (const char*) &timeTag, sizeof(timeTag))
+			< 0)
 		return -1;
 	flashfile_store_last_time_tag(file_id, &timeTag);
-}
-
-int flashfile_append_data_offset_to_last_time_tag(const FlashFileID file_id,
-		const unsigned int time_tag)
-{
-	int offset = sizeof(TimeTag);
-	offset += ((time_tag - flashFile[file_id].last_time_tag.time_tag)
-			/ flashFile[file_id].time_tag_unit)
-			* flashFile[file_id].record_size;
-	return offset;
+	return 0;
 }
 
 int flashfile_append_data(const FlashFileID file_id,

@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 	while (1)
 	{
 		time_t now = time(NULL );
-		printf("Insert 0x%08x\n", (unsigned int)now);
+
 		flashfile_append_record(SpeedFile, now, buf);
 		sleep(1);
 	};

@@ -355,7 +355,7 @@ void flashfile_store_last_time_tag(const FlashFileID file_id,
 int flashfile_init_record(const FlashFileID file_id,
 		const unsigned int time_tag, const char* ptrData)
 {
-	unsigned char block = flashfile_alloc_block(file_id);
+	unsigned int block = flashfile_alloc_block(file_id);
 	if (block > 256)
 		return -1;
 	block_map[block].first_time_tag_offset = sizeof(FlashBlockHead);

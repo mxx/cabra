@@ -124,6 +124,7 @@ int main(int argc, char** argv)
 	flashfile_set_param(SpeedFile, 64, 1, 60);
 	char buf[64];
 	memset(buf, 0x55, 63);
+	buf[0] = 0xAA;
 	buf[63] = 0;
 	while (1)
 	{

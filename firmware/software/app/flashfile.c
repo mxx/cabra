@@ -141,6 +141,8 @@ void flashfile_scan_file_block(FlashFileID file_id)
 		}
 	}
 
+	flashFile[file_id].last_time_tag_offset = -1;
+
 	if (flashFile[file_id].total_block > 0)
 	{
 		unsigned char nextBlock = flashFile[file_id].start_block;
@@ -153,13 +155,13 @@ void flashfile_scan_file_block(FlashFileID file_id)
 		int last_tag_offset = flashfile_get_last_time_tag(last_tag_block,
 				&(flashFile[file_id].last_time_tag));
 
-		while (last_tag_offset < 0 && (last_tag_block != flashFile[file_id].start_block))
+		while (last_tag_offset < 0
+				&& (last_tag_block != flashFile[file_id].start_block))
 		{
 			last_tag_block = block_map[last_tag_block].prev_block;
 			last_tag_offset = flashfile_get_last_time_tag(last_tag_block,
-							&(flashFile[file_id].last_time_tag));
+					&(flashFile[file_id].last_time_tag));
 		};
-
 
 		flashFile[file_id].last_time_tag_offset = last_tag_offset;
 		flashFile[file_id].last_time_tag_block = last_tag_block;
@@ -180,6 +182,10 @@ void flashfile_init_file_struct(FlashFileID file_id)
 int flashfile_update_blockmap(void)
 {
 	int rt = 0;
+	for (int i = 0; i < BLOCK_NUMBER; i++)
+	{
+		nextBlockChain[i] = i;
+	}
 	for (int i = 0; i < BLOCK_NUMBER; i++)
 	{
 		if (sizeof(FlashBlockHead)
@@ -224,6 +230,21 @@ int flashfile_system_init(void)
 	return 0;
 }
 
+int flashfile_block_write(const unsigned char block, const int offset,
+		const char* ptrData, const int size)
+{
+	if (offset > BLOCK_SIZE || (offset + size) > BLOCK_SIZE)
+	{
+		TRACE("\n%s(%u,%u,%u)\n",__FUNCTION__,block,offset,size+offset);
+		return -1;
+	}
+
+	FlashFile* ptrFile = &flashFile[block_map[block].file_id];
+	ptrFile->last_write_block = block;
+	ptrFile->last_write_offset = offset;
+	return flash_write(block, offset, ptrData, size);
+}
+
 void flashfile_remove_file_head_block(const FlashFileID file_id)
 {
 	unsigned char block = flashFile[file_id].start_block;
@@ -249,6 +270,9 @@ void flashfile_append_file_tail_block(const FlashFileID file_id,
 	nextBlockChain[flashFile[file_id].last_write_block] = block;
 	flashFile[file_id].last_write_block = block;
 	flashFile[file_id].total_block++;
+
+	flashfile_block_write(block, 0, (const char*) &block_map[block],
+			sizeof(block_map[block]));
 }
 
 int flashfile_set_param(const FlashFileID file_id, int record_size,
@@ -272,7 +296,7 @@ void flashfile_round_file_struct(const FlashFileID file_id,
 
 int flashfile_alloc_block(const FlashFileID file_id)
 {
-	TRACE("%s(%u)\n",__FUNCTION__,file_id);
+	TRACE("%s(%u) =>",__FUNCTION__,file_id);
 	int block = flashfile_find_first_freeblock();
 
 	if (block < 256)
@@ -280,11 +304,11 @@ int flashfile_alloc_block(const FlashFileID file_id)
 		if (flashFile[file_id].total_block == 0)
 		{
 			flashfile_append_file_tail_block(file_id, block);
+			TRACE("%d\n",block);
 			return block;
 		}
 		flashfile_round_file_struct(file_id, block);
-	}
-
+	}TRACE("%d\n",block);
 	return block;
 }
 
@@ -294,52 +318,62 @@ int flashfile_read(const unsigned char block, const int offset, char* ptrData,
 	return flash_read(block, offset, ptrData, size);
 }
 
-int flashfile_block_write(const unsigned char block, const int offset,
-		const char* ptrData, const int size)
-{
-	if (offset > BLOCK_SIZE)
-		return -1;
-
-	FlashFile* ptrFile = &flashFile[block_map[block].file_id];
-	ptrFile->last_write_block = block;
-	ptrFile->last_write_offset = offset;
-	return flash_write(block, offset, ptrData, size);
-}
-
 int flashfile_write(const unsigned char block, const int offset,
 		const char* ptrData, const int size)
 {
 	int write_block = block;
-	if ((offset > 2 * BLOCK_SIZE) && ((offset + size) > 2 * BLOCK_SIZE))
+	int new_offset = offset;
+	if ((offset + size) > (2 * BLOCK_SIZE))
 	{
 		TRACE("error,too big\n");
 		return -1;
 	}
 
-	int wrote_size;
-	if (offset < BLOCK_SIZE)
+	if (offset > BLOCK_SIZE)
 	{
-		wrote_size = flashfile_block_write(write_block, offset, ptrData, size);
+		if (write_block != nextBlockChain[write_block])
+		{
+			TRACE(" shift to block %d ",nextBlockChain[write_block]);
+			write_block = nextBlockChain[write_block];
+			new_offset = offset - BLOCK_SIZE +  sizeof(FlashBlockHead);
+		}
+		else
+			return -1;
+	}
+
+	int wrote_size = 0;
+	if (new_offset < BLOCK_SIZE)
+	{
+		int write = size;
+		if ((new_offset + size) > BLOCK_SIZE)
+		{
+			write = BLOCK_SIZE - offset;
+		}
+		wrote_size = flashfile_block_write(write_block, new_offset, ptrData, write);
 	}
 
 	if (wrote_size < 0 || wrote_size > size)
+	{
+		TRACE("write fail.\n");
 		return -1;
+	}
 
-	if (wrote_size > 0 && wrote_size == size)
+	if (wrote_size == size)
 		return size;
 
+	TRACE(" part write[%d] ",wrote_size);
+
 	write_block = flashfile_alloc_block(block_map[block].file_id);
+	new_offset = sizeof(FlashBlockHead);
 
 	if (write_block > 255)
+	{
+		TRACE("no block to write.\n");
 		return -1;
+	}
 
-	if (flashfile_block_write(write_block, 0,
-			(const char*) &block_map[write_block],
-			sizeof(block_map[write_block])) < 0)
-		return -1;
-
-	return flashfile_block_write(write_block, sizeof(FlashBlockHead),
-			ptrData + wrote_size, size - wrote_size);
+	return flashfile_block_write(write_block, new_offset, ptrData + wrote_size,
+			size - wrote_size);
 }
 
 int flashfile_time_tag_offset(const FlashFileID file_id)
@@ -397,22 +431,31 @@ int flashfile_init_record(const FlashFileID file_id,
 int flashfile_append_time_tag(const FlashFileID file_id,
 		const unsigned int time_tag)
 {
-	TRACE("%s(%u,%u)\n",__FUNCTION__,file_id,time_tag);
+	TRACE("%s(%u,%u) ",__FUNCTION__,file_id,time_tag);
 	unsigned char block;
 	TimeTag timeTag;
 	timeTag.time_tag = time_tag;
 	timeTag.next_time_tag_offset = flashfile_time_tag_offset(file_id);
 
-	block = flashFile[file_id].last_write_block;
-	int offset = 0;
-	TimeTag lastTag;
-	offset = flashfile_get_last_time_tag(block, &lastTag);
-	offset += lastTag.next_time_tag_offset;
-	flashFile[file_id].last_time_tag_offset = offset;
-	TRACE("new Tag @ %d\n",offset);
+	block = flashFile[file_id].last_time_tag_block;
+	int offset = flashFile[file_id].last_time_tag_offset;
+
+	if (offset < 0)
+	{
+		offset = sizeof(FlashBlockHead);
+	}
+	else
+	{
+		offset += timeTag.next_time_tag_offset;
+	}
+
+	TRACE(" @%d->%d\n",block,offset);
 	if (flashfile_write(block, offset, (const char*) &timeTag, sizeof(timeTag))
 			< 0)
+	{
+		TRACE("flash write fail\n");
 		return -1;
+	}
 	flashfile_store_last_time_tag(file_id, &timeTag);
 	return 0;
 }
@@ -421,7 +464,7 @@ int flashfile_append_data(const FlashFileID file_id,
 		const unsigned int time_tag, const char* ptrData)
 {
 	unsigned char block;
-	TRACE("Time:%u ",time_tag);
+	TRACE("Time:%u[%d] ",time_tag,time_tag - flashFile[file_id].last_time_tag.time_tag);
 	block = flashFile[file_id].last_time_tag_block;
 	int offset = 0;
 	int relative_offset = 0;
@@ -432,19 +475,19 @@ int flashfile_append_data(const FlashFileID file_id,
 
 		relative_offset = flashfile_append_data_offset_to_last_time_tag(file_id,
 				time_tag);
-
+		TRACE(" data offset %d",relative_offset);
 		if (relative_offset < flashfile_time_tag_offset(file_id))
 			break;
 
 		int new_tag = time_tag / flashFile[file_id].time_tag_interval;
 		new_tag *= flashFile[file_id].time_tag_interval;
-		TRACE("Insert new Tag:%u\n",new_tag);
+		TRACE(" Insert new Tag:%u",new_tag);
 		flashfile_append_time_tag(file_id, new_tag);
 
 	} while (1);
 
 	offset += relative_offset;
-
+	TRACE(" @%d->%d\n",block,offset);
 	return flashfile_write(block, offset, ptrData,
 			flashFile[file_id].record_size);
 }

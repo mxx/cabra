@@ -80,31 +80,33 @@ int flashfile_scan_last_block(FlashFileID file_id)
 	return -1;
 }
 // return the time_tag structure offset from block head;
-int flashfile_get_first_time_tag(const unsigned char block)
+int flashfile_get_first_time_tag_offset(const unsigned char block)
 {
 	return block_map[block].first_time_tag_offset;
 }
 
-int flashfile_get_next_time_tag(const unsigned char block, const int offset,
-		TimeTag* ptrTag)
+int flashfile_get_time_tag_next(const unsigned char block, const int offset,
+		TimeTag* ptrCurrentTag)
 {
-	flash_read(block, offset, (char *) ptrTag, sizeof(TimeTag));
-	return ptrTag->next_time_tag_offset;
+	flash_read(block, offset, (char *) ptrCurrentTag, sizeof(TimeTag));
+	return ptrCurrentTag->next_time_tag_offset;
 }
 
 int flashfile_get_last_time_tag(const unsigned char block, TimeTag* ptrTag)
 {
-	int offset = flashfile_get_first_time_tag(block);
+	int offset = flashfile_get_first_time_tag_offset(block);
 	TRACE("[%u]Start offset->[:%d] ",block,offset);
 	while (offset < BLOCK_SIZE)
 	{
 		short new_offset = 0;
 		TimeTag tag;
-		new_offset = flashfile_get_next_time_tag(block, offset, &tag);
+		new_offset = flashfile_get_time_tag_next(block, offset, &tag);
 		TRACE(",time:%u ",tag.time_tag);
 		if (new_offset == -1)
 		{
 			TRACE(" -1End\n");
+			if (offset == flashfile_get_first_time_tag_offset(block))
+				return -1;
 			return offset - ptrTag->next_time_tag_offset;
 		}
 
@@ -146,11 +148,21 @@ void flashfile_scan_file_block(FlashFileID file_id)
 		{
 			nextBlock = nextBlockChain[nextBlock];
 		}
-		flashFile[file_id].last_write_block = nextBlock;
 
-		flashFile[file_id].last_time_tag_offset = flashfile_get_last_time_tag(
-				flashFile[file_id].last_write_block,
+		int last_tag_block = flashFile[file_id].last_write_block;
+		int last_tag_offset = flashfile_get_last_time_tag(last_tag_block,
 				&(flashFile[file_id].last_time_tag));
+
+		while (last_tag_offset < 0 && (last_tag_block != flashFile[file_id].start_block))
+		{
+			last_tag_block = block_map[last_tag_block].prev_block;
+			last_tag_offset = flashfile_get_last_time_tag(last_tag_block,
+							&(flashFile[file_id].last_time_tag));
+		};
+
+
+		flashFile[file_id].last_time_tag_offset = last_tag_offset;
+		flashFile[file_id].last_time_tag_block = last_tag_block;
 	}
 
 }

@@ -16,6 +16,49 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+
+extern  FlashFile flashFile[];
+
+extern unsigned char nextBlockChain[];
+
+void dump_file_info(int i)
+{
+	FlashFile* FILE = &flashFile[i];
+	printf("\nfileID:%d,lastTime:%u@%d->%d,%d/%d,START:%d\n", FILE->file_id,
+			FILE->last_time_tag.time_tag, FILE->last_time_tag_block,
+			FILE->last_time_tag_offset, FILE->total_block, FILE->block_limit,
+			FILE->start_block);
+}
+
+void dump_file_map(int i)
+{
+	printf("\nFileID:%d, Total:%d\n",i,flashFile[i].total_block);
+	if (flashFile[i].total_block)
+	{
+		printf("Block Chain:");
+		int block = flashFile[i].start_block;
+		int next = nextBlockChain[block];
+		printf(" %d->",block);
+		while(next != block)
+		{
+			block = next;
+			next = nextBlockChain[block];
+			if (next != block)
+				printf("%d->",block);
+		}
+	}
+	printf("\n");
+
+}
+
+void flashfile_dump(void)
+{
+	for (int i = 0; i < FileIDMax; i++)
+	{
+		dump_file_info(i);
+	}
+}
+
 int flash_erase_block(const int block)
 {
 	char buf[BLOCK_SIZE];
@@ -43,7 +86,7 @@ int flash_write(const int block, const int offset, const char* ptrData,
 		const int size)
 {
 	int abs_offset = block * BLOCK_SIZE + offset;
-	int fp = open("test.dat", O_CREAT|O_RDWR);
+	int fp = open("test.dat", O_CREAT | O_RDWR);
 	char* ptrRaw = (char*) malloc(size);
 	int rt = 0;
 	while (fp > 0)
@@ -58,7 +101,7 @@ int flash_write(const int block, const int offset, const char* ptrData,
 		{
 			ptrRaw[i] &= ptrData[i];
 		}
-		if (lseek(fp, abs_offset, SEEK_SET)<0)
+		if (lseek(fp, abs_offset, SEEK_SET) < 0)
 		{
 			perror("seek");
 			rt = -1;
@@ -88,7 +131,7 @@ int flash_read(const int block, const int offset, char* ptrData, const int size)
 	if (fp)
 	{
 		int rt = 0;
-		if (lseek(fp, abs_offset, SEEK_SET)<0)
+		if (lseek(fp, abs_offset, SEEK_SET) < 0)
 		{
 			perror("seek");
 			close(fp);
@@ -126,12 +169,16 @@ int main(int argc, char** argv)
 	memset(buf, 0x55, 63);
 	buf[0] = 0xAA;
 	buf[63] = 0;
+	time_t now = time(NULL);
+
 	while (1)
 	{
-		time_t now = time(NULL );
 
 		flashfile_append_record(SpeedFile, now, buf);
-		sleep(1);
+		dump_file_info(SpeedFile);
+		dump_file_map(SpeedFile);
+		now++;
+		//sleep(1);
 	};
 
 }

@@ -18,6 +18,7 @@
 
 
 extern  FlashFile flashFile[];
+extern FlashBlockHead block_map[BLOCK_NUMBER];
 
 extern unsigned char nextBlockChain[];
 
@@ -38,13 +39,12 @@ void dump_file_map(int i)
 		printf("Block Chain:");
 		int block = flashFile[i].start_block;
 		int next = nextBlockChain[block];
-		printf(" %d->",block);
+		printf(" %d[%d(%d)]->",block,block_map[block].prev_block,block_map[block].write_count);
 		while(next != block)
 		{
+			printf("%d[%d(%d)]->",next,block_map[next].prev_block,block_map[next].write_count);
 			block = next;
 			next = nextBlockChain[block];
-			if (next != block)
-				printf("%d->",block);
 		}
 	}
 	printf("\n");
@@ -61,9 +61,32 @@ void flashfile_dump(void)
 
 int flash_erase_block(const int block)
 {
-	char buf[BLOCK_SIZE];
-	memset(buf, 0xFF, BLOCK_SIZE);
-	return flash_write(block, 0, buf, BLOCK_SIZE);
+	int abs_offset = block * BLOCK_SIZE ;
+	int fp = open("test.dat", O_CREAT | O_RDWR);
+	char* ptrRaw[BLOCK_SIZE];
+	memset(ptrRaw,0xFF,BLOCK_SIZE);
+	int rt = 0;
+	while (fp > 0)
+	{
+		if (lseek(fp, abs_offset, SEEK_SET) < 0)
+		{
+			perror("seek");
+			rt = -1;
+			break;
+		}
+		if (!rt && ((rt = write(fp, ptrRaw, BLOCK_SIZE)) != BLOCK_SIZE))
+		{
+			perror("write");
+			rt = -1;
+			break;
+		}
+
+		break;
+	}
+
+	if (fp)
+		close(fp);
+	return rt;
 }
 
 int flash_read_raw(int fp, const int offset, char* ptrData, int size)
@@ -173,10 +196,12 @@ int main(int argc, char** argv)
 
 	while (1)
 	{
-
-		flashfile_append_record(SpeedFile, now, buf);
+		buf[1]=now%60;
+		int rt = flashfile_append_record(SpeedFile, now, buf);
 		dump_file_info(SpeedFile);
 		dump_file_map(SpeedFile);
+		if (rt < 0)
+			return -1;
 		now++;
 		//sleep(1);
 	};

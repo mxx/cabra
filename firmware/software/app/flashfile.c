@@ -7,7 +7,6 @@
 #include "flashfile.h"
 #include "flash_dev.h"
 
-
 #define FLASH_SIZE 1024*1024
 #define BLOCK_NUMBER 256
 #define BLOCK_SIZE FLASH_SIZE/BLOCK_NUMBER
@@ -179,6 +178,16 @@ int flashfile_update_blockmap(void)
 	}
 	return rt;
 }
+
+int flashfile_count_compare(const unsigned char x, const unsigned char y)
+{
+	if (x == 255 && y == 0)
+		return -1;
+	if (x == 0 && y == 255)
+		return 255;
+	return x - y;
+}
+
 // if return value > 255, means that no block found
 int flashfile_find_first_freeblock(void)
 {
@@ -188,11 +197,13 @@ int flashfile_find_first_freeblock(void)
 	{
 		if (block_map[i].file_id == NoFile)
 		{
-			if ((unsigned char) (block_map[i].write_count + 1)
-					< found_write_count)
+			if (found_block == 256)
+				found_block = i;
+			if (flashfile_count_compare(found_write_count,
+					block_map[i].write_count) > 0)
 			{
 				found_block = i;
-				found_write_count = block_map[i].write_count + 1;
+				found_write_count = block_map[i].write_count;
 			}
 		}
 	}
@@ -316,7 +327,7 @@ int flashfile_write(const unsigned char block, const int offset,
 		{
 			TRACE(" shift to block %d ",nextBlockChain[write_block]);
 			write_block = nextBlockChain[write_block];
-			new_offset = offset - BLOCK_SIZE +  sizeof(FlashBlockHead);
+			new_offset = offset - BLOCK_SIZE + sizeof(FlashBlockHead);
 		}
 		else
 			return -1;
@@ -330,7 +341,8 @@ int flashfile_write(const unsigned char block, const int offset,
 		{
 			write = BLOCK_SIZE - offset;
 		}
-		wrote_size = flashfile_block_write(write_block, new_offset, ptrData, write);
+		wrote_size = flashfile_block_write(write_block, new_offset, ptrData,
+				write);
 	}
 
 	if (wrote_size < 0 || wrote_size > size)

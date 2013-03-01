@@ -7,6 +7,12 @@
 
 #include "VTDRDriverIDRecord.h"
 
+const char* VTDRDriverIDRecord::decodeType[]={
+		"Unknown",
+		"Login",
+		"Logout"
+};
+
 VTDRDriverIDRecord::VTDRDriverIDRecord() :
 		tStart(0), cType(0)
 {
@@ -43,6 +49,6 @@ string& VTDRDriverIDRecord::Dump(string& buf)
 	stringstream stream;
 	stream << VTDRRecord::Dump(buf) << " Time:" << Time2String(tStart) << endl;
 	stream << "LICIENCE:" << strLicenseNumber << endl;
-	stream << "Type:" << (int)cType ;
+	stream << "Type:" << decodeType[mapType(cType)];
 	return buf = stream.str();
 }

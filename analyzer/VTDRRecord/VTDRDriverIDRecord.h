@@ -29,6 +29,13 @@ protected:
 		unsigned char License[18];
 		char cType;
 	} __attribute__ ((packed)) DriverIDRecord;
+	static const char* decodeType[];
+	int mapType(char n)
+	{
+		if (n > 2 || n < 1)
+			return 0;
+		return n;
+	}
 };
 
 #endif /* VTDRDRIVERIDRECORD_H_ */

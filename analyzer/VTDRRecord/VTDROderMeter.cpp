@@ -7,6 +7,7 @@
 
 #include "VTDROderMeter.h"
 
+
 VTDROderMeter::VTDROderMeter() :
 		tNow(0), tInstall(0), startMeter(0.0), sumMeter(0.0)
 {

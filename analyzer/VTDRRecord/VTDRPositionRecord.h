@@ -22,6 +22,7 @@ public:
 	int Speed[60];
 	int Read(const char* buf);
 	string& Write(string& buf);
+	string& Dump(string& buf);
 protected:
 
 	typedef struct _PositionRecord

@@ -22,7 +22,7 @@ int VTDRDetailRecord::Read(const char* buf)
 {
 	DetailRecord* ptrRec = (DetailRecord*) buf;
 	tEnd = ToSystime(ptrRec->endTime);
-	ASSIGN(strLicenseNumber, ptrRec->License);
+	strLicenseNumber.assign((const char*)(ptrRec->License),sizeof(ptrRec->License));
 	for (int i = 0; i < 100; i++)
 	{
 		Speed[i] = ptrRec->record[i].speed;
@@ -46,3 +46,20 @@ string& VTDRDetailRecord::Write(string& buf)
 	buf.append((const char*) &rec, sizeof(rec));
 	return buf;
 }
+
+string& VTDRDetailRecord::Dump(string& buf)
+{
+	stringstream s(buf);
+	s << VTDRRecord::Dump(buf) << endl;
+	s << "Driver License:" << strLicenseNumber.c_str() << endl;
+	s << "Last End Time:" << ctime(&tEnd);
+	s << "Time\tSpeed\tState:" << endl;
+
+	for (int i = 0; i < 100; i++)
+	{
+		s << i/5 << "." << i%5*2 << "\t" << Speed[i] << "\t" << State[i] << endl;
+	}
+
+	return buf += s.str();
+}
+

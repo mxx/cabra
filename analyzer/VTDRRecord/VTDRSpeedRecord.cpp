@@ -48,15 +48,10 @@ string& VTDRSpeedRecord::Dump(string& buf)
 {
 	stringstream stream;
 	stream << VTDRRecord::Dump(buf) << " Time:" << Time2String(tStart) << endl;
-	stream << "SPEED:";
+	stream << "SEC\tSPEED\tSTATE:" << endl;
 	for (int i = 0; i < 60; i++)
 	{
-		stream << Speed[i] << " ";
-	}
-	stream << endl << "STATE:";
-	for (int i = 0; i < 60; i++)
-	{
-		stream << State[i] << " ";
+		stream << i << "\t" << Speed[i] << "\t" << State[i]<< endl;
 	}
 	return buf = stream.str();
 }

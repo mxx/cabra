@@ -30,6 +30,8 @@ protected:
 			unsigned char startValue[4];
 			unsigned char oderMeter[4];
 		}__attribute__ ((packed)) OderMeter;
+
+
 };
 
 #endif /* VTDRODERMETER_H_ */

@@ -18,6 +18,7 @@ public:
 	virtual ~VTDRDetailRecord();
 	int Read(const char* buf);
 	string& Write(string& buf);
+	string& Dump(string& buf);
 
 	time_t tEnd;
 	string strLicenseNumber;

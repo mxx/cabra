@@ -17,6 +17,7 @@ public:
 	virtual ~VTDROutPoweredRecord();
 	int Read(const char* buf);
 	string& Write(string& buf);
+	string& Dump(string& buf);
 	time_t tTime;
 	char cType;
 protected:
@@ -25,6 +26,8 @@ protected:
 		VTDRTime vTime;
 		char cType;
 	}__attribute__ ((packed)) PowerLog;
+
+	static const char* decodeType[];
 };
 
 #endif /* VTDROUTPOWEREDRECORD_H_ */

@@ -7,6 +7,12 @@
 
 #include "VTDROutPoweredRecord.h"
 
+const char* VTDROutPoweredRecord::decodeType[]={
+		"",
+		"PowerOn",
+		"PowerOff"
+};
+
 VTDROutPoweredRecord::VTDROutPoweredRecord() :
 		tTime(0), cType(0)
 {
@@ -34,3 +40,12 @@ string& VTDROutPoweredRecord::Write(string& buf)
 	buf.append((const char*) &log, sizeof(log));
 	return buf;
 }
+
+string& VTDROutPoweredRecord::Dump(string& buf)
+{
+	stringstream stream;
+	stream << VTDRRecord::Dump(buf) << " Time:" << ctime(&tTime);
+	stream << " Type:" << decodeType[cType];
+	return buf = stream.str();
+}
+

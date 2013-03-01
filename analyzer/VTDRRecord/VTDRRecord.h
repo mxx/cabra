@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <arpa/inet.h>
+#include <math.h>
 using namespace std;
 
 #define SET(x,y) set(x,y,sizeof(x))
@@ -29,7 +30,6 @@ typedef struct _VTDRTime
 	unsigned char bcdMinute;
 	unsigned char bcdSecond;
 }__attribute__ ((packed)) VTDRTime;
-
 
 class VTDRRecord
 {
@@ -58,7 +58,7 @@ public:
 	virtual ~VTDRRecord();
 	unsigned char GetDataCode()
 	{
-		return (unsigned char)cDataCode;
+		return (unsigned char) cDataCode;
 	}
 	;
 
@@ -67,10 +67,11 @@ public:
 	virtual string& Dump(string& buf)
 	{
 		stringstream stream(buf);
-		stream << "DataCode:" << cDataCode ;
-		buf =  stream.str();
+		stream << "DataCode:" << cDataCode;
+		buf = stream.str();
 		return buf;
-	};
+	}
+	;
 	static string BCD2ASCII(string& strBCD);
 	static unsigned int BCD2INT(const char* bcd, int size);
 	static unsigned int BCD2INT(unsigned char bcd);
@@ -114,13 +115,21 @@ protected:
 		short altitude;
 	}__attribute__ ((packed)) Position;
 
-
+	bool validPosition(const int pos)
+	{
+		return (ntohl(pos) != 0x7FFFFFFF) && (ntohl(pos) != 0xFFFFFFFF);
+	}
 
 	void readPosition(Position& pos, float& Long, float& Lat, int& Alt)
 	{
-		Long = ntohl(pos.longititude) / 10000.0;
-		Lat = ntohl(pos.latitude) / 10000.0;
+
+		Long = validPosition(pos.longititude) ? ntohl(pos.longititude)
+				/ 10000.0 :
+				nanf("NAN");
+		Lat = validPosition(pos.latitude) ? ntohl(pos.latitude) / 10000.0 :
+				nanf("NAN");
 		Alt = ntohs(pos.altitude);
+
 	}
 	;
 	void writePosition(Position& pos, float Long, float Lat, int Alt)

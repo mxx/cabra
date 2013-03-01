@@ -33,8 +33,7 @@ int VTDRPositionRecord::Read(const char* buf)
 
 string& VTDRPositionRecord::Write(string& buf)
 {
-	PositionRecord rec =
-	{ 0xFF };
+	PositionRecord rec;
 
 	ToBCDTime(tStart, rec.vStart);
 	for (int i = 0; i < 60; i++)
@@ -46,3 +45,19 @@ string& VTDRPositionRecord::Write(string& buf)
 	buf.append((const char*) &rec, sizeof(rec));
 	return buf;
 }
+
+string& VTDRPositionRecord::Dump(string& buf)
+{
+	stringstream stream;
+	stream << VTDRRecord::Dump(buf) << " Time:" << ctime(&tStart) ;
+	stream << "minute\tSpeed\t(Latitude,Longitude,Altitude):" << endl;
+	for (int i = 0; i < 60; i++)
+	{
+		stream << i << "\t" << Speed[i];
+		stream << "\t(" << Latitude[i] << "," << Longititude[i] << ",";
+		stream << Altitude[i] << ")" << endl;
+	}
+	stream << endl;
+	return buf = stream.str();
+}
+

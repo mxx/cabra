@@ -15,7 +15,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <syslog.h>
-#define MAXBUFSIZE 1024
+#define MAXBUFSIZE 2048
 
 TraceLog gTraceLog;
 
@@ -203,7 +203,7 @@ void TraceLog::Trace(int nLev, const char* szFile, const char* szFunc ,int nLine
 	if ((pBuf = (char*) malloc(size)) == NULL)
 	{
 		pBuf = szBuf;
-		size = 80;
+		size = sizeof(szBuf);
 	}
 
 	SetTitle(pBuf, size);
@@ -229,7 +229,7 @@ void TraceLog::Trace(int nLev, const char* szFile, const char* szFunc ,int nLine
 			nLev= 8 - nLev;
 			if (nLev < 0) nLev = 0;
 			if (bSysLog) syslog(nLev,"%s\n",pBuf+nSysLogStart);
-			if (80 != size)
+			if (sizeof(szBuf) != size)
 				free(pBuf);
 			return;
 		}

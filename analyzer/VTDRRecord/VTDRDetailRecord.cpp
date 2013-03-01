@@ -55,6 +55,7 @@ string& VTDRDetailRecord::Dump(string& buf)
 	s << VTDRRecord::Dump(buf) << endl;
 	s << "Driver License:" << strLicenseNumber.c_str() << endl;
 	s << "Last End Time:" << ctime(&tEnd);
+	s << " AT (" << Longititude << "," << Latitude << "," << Altitude  << ")" << endl;
 	s << "Time\tSpeed\tState:" << endl;
 
 	for (int i = 0; i < 100; i++)

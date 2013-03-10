@@ -47,9 +47,18 @@
 #include "lcd.h"
 #include "font_lib.h"
 
+/**iclude the host usb lib**/ //modify by leiyq 20120318
+#include <usbh_core.h>
+extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
+extern USBH_HOST             USB_Host;
+ USBH_Class_cb_TypeDef USBH_MSC_cb;
+ USBH_Usr_cb_TypeDef   USR_cb;
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t led_stack[ 512 ];
+//static rt_uint8_t usb_stack[ 512 ];//modify by leiyq 20130215
 static struct rt_thread led_thread;
+//static struct rt_thread usb_thread;//modify by leiyq 20130215
+
 static void led_thread_entry(void* parameter)
 {
     unsigned int count=0;
@@ -74,10 +83,35 @@ static void led_thread_entry(void* parameter)
         rt_thread_delay( RT_TICK_PER_SECOND/2 );
     }
 }
+/*usb_thread_entry */ //add by leiyq 20120516
+static void usb_thread_entry(void* parameter)
+{
+/* init the usbhost mode *///first
+#if 1
+	//GPIO_SetBits(GPIOB,USB_PWR_ON);
+	USBH_Init( &USB_OTG_Core,USB_OTG_FS_CORE_ID,
+			&USB_Host,&USBH_MSC_cb,&USR_cb);
+#endif
+////code area //////////////
+////code area //////////////
 
+	while(1)
+	{
+		/* dectect the usb plugin *///second
+		USBH_Process( &USB_OTG_Core, &USB_Host);
+		rt_thread_delay(1);
+
+	}
+////code area //////////////
+////code area //////////////
+
+
+
+
+}
 void rt_init_thread_entry(void* parameter)
 {
-    rt_hw_buzz_on();
+   // rt_hw_buzz_on();
     rt_thread_delay(10);
     rt_hw_buzz_off();
 /* Filesystem Initialization */
@@ -100,8 +134,9 @@ void rt_init_thread_entry(void* parameter)
 #endif
 	}
 #endif
-
+/*
 	lcd_write_matrix(0,0,(unsigned char*)distance_cheng);
+*/
 #ifdef RT_USING_RTGUI
 	{
 	    extern void rtgui_startup();
@@ -136,9 +171,15 @@ void rt_init_thread_entry(void* parameter)
 int rt_application_init()
 {
 	rt_thread_t init_thread;
+	rt_thread_t usb_thread;
 
 	rt_err_t result;
+#if 0
+	//rt_hw_interrupt_disable();
+	USBH_Init( &USB_OTG_Core,USB_OTG_FS_CORE_ID,
+				&USB_Host,&USBH_MSC_cb,&USR_cb);
 
+#endif
     /* init led thread */
 	result = rt_thread_init(&led_thread,
 		"led",
@@ -148,6 +189,23 @@ int rt_application_init()
 	{
         rt_thread_startup(&led_thread);
 	}
+	/*init usb thread*/ //modify by leiyq 20130216
+	/*
+	result = rt_thread_init(&usb_thread,
+			"usb",
+			usb_thread_entry, RT_NULL,
+			(rt_uint8_t*)&usb_stack[0], sizeof(usb_stack), 21, 5);
+	if (result == RT_EOK)
+	{
+		rt_thread_startup(&usb_thread);
+	}
+	*/
+	usb_thread = rt_thread_create("usb",
+			usb_thread_entry, RT_NULL,
+								2048, 10, 15);
+
+	if (usb_thread != RT_NULL)
+		rt_thread_startup(usb_thread);
 
 #if (RT_THREAD_PRIORITY_MAX == 32)
 	init_thread = rt_thread_create("init",

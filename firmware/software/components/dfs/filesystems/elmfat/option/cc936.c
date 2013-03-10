@@ -12,6 +12,11 @@
 #endif
 
 static
+const WCHAR uni2oem[] = {0x4E0A, 0xC9CF,0x4E0B, 0xCFC2,0,0};
+static
+const WCHAR oem2uni[] = {0xC9CF,0x4E0A ,0xCFC2,0x4E0B,0,0};
+#if 0
+static
 const WCHAR uni2oem[] = {
 /*  Unicode - OEM,  Unicode - OEM,  Unicode - OEM,  Unicode - OEM */
 	0x00A4, 0xA1E8, 0x00A7, 0xA1EC, 0x00A8, 0xA1A7, 0x00B0, 0xA1E3,
@@ -10918,7 +10923,7 @@ const WCHAR oem2uni[] = {
 	0xFE4C, 0xFA24, 0xFE4D, 0xFA27, 0xFE4E, 0xFA28, 0xFE4F, 0xFA29,
 	0, 0
 };
-
+#endif
 
 
 WCHAR ff_convert (	/* Converted code, 0 means conversion error */

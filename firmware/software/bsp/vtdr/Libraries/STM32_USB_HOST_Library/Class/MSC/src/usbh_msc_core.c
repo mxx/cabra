@@ -44,7 +44,7 @@
 #include "usbh_msc_bot.h"
 #include "usbh_core.h"
 
-
+#include <rtthread.h>
 /** @addtogroup USBH_LIB
   * @{
   */

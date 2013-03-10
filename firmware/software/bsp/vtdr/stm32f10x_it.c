@@ -26,6 +26,9 @@
 #include <board.h>
 #include <rtthread.h>
 
+#include <usb_core.h>
+#include <usbh_core.h>
+
 /** @addtogroup Template_Project
   * @{
   */
@@ -324,5 +327,43 @@ void EXTI15_10_IRQHandler(void)
 	EXTI_ClearITPendingBit(EXTI_Line11);
 	rt_kprintf("fired\n");
 }
+void TIM2_IRQHandler(void)
+{
+	extern void USB_OTG_BSP_TimerIRQ(void);
+	/* enter interrupt */
+	rt_interrupt_enter();
+
+	USB_OTG_BSP_TimerIRQ();
+
+	/* leave interrupt */
+    rt_interrupt_leave();
+
+}
+void OTG_FS_IRQHandler()
+{
+	extern uint32_t USBH_OTG_ISR_Handler(USB_OTG_CORE_HANDLE *pdev);
+	/* enter interrupt */
+	rt_interrupt_enter();
+
+	USBH_OTG_ISR_Handler(&USB_OTG_Core);
+
+	/* leave interrupt */
+    rt_interrupt_leave();
+
+}
+#if 0
+void WWDG_IRQHandler()
+{
+	extern uint32_t USBH_OTG_ISR_Handler(USB_OTG_CORE_HANDLE *pdev);
+		/* enter interrupt */
+		rt_interrupt_enter();
+
+		USBH_OTG_ISR_Handler(&USB_OTG_Core);
+
+		/* leave interrupt */
+	    rt_interrupt_leave();
+}
+#endif
+
 
 /******************* (C) COPYRIGHT 2009 STMicroelectronics *****END OF FILE****/

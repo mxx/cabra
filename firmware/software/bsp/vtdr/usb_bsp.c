@@ -118,18 +118,22 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 
      GPIO_InitTypeDef GPIO_InitStructure;
 
-     RCC_AHB1PeriphClockCmd( RCC_APB2Periph_GPIOB , ENABLE);
-
+     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS , ENABLE);
+     RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
+#if 0
      /* Configure SOF VBUS ID DM DP Pins */
      GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8  |
-       GPIO_Pin_9  |
+       GPIO_Pin_9 |
          GPIO_Pin_11 |
            GPIO_Pin_12;
+#else
+     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+
 
      GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
      GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
      GPIO_Init(GPIOA, &GPIO_InitStructure);
-
+#endif
 	USB_OTG_BSP_TimeInit();
 }
 
@@ -150,7 +154,7 @@ void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev)
 	NVIC_InitStructure.NVIC_IRQChannel = OTG_FS_IRQn;
 
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }
@@ -182,12 +186,14 @@ void USB_OTG_BSP_DriveVBUS(USB_OTG_CORE_HANDLE *pdev, uint8_t state)
 	if (0 == state)
 	{
 		/* DISABLE is needed on output of the Power Switch */
-		GPIO_SetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);
+		//GPIO_SetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);
+		GPIO_ResetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);//modify by leiyq
 	}
 	else
 	{
 		/*ENABLE the Power Switch by driving the Enable LOW */
-		GPIO_ResetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);
+		//GPIO_ResetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);
+		GPIO_SetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);//modify by leiyq
 	}
 #endif
 }
@@ -213,7 +219,8 @@ void USB_OTG_BSP_ConfigVBUS(USB_OTG_CORE_HANDLE *pdev)
 	GPIO_Init(HOST_POWERSW_PORT, &GPIO_InitStructure);
 
 	/* By Default, DISABLE is needed on output of the Power Switch */
-	GPIO_SetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);
+	//GPIO_SetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);
+	GPIO_ResetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);//modify by leiyq 20130301
 
 	USB_OTG_BSP_mDelay(200); /* Delay is need for stabilising the Vbus Low
 	 in Reset Condition, when Vbus=1 and Reset-button is pressed by user */

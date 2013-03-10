@@ -1066,6 +1066,7 @@ USB_OTG_STS USB_OTG_HC_StartXfer(USB_OTG_CORE_HANDLE *pdev , uint8_t hc_num)
       }
       
       /* Write packet into the Tx FIFO. */
+      rt_kprintf(pdev->host.hc[hc_num].xfer_buff);
       USB_OTG_WritePacket(pdev, 
                           pdev->host.hc[hc_num].xfer_buff , 
                           hc_num, pdev->host.hc[hc_num].xfer_len);

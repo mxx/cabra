@@ -30,6 +30,9 @@
 #include "usb_defines.h"
 #include "usb_hcd_int.h"
 
+#include <rtthread.h>
+#include <rthw.h>
+
 #if defined   (__CC_ARM) /*!< ARM Compiler */
 #pragma O0
 #elif defined (__GNUC__) /*!< GNU Compiler */
@@ -579,6 +582,11 @@ uint32_t USB_OTG_USBH_handle_hc_n_Out_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t 
         pdev->host.URB_State[num] = URB_ERROR;  
         pdev->host.ErrCnt[num] = 0;
       }
+      else//add by leiyq
+      {
+
+    	  pdev->host.URB_State[num] = URB_ERROR;
+      }
     }
     CLEAR_HC_INT(hcreg , chhltd);    
   }
@@ -778,6 +786,7 @@ static uint32_t USB_OTG_USBH_handle_rx_qlvl_ISR (USB_OTG_CORE_HANDLE *pdev)
     {  
       
       USB_OTG_ReadPacket(pdev, pdev->host.hc[channelnum].xfer_buff, grxsts.b.bcnt);
+      rt_kprintf(pdev->host.hc[channelnum].xfer_buff);
       /*manage multiple Xfer */
       pdev->host.hc[grxsts.b.chnum].xfer_buff += grxsts.b.bcnt;           
       pdev->host.hc[grxsts.b.chnum].xfer_count  += grxsts.b.bcnt;

@@ -33,7 +33,7 @@
 #include "usbh_def.h"
 #include "usb_hcd_int.h"
 
-
+#include <rtthread.h>
 /** @addtogroup USBH_LIB
 * @{
 */
@@ -153,7 +153,7 @@ void USBH_MSC_Init(USB_OTG_CORE_HANDLE *pdev )
 void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
 {
   uint8_t xferDirection, index;
-  static uint32_t remainingDataLength;
+  static uint32_t remainingDataLength,remainingDataLengthBak;
   static uint8_t *datapointer , *datapointer_prev;
   static uint8_t error_direction;
   USBH_Status status;
@@ -166,6 +166,7 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
     switch (USBH_MSC_BOTXferParam.BOTState)
     {
     case USBH_MSC_SEND_CBW:
+       rt_kprintf("\nUSBH_MSC_SEND_CBW\n");
       /* send CBW */    
       USBH_BulkSendData (pdev,
                          &USBH_MSC_CBWData.CBWArray[0], 
@@ -178,8 +179,8 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       break;
       
     case USBH_MSC_SENT_CBW:
+        rt_kprintf("\n USBH_MSC_SENT_CBW\n");
       URB_Status = HCD_GetURB_State(pdev , MSC_Machine.hc_num_out);
-      
       if(URB_Status == URB_DONE)
       { 
         BOTStallErrorCount = 0;
@@ -215,17 +216,21 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       }   
       else if(URB_Status == URB_NOTREADY)
       {
-        USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOTXferParam.BOTStateBkp;    
+        USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOTXferParam.BOTStateBkp;
       }     
       else if(URB_Status == URB_STALL)
       {
         error_direction = USBH_MSC_DIR_OUT;
         USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOT_ERROR_OUT;
       }
+      else if(URB_Status == URB_ERROR)//add by leiyq 20130305
+      {
+    	  USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOTXferParam.BOTStateBkp;
+      }
       break;
       
     case USBH_MSC_BOT_DATAIN_STATE:
-      
+    	rt_kprintf("\n USBH_MSC_BOT_DATAIN_STATE\n");
       URB_Status =   HCD_GetURB_State(pdev , MSC_Machine.hc_num_in);
       /* BOT DATA IN stage */
       if((URB_Status == URB_DONE) ||(USBH_MSC_BOTXferParam.BOTStateBkp != USBH_MSC_BOT_DATAIN_STATE))
@@ -255,6 +260,7 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
 			        remainingDataLength , 
 			        MSC_Machine.hc_num_in);
           
+          remainingDataLengthBak = remainingDataLength;//add by leiyq 20130305
           remainingDataLength = 0; /* Reset this value and keep in same state */
         }
       }
@@ -277,11 +283,29 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         */
         USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
         
-      }     
+      }
+      else if(URB_Status == URB_ERROR)//add by leiyq 20130305
+	  {
+		  if (remainingDataLength == 0)
+		  {
+			  USBH_BulkReceiveData (pdev,
+									  datapointer,
+									  remainingDataLengthBak ,
+									  MSC_Machine.hc_num_in);
+		  }
+		  else
+		  {
+			  USBH_BulkReceiveData (pdev,
+									   datapointer_prev,
+									   MSC_Machine.MSBulkInEpSize  ,
+									   MSC_Machine.hc_num_in);
+		  }
+	  }
       break;   
       
       
     case USBH_MSC_BOT_DATAOUT_STATE:
+    	rt_kprintf("\n USBH_MSC_BOT_DATAOUT_STATE\n");
       /* BOT DATA OUT stage */
       URB_Status = HCD_GetURB_State(pdev , MSC_Machine.hc_num_out);       
       if(URB_Status == URB_DONE)
@@ -311,6 +335,7 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
 			     remainingDataLength , 
 			     MSC_Machine.hc_num_out);
           
+          remainingDataLengthBak = remainingDataLength;//add by leiyq 20130305
           remainingDataLength = 0; /* Reset this value and keep in same state */   
         }      
       }
@@ -354,9 +379,27 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
         
       }
+      else if(URB_Status == URB_ERROR)//add by leiyq 20130305
+      {
+    	  if (remainingDataLength == 0)
+    	  {
+    		  USBH_BulkSendData (pdev,
+    				  	  	  	  	  datapointer,
+    			  	  	  	  	  	  remainingDataLengthBak ,
+    	                              MSC_Machine.hc_num_out);
+    	  }
+    	  else
+    	  {
+    		  USBH_BulkSendData (pdev,
+    		    			  	  	   datapointer_prev,
+    		    			  	  	   MSC_Machine.MSBulkOutEpSize  ,
+    		    	                   MSC_Machine.hc_num_out);
+    	  }
+      }
       break;
       
     case USBH_MSC_RECEIVE_CSW_STATE:
+    	rt_kprintf("\n USBH_MSC_RECEIVE_CSW_STATE\n");
       /* BOT CSW stage */     
         /* NOTE: We cannot reset the BOTStallErrorCount here as it may come from 
         the clearFeature from previous command */
@@ -372,7 +415,6 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         }
         
         USBH_MSC_CSWData.CSWArray[0] = 0;
-        
         USBH_BulkReceiveData (pdev,
                               USBH_MSC_BOTXferParam.pRxTxBuff, 
                               USBH_MSC_CSW_MAX_LENGTH , 
@@ -382,6 +424,7 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       break;
       
     case USBH_MSC_DECODE_CSW:
+    	rt_kprintf("\nUSBH_MSC_DECODE_CSW\n");
       URB_Status = HCD_GetURB_State(pdev , MSC_Machine.hc_num_in);
       /* Decode CSW */
       if(URB_Status == URB_DONE)
@@ -401,6 +444,7 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       break;
       
     case USBH_MSC_BOT_ERROR_IN: 
+    	rt_kprintf("\nUSBH_MSC_BOT_ERROR_IN\n");
       status = USBH_MSC_BOT_Abort(pdev, phost, USBH_MSC_DIR_IN);
       if (status == USBH_OK)
       {

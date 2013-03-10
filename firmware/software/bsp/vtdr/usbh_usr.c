@@ -30,6 +30,11 @@
 #include "usbh_msc_core.h"
 #include "usbh_msc_scsi.h"
 #include "usbh_msc_bot.h"
+
+#include <rthw.h>
+#include <rtthread.h>
+
+#include <ff.h>
 /** @addtogroup USBH_USER
 * @{
 */
@@ -63,6 +68,8 @@
 * @{
 */ 
 extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
+#define NULL 0
+
 /**
 * @}
 */ 
@@ -76,6 +83,8 @@ uint8_t filenameString[15]  = {0};
 
 //FATFS fatfs;
 //FIL file;
+FATFS fatfs; //modify by leiyq 20120219
+FIL file;    //modify by leiyq 20120219
 uint8_t line_idx = 0;   
 
 /*  Points to the DEVICE_PROP structure of current device */
@@ -247,8 +256,8 @@ void USBH_USR_Device_DescAvailable(void *DeviceDesc)
 { 
   USBH_DevDesc_TypeDef *hs;
   hs = DeviceDesc;  
-  LOGOUT("VID : %04Xh\n" , (uint32_t)(*hs).idVendor);
-  LOGOUT("PID : %04Xh\n" , (uint32_t)(*hs).idProduct);
+  //LOGOUT("VID : %04Xh\n" , (uint32_t)(*hs).idVendor);
+ // LOGOUT("PID : %04Xh\n" , (uint32_t)(*hs).idProduct);
 }
 
 /**
@@ -279,11 +288,11 @@ void USBH_USR_Configuration_DescAvailable(USBH_CfgDesc_TypeDef * cfgDesc,
   
   if((*id).bInterfaceClass  == 0x08)
   {
-    LOGOUT((void *)MSG_MSC_CLASS);
+    //LOGOUT((void *)MSG_MSC_CLASS);
   }
   else if((*id).bInterfaceClass  == 0x03)
   {
-    LOGOUT((void *)MSG_HID_CLASS);
+    //LOGOUT((void *)MSG_HID_CLASS);
   }    
 }
 
@@ -295,7 +304,7 @@ void USBH_USR_Configuration_DescAvailable(USBH_CfgDesc_TypeDef * cfgDesc,
 */
 void USBH_USR_Manufacturer_String(void *ManufacturerString)
 {
-  LOGOUT("Manufacturer : %s\n", (char *)ManufacturerString);
+ // LOGOUT("Manufacturer : %s\n", (char *)ManufacturerString);
 }
 
 /**
@@ -306,7 +315,7 @@ void USBH_USR_Manufacturer_String(void *ManufacturerString)
 */
 void USBH_USR_Product_String(void *ProductString)
 {
-  LOGOUT("Product : %s\n", (char *)ProductString);
+ // LOGOUT("Product : %s\n", (char *)ProductString);
 }
 
 /**
@@ -317,7 +326,7 @@ void USBH_USR_Product_String(void *ProductString)
 */
 void USBH_USR_SerialNum_String(void *SerialNumString)
 {
-  LOGOUT( "Serial Number : %s\n", (char *)SerialNumString);
+ // LOGOUT( "Serial Number : %s\n", (char *)SerialNumString);
 } 
 
 
@@ -332,10 +341,10 @@ void USBH_USR_EnumerationDone(void)
 {
   
   /* Enumeration complete */
-  LOGOUT((void *)MSG_DEV_ENUMERATED);
+  //LOGOUT((void *)MSG_DEV_ENUMERATED);
   
-  LOGOUT( "To see the root content of the disk : " );
-  LOGOUT("Press Key...");
+ // LOGOUT( "To see the root content of the disk : " );
+  //LOGOUT("Press Key...");
   
 } 
 
@@ -348,7 +357,7 @@ void USBH_USR_EnumerationDone(void)
 */
 void USBH_USR_DeviceNotSupported(void)
 {
-  LOGOUT ("> Device not supported.");
+  //LOGOUT ("> Device not supported.");
 }  
 
 
@@ -382,7 +391,7 @@ USBH_USR_Status USBH_USR_UserInput(void)
 */
 void USBH_USR_OverCurrentDetected (void)
 {
-  LOGOUT ("Overcurrent detected.");
+ // LOGOUT ("Overcurrent detected.");
 }
 
 
@@ -394,7 +403,7 @@ void USBH_USR_OverCurrentDetected (void)
 */
 int USBH_USR_MSC_Application(void)
 {
- // FRESULT res;
+  FRESULT res;//modify by leiyq 20120319
   uint8_t writeTextBuff[] = "STM32 Connectivity line Host Demo application using FAT_FS   ";
   uint16_t bytesWritten, bytesToWrite;
   
@@ -403,27 +412,29 @@ int USBH_USR_MSC_Application(void)
   case USH_USR_FS_INIT: 
     
     /* Initialises the File System*/
-   // if ( f_mount( 0, &fatfs ) != FR_OK )
+    if ( f_mount( 0, &fatfs ) != FR_OK ) //modify by leiyq20120319
     {
       /* efs initialisation fails*/
-      LOGOUT("> Cannot initialize File System.\n");
+      //LOGOUT("> Cannot initialize File System.\n");
       return(-1);
     }
-    LOGOUT("> File System initialized.\n");
-    LOGOUT("> Disk capacity : %d Bytes\n", USBH_MSC_Param.MSCapacity * \
+   // LOGOUT("> File System initialized.\n");
+    //LOGOUT("> Disk capacity : %d Bytes\n", USBH_MSC_Param.MSCapacity * \
       USBH_MSC_Param.MSPageLength); 
     
     if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
     {
-      LOGOUT((void *)MSG_WR_PROTECT);
+     // LOGOUT((void *)MSG_WR_PROTECT);
     }
     
-    USBH_USR_ApplicationState = USH_USR_FS_READLIST;
+   // USBH_USR_ApplicationState = USH_USR_FS_READLIST;//modify by leiyq 20120219
+    USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;//modify by leiyq 20120219
+
     break;
     
   case USH_USR_FS_READLIST:
     
-    LOGOUT((void *)MSG_ROOT_CONT);
+    //LOGOUT((void *)MSG_ROOT_CONT);
     Explore_Disk("0:/", 1);
     line_idx = 0;   
     USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;
@@ -432,7 +443,7 @@ int USBH_USR_MSC_Application(void)
     
   case USH_USR_FS_WRITEFILE:
     
-	LOGOUT( "Press Key to write file");
+	//LOGOUT( "Press Key to write file");
 
     USB_OTG_BSP_mDelay(100);
     
@@ -443,11 +454,11 @@ int USBH_USR_MSC_Application(void)
 //      Toggle_Leds();
 //    }
     /* Writes a text file, STM32.TXT in the disk*/
-    LOGOUT("> Writing File to disk flash ...\n");
+    //LOGOUT("> Writing File to disk flash ...\n");
     if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
     {
       
-      LOGOUT ( "> Disk flash is write protected \n");
+      //LOGOUT ( "> Disk flash is write protected \n");
       USBH_USR_ApplicationState = USH_USR_FS_DRAW;
       break;
     }
@@ -479,10 +490,33 @@ int USBH_USR_MSC_Application(void)
 //    {
 //      LOGOUT ("> STM32.TXT created in the disk\n");
 //    }
+        /*write the file to the FATfs*/ //modify by leiyq 20120219
+		f_mount(0, &fatfs);
+		if(f_open(&file, "0:上下.txt",FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
+		{
+			/* Write buffer to file */
+			bytesToWrite = sizeof(writeTextBuff);
+			res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);
+			if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
+			{
+			 //LOGOUT("> STM32.TXT CANNOT be writen.\n");
+			}
+			else
+			{
+			 //LOGOUT("> 'STM32.TXT' file created\n");
+			}
 
-    USBH_USR_ApplicationState = USH_USR_FS_DRAW; 
+		 /*close file and filesystem*/
+			f_close(&file);
+			f_mount(0, NULL);
+		}
+		else
+		{
+			//LOGOUT ("> STM32.TXT created in the disk\n");
+		}
+		USBH_USR_ApplicationState = USH_USR_FS_DRAW;
 
-    LOGOUT( "To start Image slide show Press Key.");
+   // LOGOUT( "To start Image slide show Press Key.");
 
   
     break;

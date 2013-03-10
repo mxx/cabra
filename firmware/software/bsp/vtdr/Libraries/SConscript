@@ -34,6 +34,7 @@ STM32F10x_StdPeriph_Driver/src/misc.c
 STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_bot.c
 STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_scsi.c
 STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_core.c
+STM32_USB_HOST_Library/Class/MSC/src/usbh_msc_fatfs.c
 STM32_USB_HOST_Library/Core/src/usbh_core.c
 STM32_USB_HOST_Library/Core/src/usbh_hcs.c
 STM32_USB_HOST_Library/Core/src/usbh_stdreq.c

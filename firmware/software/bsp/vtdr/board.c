@@ -115,6 +115,9 @@ void rt_hw_usb_init()
 
 	 GPIO_InitTypeDef GPIO_InitStructure;
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO , ENABLE);
+
 
     //GPIO_SetBits(GPIOB,USB_PWR_ON);
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
@@ -125,15 +128,16 @@ void rt_hw_usb_init()
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
     GPIO_InitStructure.GPIO_Pin   = USB_OC ;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
+#if 0
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPD;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Pin   =   USB_ID | USB_DM |USB_DP ;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-
+#endif
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
     GPIO_InitStructure.GPIO_Pin = USB_VBUS;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_SetBits(GPIOA,USB_VBUS);
 
     GPIO_ResetBits(GPIOB,USB_PWR_ON);
 }

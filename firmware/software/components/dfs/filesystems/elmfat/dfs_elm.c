@@ -676,6 +676,7 @@ int elm_init(void)
 /*
  * RT-Thread Device Interface for ELM FatFs
  */
+#if 0
 #include "diskio.h"
 
 /* Initialize a Drive */
@@ -760,7 +761,7 @@ DRESULT disk_ioctl(BYTE drv, BYTE ctrl, void *buff)
 
 	return RES_OK;
 }
-
+#endif
 rt_time_t get_fattime(void)
 {
 	return 0;
@@ -804,3 +805,4 @@ void ff_rel_grant(_SYNC_t m)
 }
 
 #endif
+

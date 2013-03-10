@@ -243,7 +243,8 @@ typedef struct _Host_TypeDef
 /** @defgroup USBH_CORE_Exported_Macros
   * @{
   */ 
-
+extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
+extern USBH_HOST             USB_Host;
 /**
   * @}
   */ 

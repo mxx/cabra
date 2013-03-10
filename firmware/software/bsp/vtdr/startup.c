@@ -112,7 +112,7 @@ void rtthread_startup(void)
 	finsh_set_device("uart2");
 #endif
 
-	rt_hw_lcd_on();
+	//rt_hw_lcd_on();
 
     /* init timer thread */
     rt_system_timer_thread_init();

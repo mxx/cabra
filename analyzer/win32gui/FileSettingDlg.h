@@ -15,9 +15,6 @@ class CFileSettingDlg : public CDialog
 // Construction
 public:
 	void InitComNo();
-	void UpdateListItem(int MYNo);
-	void InitListData();
-	void InitListCtrl();
 	CFileSettingDlg(CWnd* pParent = NULL);   // standard constructor
 	DCB m_dcbConf;
 	CString m_strDev;
@@ -25,13 +22,7 @@ public:
 	//{{AFX_DATA(CFileSettingDlg)
 	enum { IDD = IDD_DIALOG_FILE_SETTING };
 	CButton	m_btnConf;
-	CSpinButtonCtrl	m_spinExt;
 	CComboBoxEx	m_ComboComNo;
-	CListCtrl	m_ListSet;
-	CComboBox	m_ComboMyNo;
-	CString	m_strFileName;
-	int		m_DataCollectionByNo;
-	CString	m_strExt;
 	//}}AFX_DATA
 
 
@@ -51,15 +42,9 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CFileSettingDlg)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnButtonOpenFiledia();
-	afx_msg void OnButtonSet();
 	afx_msg void OnButtonDataCollection();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnButtonComconf();
-	afx_msg void OnDeltaposSpinExt(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnChangeEditExt();
-	afx_msg void OnSelchangeComboMyno();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 	

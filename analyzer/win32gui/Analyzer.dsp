@@ -148,15 +148,7 @@ SOURCE=.\SerialPort.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\shell.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\SpectrumDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\sqlite3.c
 # End Source File
 # Begin Source File
 

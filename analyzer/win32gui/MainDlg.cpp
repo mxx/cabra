@@ -213,7 +213,7 @@ void CMainDlg::OnClose()
 		return;
 	}
 
-	if (MessageBox("Do you really want to quit?","Quit",MB_OKCANCEL) == IDOK)
+	if (MessageBox("确认要关闭程序?","关闭",MB_OKCANCEL) == IDOK)
 	{
 		m_DataCollectionDlg.m_bStop = true;
 		m_DataCollectionDlg.ClosePort();
@@ -226,7 +226,7 @@ void CMainDlg::OnDestroy()
 {
 	CDialog::OnDestroy();
 	
-	CString strSec="FileSetting";
+	CString strSec="Setting";
 	CString strEnt;
 	for(int i =1;i<=12;i++)
 	{

@@ -3,7 +3,7 @@ Import('RTT_ROOT')
 from building import *
 
 src_bsp = ['application.c', 'startup.c', 'board.c', 'stm32f10x_it.c']
-src_drv = ['rtc.c', 'usart.c', 'serial.c','lcd.c','led.c', 'usbd_mem_if.c','usb_bsp.c','usbh_usr.c','gpio_drv.c']
+src_drv = ['rtc.c', 'usart.c', 'serial.c','lcd.c','led.c', 'usbd_mem_if.c','usb_bsp.c','usbh_usr.c','gpio_drv.c','i2c_drv.c']
 
 if GetDepend('RT_USING_DFS'):
 	if rtconfig.STM32_TYPE == 'STM32F10X_HD':

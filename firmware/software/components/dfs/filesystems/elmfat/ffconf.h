@@ -89,7 +89,6 @@
 /	1    - ASCII only (Valid for non LFN cfg.)
 */
 
-
 #if RT_DFS_ELM_USE_LFN
 #define _USE_LFN 	RT_DFS_ELM_USE_LFN
 #define _MAX_LFN 	RT_DFS_ELM_MAX_LFN
@@ -109,7 +108,7 @@
 /  to the project. When enable to use heap, memory control functions
 /  ff_memalloc() and ff_memfree() must be added to the project. */
 
-
+//#define  RT_DFS_ELM_LFN_UNICODE
 #ifdef RT_DFS_ELM_LFN_UNICODE
 #define _LFN_UNICODE	1	/* 0:ANSI/OEM or 1:Unicode */
 #else

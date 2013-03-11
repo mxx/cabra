@@ -45,7 +45,10 @@
 
 #include "led.h"
 #include "lcd.h"
+#include "i2c_drv.h"
 #include "font_lib.h"
+#include<rtdef.h>
+#include<rtconfig.h>
 
 /**iclude the host usb lib**/ //modify by leiyq 20120318
 #include <usbh_core.h>
@@ -58,11 +61,12 @@ static rt_uint8_t led_stack[ 512 ];
 //static rt_uint8_t usb_stack[ 512 ];//modify by leiyq 20130215
 static struct rt_thread led_thread;
 //static struct rt_thread usb_thread;//modify by leiyq 20130215
-
+rt_uint8_t testwritebuff;
+rt_uint8_t testreadbuff;
 static void led_thread_entry(void* parameter)
 {
     unsigned int count=0;
-
+    testwritebuff = 10;
 //    rt_hw_led_init();
 
     while (1)
@@ -81,6 +85,13 @@ static void led_thread_entry(void* parameter)
 #endif
         rt_hw_led_off(0);
         rt_thread_delay( RT_TICK_PER_SECOND/2 );
+        testreadbuff=I2C_Master_BufferWrite(I2C1,OwnAddress1,0,1,&testwritebuff);
+        rt_hw_led_on(0);
+        rt_thread_delay( RT_TICK_PER_SECOND/2 );
+        I2C_Master_BufferRead(I2C1,OwnAddress1,0,1,&testreadbuff);
+
+
+
     }
 }
 /*usb_thread_entry */ //add by leiyq 20120516

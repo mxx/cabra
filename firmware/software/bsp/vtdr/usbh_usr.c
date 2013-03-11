@@ -79,7 +79,7 @@ extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
 * @{
 */ 
 uint8_t USBH_USR_ApplicationState = USH_USR_FS_INIT;
-uint8_t filenameString[15]  = {0};
+uint16_t filenameString[5]  = {0x3a30,0xcfc9,0xc2cf,0x542e,0x5458};
 
 //FATFS fatfs;
 //FIL file;
@@ -156,7 +156,7 @@ static void    Toggle_Leds(void);
 * @{
 */ 
 
-#define rt_kprintf   LOGOUT
+//#define rt_kprintf   LOGOUT
 /**
 * @brief  USBH_USR_Init 
 *         Displays the message for host lib initialization
@@ -406,7 +406,6 @@ int USBH_USR_MSC_Application(void)
   FRESULT res;//modify by leiyq 20120319
   uint8_t writeTextBuff[] = "STM32 Connectivity line Host Demo application using FAT_FS   ";
   uint16_t bytesWritten, bytesToWrite;
-  
   switch(USBH_USR_ApplicationState)
   {
   case USH_USR_FS_INIT: 
@@ -492,7 +491,8 @@ int USBH_USR_MSC_Application(void)
 //    }
         /*write the file to the FATfs*/ //modify by leiyq 20120219
 		f_mount(0, &fatfs);
-		if(f_open(&file, "0:上下.txt",FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
+	    res = f_open(&file, filenameString,FA_CREATE_ALWAYS | FA_WRITE);
+		if(res == FR_OK)
 		{
 			/* Write buffer to file */
 			bytesToWrite = sizeof(writeTextBuff);
@@ -500,10 +500,12 @@ int USBH_USR_MSC_Application(void)
 			if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
 			{
 			 //LOGOUT("> STM32.TXT CANNOT be writen.\n");
+				rt_kprintf("> STM32.TXT CANNOT be writen.\n");
 			}
 			else
 			{
 			 //LOGOUT("> 'STM32.TXT' file created\n");
+				rt_kprintf("> 'STM32.TXT' file created\n");
 			}
 
 		 /*close file and filesystem*/
@@ -513,6 +515,7 @@ int USBH_USR_MSC_Application(void)
 		else
 		{
 			//LOGOUT ("> STM32.TXT created in the disk\n");
+			rt_kprintf("> STM32.TXT created in the disk\n");
 		}
 		USBH_USR_ApplicationState = USH_USR_FS_DRAW;
 

@@ -42,6 +42,7 @@
 #define READ       0x03  /* Read from Memory instruction */
 #define RDSR       0x05  /* Read Status Register instruction  */
 #define RDID       0x9F  /* Read identification */
+#define SE4K       0x20  /*Sector 4k Erase instruction */
 #define SE         0xD8  /* Sector Erase instruction */
 #define BE         0xC7  /* Bulk Erase instruction */
 
@@ -96,7 +97,78 @@ u8 DATAFLASH_Init(void)
 	/*------------Put DATAFLASH in SPI mode--------------*/
 	/* DATAFLASH initialized and set to SPI mode properly */
 	sDATAFLASH_CID cid;
+	DATAFLASH_ChangProtectStatus(0x01);
+	DATAFLASH_GetStatusREG();
 	return (DATAFLASH_GetDeviceID(&cid));
+
+
+
+}
+
+/*******************************************************************************
+* Function Name  : DATAFLASH_ChangProtectStatus
+* Description    : change the global protect status.
+* Input          : - pBuffer : the status you want to change.
+*
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void DATAFLASH_ChangProtectStatus(u8 pBuffer)
+{
+  /* Enable the write access to the FLASH */
+  SPI_FLASH_WriteEnable();
+  dataflash_delay(2000);
+  /* Select the FLASH: Chip Select low */
+  SPI_FLASH_CS_LOW();
+  dataflash_delay(1000);
+  /* Send "Write to Memory " instruction */
+  SPI_FLASH_SendByte(WRSR);
+    SPI_FLASH_SendByte(pBuffer);
+  /* Deselect the FLASH: Chip Select high */
+  SPI_FLASH_CS_HIGH();
+  dataflash_delay(2000);
+  /* Wait the end of Flash writing */
+  SPI_FLASH_WaitForWriteEnd();
+}
+
+u8 DATAFLASH_GetStatusREG(void)
+{
+	u8 rvalue = DATAFLASH_RESPONSE_FAILURE;
+	u8 CID_Tab[2];
+	DATAFLASH_CS_HIGH();
+    dataflash_delay(2000);
+
+	  /* Sector Erase */
+	  /* Select the FLASH: Chip Select low */
+	  SPI_FLASH_CS_LOW();
+
+	  dataflash_delay(1000);
+	  /* Send Sector Erase instruction */
+	  SPI_FLASH_SendByte( RDSR );
+
+		u16 i;
+		for (i = 0; i < 2; i++)
+		{
+
+			DATAFLASH_WriteByte(Dummy_Byte);
+			u16 data = DATAFLASH_ReadByte();
+			if (DATAFLASH_READSUCCESS(data))
+			{
+				CID_Tab[i] = DATAFLASH_READ_BYTE(data);
+			}
+			else
+			{
+				rvalue = DATAFLASH_RESPONSE_FAILURE;
+				break;
+			}
+			rvalue = DATAFLASH_RESPONSE_NO_ERROR;
+
+		}
+
+		DATAFLASH_CS_HIGH();
+		return rvalue;
+
+
 }
 
 
@@ -246,6 +318,36 @@ void SPI_Config(void)
 }
 
 /*******************************************************************************
+* Function Name  : SPI_FLASH_Sector4kErase
+* Description    : Erases the specified 4k FLASH sector.
+* Input          : SectorAddr: address of the sector to erase.
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void SPI_FLASH_Sector4kErase(u32 SectorAddr)
+{
+  /* Send write enable instruction */
+  SPI_FLASH_WriteEnable();
+  dataflash_delay(2000);
+  /* Sector Erase */
+  /* Select the FLASH: Chip Select low */
+  SPI_FLASH_CS_LOW();
+  dataflash_delay(1000);
+  /* Send Sector Erase instruction */
+  SPI_FLASH_SendByte(SE4K);
+  /* Send SectorAddr high nibble address byte */
+  SPI_FLASH_SendByte((SectorAddr & 0xFF0000) >> 16);
+  /* Send SectorAddr medium nibble address byte */
+  SPI_FLASH_SendByte((SectorAddr & 0xFF00) >> 8);
+  /* Send SectorAddr low nibble address byte */
+  SPI_FLASH_SendByte(SectorAddr & 0xFF);
+  /* Deselect the FLASH: Chip Select high */
+  SPI_FLASH_CS_HIGH();
+
+  /* Wait the end of Flash writing */
+  SPI_FLASH_WaitForWriteEnd();
+}
+/*******************************************************************************
 * Function Name  : SPI_FLASH_SectorErase
 * Description    : Erases the specified FLASH sector.
 * Input          : SectorAddr: address of the sector to erase.
@@ -286,10 +388,11 @@ void SPI_FLASH_BulkErase(void)
 {
   /* Send write enable instruction */
   SPI_FLASH_WriteEnable();
-
+  dataflash_delay(2000);
   /* Bulk Erase */
   /* Select the FLASH: Chip Select low */
   SPI_FLASH_CS_LOW();
+  dataflash_delay(1000);
   /* Send Bulk Erase instruction  */
   SPI_FLASH_SendByte(BE);
   /* Deselect the FLASH: Chip Select high */
@@ -316,9 +419,10 @@ void SPI_FLASH_PageWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
 {
   /* Enable the write access to the FLASH */
   SPI_FLASH_WriteEnable();
-
+  dataflash_delay(2000);
   /* Select the FLASH: Chip Select low */
   SPI_FLASH_CS_LOW();
+  dataflash_delay(1000);
   /* Send "Write to Memory " instruction */
   SPI_FLASH_SendByte(WRITE);
   /* Send WriteAddr high nibble address byte to write to */
@@ -339,7 +443,7 @@ void SPI_FLASH_PageWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
 
   /* Deselect the FLASH: Chip Select high */
   SPI_FLASH_CS_HIGH();
-
+  dataflash_delay(2000);
   /* Wait the end of Flash writing */
   SPI_FLASH_WaitForWriteEnd();
 }
@@ -440,7 +544,7 @@ void SPI_FLASH_BufferRead(u8* pBuffer, u32 ReadAddr, u16 NumByteToRead)
 {
   /* Select the FLASH: Chip Select low */
   SPI_FLASH_CS_LOW();
-
+  dataflash_delay(1000);
   /* Send "Read from Memory " instruction */
   SPI_FLASH_SendByte(READ);
 
@@ -517,16 +621,16 @@ u8 SPI_FLASH_ReadByte(void)
 u8 SPI_FLASH_SendByte(u8 byte)
 {
   /* Loop while DR register in not emplty */
-  while(SPI_GetFlagStatus(SPI1, SPI_FLAG_TXE) == RESET);
+  while(SPI_I2S_GetFlagStatus(SPI1, SPI_FLAG_TXE) == RESET);
 
   /* Send byte through the SPI1 peripheral */
-  SPI_SendData(SPI1, byte);
+  SPI_I2S_SendData(SPI1, byte);
 
   /* Wait to receive a byte */
-  while(SPI_GetFlagStatus(SPI1, SPI_FLAG_RXNE) == RESET);
+  while(SPI_I2S_GetFlagStatus(SPI1, SPI_FLAG_RXNE) == RESET);
 
   /* Return the byte read from the SPI bus */
-  return SPI_ReceiveData(SPI1);
+  return SPI_I2S_ReceiveData(SPI1);
 }
 
 /*******************************************************************************
@@ -540,13 +644,13 @@ u8 SPI_FLASH_SendByte(u8 byte)
 u16 SPI_FLASH_SendHalfWord(u16 HalfWord)
 {
   /* Loop while DR register in not emplty */
-  while(SPI_GetFlagStatus(SPI1, SPI_FLAG_TXE) == RESET);
+  while(SPI_I2S_GetFlagStatus(SPI1, SPI_FLAG_TXE) == RESET);
 
   /* Send Half Word through the SPI1 peripheral */
   SPI_SendData(SPI1, HalfWord);
 
   /* Wait to receive a Half Word */
-  while(SPI_GetFlagStatus(SPI1, SPI_FLAG_RXNE) == RESET);
+  while(SPI_I2S_GetFlagStatus(SPI1, SPI_FLAG_RXNE) == RESET);
 
   /* Return the Half Word read from the SPI bus */
   return SPI_ReceiveData(SPI1);
@@ -563,12 +667,13 @@ void SPI_FLASH_WriteEnable(void)
 {
   /* Select the FLASH: Chip Select low */
   SPI_FLASH_CS_LOW();
-
+  dataflash_delay(1000);
   /* Send "Write Enable" instruction */
   SPI_FLASH_SendByte(WREN);
 
   /* Deselect the FLASH: Chip Select high */
   SPI_FLASH_CS_HIGH();
+
 }
 
 /*******************************************************************************

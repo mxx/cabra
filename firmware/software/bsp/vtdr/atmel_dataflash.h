@@ -147,10 +147,13 @@ sDATAFLASH_CID;
 u8 DATAFLASH_Init(void);
 
 u8 DATAFLASH_GetDeviceID(sDATAFLASH_CID* DATAFLASH_cid);
+u8 DATAFLASH_GetStatusREG( void );
+void DATAFLASH_ChangProtectStatus(u8 pBuffer);
 
 /*----- Medium layer function -----*/
 /*----- High layer function -----*/
 void SPI_FLASH_Init(void);
+void SPI_FLASH_Sector4kErase(u32 SectorAddr);
 void SPI_FLASH_SectorErase(u32 SectorAddr);
 void SPI_FLASH_BulkErase(void);
 void SPI_FLASH_PageWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite);

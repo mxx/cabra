@@ -47,6 +47,7 @@
 #include "lcd.h"
 #include "i2c_drv.h"
 #include "font_lib.h"
+#include "atmel_dataflash.h"
 #include<rtdef.h>
 #include<rtconfig.h>
 
@@ -85,10 +86,13 @@ static void led_thread_entry(void* parameter)
 #endif
         rt_hw_led_off(0);
         rt_thread_delay( RT_TICK_PER_SECOND/2 );
-        testreadbuff=I2C_Master_BufferWrite(I2C1,OwnAddress1,0,1,&testwritebuff);
+       // testreadbuff=I2C_Master_BufferWrite(I2C1,OwnAddress1,0,1,&testwritebuff);
+        //SPI_FLASH_Sector4kErase(0x00);
+        //SPI_FLASH_BufferWrite(&testwritebuff,0,1);
         rt_hw_led_on(0);
         rt_thread_delay( RT_TICK_PER_SECOND/2 );
-        I2C_Master_BufferRead(I2C1,OwnAddress1,0,1,&testreadbuff);
+        //SPI_FLASH_BufferRead(&testreadbuff,0,1);
+        //I2C_Master_BufferRead(I2C1,OwnAddress1,0,1,&testreadbuff);
 
 
 

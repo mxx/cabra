@@ -7,7 +7,6 @@
 #endif // _MSC_VER > 1000
 // DataCollectionDlg.h : header file
 //
-#include "Packet.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDataCollectionDlg dialog
 
@@ -17,18 +16,16 @@ class CDataCollectionDlg : public CDialog
 public:
 	void ClosePort();
 	bool NeedCollect(CString& strMYNo);
-	void SaveData(CPacket& packet);
-	void SetStatus(CPacket& packet);
 	CDataCollectionDlg(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
 	//{{AFX_DATA(CDataCollectionDlg)
 	enum { IDD = IDD_DIALOG_DATA_COLLECTION };
-	CString	m_strFileName;
-	CString	m_strMYNo;
-	CString	m_strStartTime;
+	CString	m_strPrompt;
+	CString	m_strTime;
+	CString	m_strUniqNo;
+	CString	m_strVersion;
 	CString	m_strStatus;
-	CString	m_strCurrentTime;
 	//}}AFX_DATA
     DCB m_dcb;
 	CSerialPort m_port;
@@ -45,8 +42,7 @@ public:
 
 // Implementation
 protected:
-	CPacket m_TitlePacket;
-	CPacket m_GroupPacket;
+
 
 	CString strCurrentFile;
 	
@@ -65,6 +61,7 @@ protected:
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg void OnClose();
 	afx_msg void OnDestroy();
+	afx_msg void OnButtonVersion();
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()

@@ -84,9 +84,11 @@
 #define IDC_EDIT1                       1043
 #define IDC_EDIT_ALL                    1043
 #define IDC_EDIT_EXT                    1043
+#define IDC_EDIT_PROMPT                 1043
 #define IDC_EDIT2                       1044
 #define IDC_EDIT_AUL                    1044
 #define IDC_STATIC_MYNO                 1045
+#define IDC_STATIC_VERSION              1045
 #define IDC_EDIT_AEFF                   1046
 #define IDC_EDIT_ADPM                   1047
 #define IDC_STATIC_ORG                  1050
@@ -97,11 +99,14 @@
 #define IDC_BUTTON_COMCONF              1055
 #define IDC_SPIN_EXT                    1057
 #define IDC_STATIC_STARTTIME            1058
+#define IDC_STATIC_TIME                 1058
 #define IDC_STATIC_STATUS               1059
 #define IDC_STATIC_CURRENTTIME          1060
+#define IDC_STATIC_UNIQNO               1060
 #define IDC_BUTTON_LOG                  1062
 #define IDC_BUTTON_PRINT                1063
 #define IDC_BUTTON_PRNT                 1064
+#define IDC_BUTTON_VERSION              1065
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
@@ -110,7 +115,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1065
+#define _APS_NEXT_CONTROL_VALUE         1066
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

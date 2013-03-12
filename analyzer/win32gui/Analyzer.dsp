@@ -100,23 +100,11 @@ SOURCE=.\Analyzer.rc
 # End Source File
 # Begin Source File
 
-SOURCE=.\AWSFactorDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\AWSFile.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Config.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\DataCollectionDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\DataFile.cpp
 # End Source File
 # Begin Source File
 
@@ -133,10 +121,6 @@ SOURCE=.\FileSettingDlg.cpp
 # Begin Source File
 
 SOURCE=.\MainDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Packet.cpp
 # End Source File
 # Begin Source File
 
@@ -164,23 +148,11 @@ SOURCE=.\Analyzer.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\AWSFactorDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\AWSFile.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Config.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\DataCollectionDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DataFile.h
 # End Source File
 # Begin Source File
 
@@ -200,10 +172,6 @@ SOURCE=.\MainDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Packet.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
@@ -217,14 +185,6 @@ SOURCE=.\SerialPort.h
 # Begin Source File
 
 SOURCE=.\SpectrumDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\sqlite3.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\sqlite3ext.h
 # End Source File
 # Begin Source File
 

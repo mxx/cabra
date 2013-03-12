@@ -53,7 +53,7 @@ BOOL CAnalyzerApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
-	SetRegistryKey("Aloka");
+	SetRegistryKey("Wayon");
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();

@@ -69,13 +69,13 @@ BOOL CMainDlg::OnInitDialog()
 
 	m_DataCollectionDlg.Create(IDD_DIALOG_DATA_COLLECTION,this);
 	m_DataCollectionDlg.ShowWindow(SW_HIDE);
-	m_AWSFactorDlg.Create(IDD_DIALOG_AWS_FACTOR,this);
-	m_AWSFactorDlg.ShowWindow(SW_HIDE);
+	
+	
 	m_SpectrumDlg.Create(IDD_DIALOG_SPECTRUM,this);
 	m_SpectrumDlg.ShowWindow(SW_HIDE);
 
 	m_DataCollectionDlg.EnableWindow(FALSE);
-	m_AWSFactorDlg.EnableWindow(FALSE);
+	
 	m_SpectrumDlg.EnableWindow(FALSE);
 
 
@@ -141,11 +141,10 @@ void CMainDlg::OnOpenDlg(WPARAM wParam, LPARAM lParam)
 {
 	m_FileSettingDlg.ShowWindow(SW_HIDE);
 	m_DataCollectionDlg.ShowWindow(SW_HIDE);
-	m_AWSFactorDlg.ShowWindow(SW_HIDE);
 	m_SpectrumDlg.ShowWindow(SW_HIDE);
+
 	m_FileSettingDlg.EnableWindow(FALSE);
 	m_DataCollectionDlg.EnableWindow(FALSE);
-	m_AWSFactorDlg.EnableWindow(FALSE);
 	m_SpectrumDlg.EnableWindow(FALSE);
 	
 	
@@ -154,7 +153,7 @@ void CMainDlg::OnOpenDlg(WPARAM wParam, LPARAM lParam)
 	{
 		case OPEN_FILE_SETTING:
 			m_FileSettingDlg.ShowWindow(SW_SHOW);
-			//this->SetWindowText("File Setting");
+			this->SetWindowText("串口设置");
 			m_FileSettingDlg.m_btnConf.EnableWindow(m_DataCollectionDlg.m_bStop);
 			m_FileSettingDlg.GetClientRect(&rect);
 			m_FileSettingDlg.EnableWindow();
@@ -165,26 +164,15 @@ void CMainDlg::OnOpenDlg(WPARAM wParam, LPARAM lParam)
 			if (lParam == OPEN_FILE_SETTING)
 				m_DataCollectionDlg.m_strDev = m_FileSettingDlg.m_strDev;
 			m_DataCollectionDlg.ShowWindow(SW_SHOW);
-			this->SetWindowText("Data Collection");
+			this->SetWindowText("数据采集");
 			m_DataCollectionDlg.GetClientRect(&rect);
 			m_DataCollectionDlg.EnableWindow();
 			m_DataCollectionDlg.SetFocus();
 			break;
-		case OPEN_AWS_FACTOR:
-			m_AWSFactorDlg.m_strCurveName = m_SpectrumDlg.m_strCurveName;
-			m_AWSFactorDlg.m_strCurvePath = m_SpectrumDlg.m_strCurvePath;
-			this->SetWindowText("AWS Factor");
-			m_AWSFactorDlg.GetClientRect(&rect);
-			m_AWSFactorDlg.ShowWindow(SW_SHOW);
-			m_AWSFactorDlg.EnableWindow();
-			m_AWSFactorDlg.SetFocus();
-			break;
 		case OPEN_SPECTRUM:
-			m_SpectrumDlg.m_strCurveName = m_AWSFactorDlg.m_strCurveName;
-			m_SpectrumDlg.m_strCurvePath = m_AWSFactorDlg.m_strCurvePath;
 			m_SpectrumDlg.ShowWindow(SW_SHOW);
 			m_SpectrumDlg.UpdateData(FALSE);
-			this->SetWindowText("Spectrum");
+			this->SetWindowText("疑点数据图示");
 			m_SpectrumDlg.EnableWindow();
 			m_SpectrumDlg.SetFocus();
 			m_SpectrumDlg.GetClientRect(&rect);

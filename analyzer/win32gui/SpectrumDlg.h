@@ -111,14 +111,11 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CSpectrumDlg)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnButtonAwsFactor();
 	afx_msg void OnPaint();
 	afx_msg void OnButtonOpenAWD();
 	afx_msg void OnButtonFileOpen();
-	afx_msg void OnButtonFileSave();
 	afx_msg void OnButtonSelect();
 	afx_msg void OnButtonDelete();
-	afx_msg void OnButtonAws();
 	afx_msg void OnButtonLog();
 	afx_msg void OnButtonPrint();
 	//}}AFX_MSG

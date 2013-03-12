@@ -6,8 +6,7 @@
 #include "Config.h"
 #include "SpectrumDlg.h"
 #include "SelectList.h"
-#include "DataFile.h"
-#include "AWSFile.h"
+
 #include <math.h>
 
 #ifdef _DEBUG
@@ -90,14 +89,11 @@ void CSpectrumDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CSpectrumDlg, CDialog)
 	//{{AFX_MSG_MAP(CSpectrumDlg)
-	ON_BN_CLICKED(IDC_BUTTON_AWS_FACTOR, OnButtonAwsFactor)
 	ON_WM_PAINT()
 	ON_BN_CLICKED(IDC_BUTTON_OPEN_FILEDIA, OnButtonOpenAWD)
 	ON_BN_CLICKED(IDC_BUTTON_FILE_OPEN, OnButtonFileOpen)
-	ON_BN_CLICKED(IDC_BUTTON_FILE_SAVE, OnButtonFileSave)
 	ON_BN_CLICKED(IDC_BUTTON_SELECT, OnButtonSelect)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE, OnButtonDelete)
-	ON_BN_CLICKED(IDC_BUTTON_AWS, OnButtonAws)
 	ON_BN_CLICKED(IDC_BUTTON_LOG, OnButtonLog)
 	ON_BN_CLICKED(IDC_BUTTON_PRINT, OnButtonPrint)
 	//}}AFX_MSG_MAP
@@ -138,12 +134,7 @@ BOOL CSpectrumDlg::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CSpectrumDlg::OnButtonAwsFactor() 
-{
-	UpdateData();
-	::PostMessage(this->GetParent()->m_hWnd,WM_OPEN_DLG,OPEN_AWS_FACTOR,0);
-	
-}
+
 
 void CSpectrumDlg::OnPaint() 
 {
@@ -439,47 +430,7 @@ void CSpectrumDlg::OnButtonFileOpen()
 	}
 }
 
-void CSpectrumDlg::OnButtonFileSave() 
-{
-	if (0==listData.size()) return;
-	UpdateData();
-	RawData& data = GetListItem(nActiveIndex);
-	CDataFile Data;
-	CString strPath = data.strPath;
-	char ext[_MAX_EXT]={0};
-	
-	_splitpath(strPath, NULL, NULL, NULL, ext );
-	strPath = strPath.Left(strPath.GetLength()-strlen(ext));
-	strPath += "_AWS";
-	strPath += ext;
-	CString strExt = ext;
-	strExt.TrimLeft(".");
-	
-	CFileDialog dlg(FALSE,strExt,strPath,OFN_OVERWRITEPROMPT,NULL,this->GetParent());
-	
-	if (dlg.DoModal()!=IDOK) return;
-    strPath = dlg.GetPathName();
-	if (Data.Open(data.strPath))
-	{
-		if (Data.Load())
-		{
-			Data.SetDPM(m_strADPM,m_strBDPM);
-			Data.SetEff(m_strAEFF,m_strBEFF);
-			Data.SetGross(m_strAGROSS,m_strBGROSS);
 
-			if (Data.SaveAs(strPath))
-				AfxMessageBox("Successfully saved " + strPath);
-			else
-				AfxMessageBox("Failed to save " + strPath);
-		}
-		else
-			AfxMessageBox(CString("Failed to load data from ") + data.strPath);
-	}
-	else
-	{
-		AfxMessageBox("Failed to open raw data file" + data.strPath);
-	}
-}
 
 void CSpectrumDlg::OnButtonSelect() 
 {
@@ -589,125 +540,11 @@ void CSpectrumDlg::setMF()
 
 bool CSpectrumDlg::LoadData(LPCTSTR szPath)
 {
-		CDataFile data;
-		CString strMsg;
-		strMsg.Empty();
-		RawData rawData;
-		
-		char szName[_MAX_FNAME]={0};
-		char ext[_MAX_EXT]={0};
-
-		_splitpath(szPath, NULL, NULL, szName, ext );
-		if(listData.empty())
-		{
-			initColorList();
-		}
-		while (data.Open(szPath) && data.Load())
-		{
-			rawData.strName = szName;
-			rawData.strName+= ext;
-			rawData.strPath = szPath;
-			memset(rawData.nSpetrum,0,4000);
-			Data_Line data_rec={0};
-			memcpy(rawData.nSpetrum,data.nSpectrum,sizeof(rawData.nSpetrum));
-		
-			data.GetDataLine(data_rec);
-
-			rawData.strAGROSS = CString(data_rec.data.A_GROSS,sizeof(data_rec.data.A_GROSS));
-			rawData.strAGROSS.TrimLeft();
-			rawData.strAGROSS.TrimRight();
-		
-			rawData.strBGROSS = CString(data_rec.data.B_GROSS,sizeof(data_rec.data.B_GROSS));
-			rawData.strBGROSS.TrimLeft();
-			rawData.strBGROSS.TrimRight();
-
-			rawData.strSCCR = CString(data_rec.data.STD_ESCR_SCCR,sizeof(data_rec.data.STD_ESCR_SCCR));
-			rawData.strSCCR.TrimLeft();
-			rawData.strSCCR.TrimRight();
-			
-			rawData.strESCR = CString(data_rec.data.ESCR_SCCR,sizeof(data_rec.data.ESCR_SCCR));
-			rawData.strESCR.TrimLeft();
-			rawData.strESCR.TrimRight();
-			
-			rawData.strADPM = CString(data_rec.data.A_DPM,sizeof(data_rec.data.A_DPM));
-			rawData.strADPM.TrimLeft();
-			rawData.strADPM.TrimRight();
-
-			rawData.strBDPM = CString(data_rec.data.B_DPM,sizeof(data_rec.data.B_DPM));
-			rawData.strBDPM.TrimLeft();
-			rawData.strBDPM.TrimRight();
-
-			rawData.strAEFF = CString(data_rec.data.A_EFF,sizeof(data_rec.data.A_EFF));
-			rawData.strAEFF.TrimLeft();
-			rawData.strAEFF.TrimRight();
-
-			rawData.strBEFF = CString(data_rec.data.B_EFF,sizeof(data_rec.data.B_EFF));
-			rawData.strBEFF.TrimLeft();
-			rawData.strBEFF.TrimRight();
-			
-			rawData.strTime = CString(data_rec.data.TIME,sizeof(data_rec.data.TIME));
-			rawData.strTime.TrimLeft();
-			rawData.strTime.TrimRight();
-
-			rawData.rgb = rgb.front();
-			rgb.pop_front();
-			listData.push_back(rawData);
-			nActiveIndex = listData.size()-1;
-			return true;
-		}
 
 		return false;
 }
 
-void CSpectrumDlg::OnButtonAws() 
-{
-	if (m_strCurveName.IsEmpty()) return;
-	CAWSFile awsFile;
-	AWS_Setting set;
-	AWS_CalCo co;
-	UpdateData();
-	awsFile.ReadData(m_strCurveName,set);
-	if (awsFile.CalculateCoefficient(set,co))
-	{
-		double factor = Factor(atof(m_strESCR));
 
-		if (m_strAchLL.IsEmpty())
-		{
-			m_strAchLL.Format("%d",set.nAch_LL);
-			m_strAchUL.Format("%d", round(set.nAch_UL * factor));
-			m_strBchLL.Format("%d", round(set.nBch_LL * factor));
-			m_strBchUL.Format("%d",round(set.nBch_UL * factor));
-		}
-		
-
-		factor = atof(m_strESCR);
-		double y,fAEff,fBEff;
-		double z,Z;
-		y = co.dAch_co[0] + factor * co.dAch_co[1] + pow(factor,2) * co.dAch_co[2] + pow(factor,3)*co.dAch_co[3];
-		m_strAEFF.Format("%.2f",y);
-		fAEff = y;
-		
-		y = co.dBch_co[0] + factor * co.dBch_co[1] + pow(factor,2) * co.dBch_co[2] + pow(factor,3)*co.dBch_co[3];
-		m_strBEFF.Format("%.2f",y);
-		fBEff = y;
-
-		y = co.d_BA_co[0] + factor * co.d_BA_co[1] + pow(factor,2) * co.d_BA_co[2] + pow(factor,3)*co.d_BA_co[3];
-        DWORD sum = ChanelSum(atoi(m_strAchLL),atoi(m_strAchUL));
-		m_strAGROSS.Format("%d",sum);
-		Z = sum/m_nTime;
-		sum = ChanelSum(atoi(m_strBchLL),atoi(m_strBchUL));
-		m_strBGROSS.Format("%d",sum);
-		z = sum/m_nTime;
-		
-		Z = (Z-(1/y)*z)/fAEff;	
-		z = z/fBEff;
-		m_strADPM.Format("%.2f",Z);
-		m_strBDPM.Format("%.2f",z);
-	}	
-	UpdateData(FALSE);
-	if (listData.size())
-		SaveActive(GetListItem(nActiveIndex));
-}
 
 RawData& CSpectrumDlg::GetListItem(int n)
 {
@@ -963,152 +800,6 @@ void CSpectrumDlg::OnButtonPrint()
 
 void CSpectrumDlg::DrawPage(CDC &dc, int x, int y, int cx, int cy)
 {
-	int nCurrentY = y;
-	dc.TextOut(x,nCurrentY,"<Data>");
-	CSize size = dc.GetTextExtent("<Data>");
-	CString strText;
-	CString strTmp;
-	GetCurrentFileName(strTmp);
-	strText.Format("File Name: %s\n",strTmp);
-
-	nCurrentY+=size.cy;
-	dc.TextOut(x,nCurrentY,strText);
-	size = dc.GetTextExtent(strText);
-    nCurrentY+=size.cy;
-	dc.TextOut(x,nCurrentY,"Group condition");
-	size = dc.GetTextExtent(strText);
-	nCurrentY+=size.cy;
-	int dy=10;
-	int dx=size.cy/3;
-	int nY=nCurrentY;
-	for(int i = 0;i<5;i++)
-	{
-			dc.MoveTo(x,nY);
-			dc.LineTo(x+cx,nY);
-			if (i>0)
-				nY += 2*size.cy+dy;
-			else
-				nY += size.cy+dy;
-	}
-    nY-=2*size.cy+dy;
-	
-	for(i = 0;i<7;i++)
-	{
-		if (i > 3 && i !=6 )
-			dc.MoveTo(x+i*cx/6,nCurrentY+size.cy+dy);
-		else
-			dc.MoveTo(x+i*cx/6,nCurrentY);
-		dc.LineTo(x+i*cx/6,nY);
-	}
-	dc.SetBkMode(TRANSPARENT);
-	dc.TextOut(x+dx,nCurrentY+dy/2,"MY No.");
-	dc.TextOut(x+2*cx/6+dx,nCurrentY+dy/2,"Comment");
-	dc.TextOut(x+dx,nCurrentY+size.cy+dy + dy/2,"Correction");
-	dc.TextOut(x+dx,nCurrentY+2*size.cy+dy + dy/2,"method");
-	dc.TextOut(x+2*cx/6+dx,nCurrentY+size.cy+dy+dy/2,"Data");
-	dc.TextOut(x+4*cx/6+dx,nCurrentY+size.cy+dy+dy/2,"Label");
-	dc.TextOut(x+dx,nCurrentY+3*size.cy+2*dy+dy/2,"Repeat");
-	dc.TextOut(x+2*cx/6+dx,nCurrentY+3*size.cy+2*dy+dy/2,"Isotope");
-	dc.TextOut(x+4*cx/6+dx,nCurrentY+3*size.cy+2*dy+dy/2,"Date/Time");
-	dc.TextOut(x+dx,nCurrentY+5*size.cy+3*dy+dy/2,"SN");
-	dc.TextOut(x+2*cx/6+dx,nCurrentY+5*size.cy+3*dy+dy/2,"RN");
-	dc.TextOut(x+4*cx/6+dx,nCurrentY+5*size.cy+3*dy+dy/2,"Measurement");
-	dc.TextOut(x+4*cx/6+dx,nCurrentY+6*size.cy+3*dy+dy/2,"time");
-
-	CDataFile data;
-	Group_Line group={0};
-	Data_Line dline={0};
-
-	if (!strTmp.IsEmpty())
-	{
-		data.Open(strTmp);
-		if (data.Load())
-		{
-			data.GetGroup(group);
-			data.GetDataLine(dline);
-			
-			dc.TextOut(x+cx/6+dx,nCurrentY+dy/2,group.group.Group,sizeof(group.group.Group));
-			dc.TextOut(x+3*cx/6+dx,nCurrentY+dy/2,group.group.Comment,sizeof(group.group.Comment));
-			dc.TextOut(x+cx/6+dx,nCurrentY+size.cy+dy + dy/2,group.group.Method,sizeof(group.group.Method));
-			dc.TextOut(x+3*cx/6+dx,nCurrentY+size.cy+dy+dy/2,group.group.Data,sizeof(group.group.Data));
-			dc.TextOut(x+5*cx/6+dx,nCurrentY+size.cy+dy+dy/2,group.group.Label,sizeof(group.group.Label));
-			dc.TextOut(x+cx/6+dx,nCurrentY+3*size.cy+2*dy+dy/2,group.group.Repeat,sizeof(group.group.Repeat));
-			dc.TextOut(x+3*cx/6+dx,nCurrentY+3*size.cy+2*dy+dy/2,group.group.ISOTOPE,sizeof(group.group.ISOTOPE));
-			dc.TextOut(x+5*cx/6+dx,nCurrentY+3*size.cy+2*dy+dy/2,group.group.Date,sizeof(group.group.Date));
-			dc.TextOut(x+5*cx/6+dx,nCurrentY+4*size.cy+2*dy+dy/2,group.group.Time,sizeof(group.group.Time));
-			dc.TextOut(x+cx/6+dx,nCurrentY+5*size.cy+3*dy+dy/2,dline.data.SN,sizeof(dline.data.SN));
-			dc.TextOut(x+3*cx/6+dx,nCurrentY+5*size.cy+3*dy+dy/2,dline.data.RN,sizeof(dline.data.RN));
-			dc.TextOut(x+5*cx/6+dx,nCurrentY+5*size.cy+3*dy+dy/2,dline.data.HOUR_MINUTE,sizeof(dline.data.HOUR_MINUTE));
-			
-		}
-		data.Close();
-	}
-
-	nCurrentY=nY+2*size.cy;;
-	dc.TextOut(x,nCurrentY,"Data");
-	nCurrentY+=size.cy;
-	dc.TextOut(x,nCurrentY,"Spectrum");
-    nCurrentY+=size.cy;
-	DrawGraph(&dc,x,nCurrentY,cx,(cy/5)*2);
-
-	nCurrentY+=(cy/5)*2+size.cy;
-
-	DrawTable(dc,x,nCurrentY,cx/8,size.cy+dy,1,1);
-	DrawTableText(dc,x,nCurrentY,cx/8,size.cy+dy,1,1,"AWS curve");
-	DrawTable(dc,x+cx/8,nCurrentY,(cx/8)*3,size.cy+dy,1,1);
-	DrawTableText(dc,x+cx/8,nCurrentY,(cx/8)*3,size.cy+dy,1,1,m_strCurveName);
-	DrawTable(dc,x+(cx/8)*3+cx/8,nCurrentY,cx/8,size.cy+dy,1,4);
-	DrawTableText(dc,x+(cx/8)*3+cx/8,nCurrentY,cx/8,size.cy+dy,1,1,"ESCR");
-	DrawTableText(dc,x+(cx/8)*3+cx/8,nCurrentY,cx/8,size.cy+dy,1,2,m_strESCR);
-	DrawTableText(dc,x+(cx/8)*3+cx/8,nCurrentY,cx/8,size.cy+dy,1,3,"SCCR");
-	DrawTableText(dc,x+(cx/8)*3+cx/8,nCurrentY,cx/8,size.cy+dy,1,4,m_strSCCR);
-
-	nCurrentY+=2*(size.cy+dy);
-
-	size = dc.GetTextExtent("Window-A  ");
-	int nCurX = x;
-	DrawTable(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,1);
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,2,1,"Window-A");
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,1,"Window-B");
-	nCurX+=size.cx;
-	size = dc.GetTextExtent("GROSS(counts)  ");
-	DrawTable(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,1);
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,1,1,"GROSS(counts)");
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,2,1,m_strAGROSS);
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,1,m_strBGROSS);
-	
-	nCurX+=size.cx;
-	size.cx = (cx - (nCurX-x))/5;;
-	DrawTable(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,5);
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,1,1,"Lower(ch)");
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,2,1,m_strAchLL);
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,1,m_strBchLL);
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,1,2,"Upper(ch)");
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,2,2,m_strAchUL);
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,2,m_strBchUL);
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,1,3,"CPM");
-	strTmp.Empty();
-	if (dline.data.A_CPM[0])
-	{
-		strTmp=CString(dline.data.A_CPM,sizeof(dline.data.A_CPM));
-		double t = atof(strTmp);
-		strTmp.Format("%.2f",t);
-	}
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,2,3,strTmp);
-	strTmp.Empty();
-	if (dline.data.B_CPM[0])
-	{
-		strTmp = CString(dline.data.B_CPM,sizeof(dline.data.B_CPM));
-		double t = atof(strTmp);
-		strTmp.Format("%.2f",t);
-	}
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,3,strTmp);
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,1,4,"Eff");
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,2,4,m_strAEFF);
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,4,m_strBEFF);
-	DrawTableText(dc,nCurX,nCurrentY,size.cx,size.cy+dy,1,5,"DPM");
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,2,5,m_strADPM);
-	DrawTableTextRight(dc,nCurX,nCurrentY,size.cx,size.cy+dy,3,5,m_strBDPM);
 
 }
 
@@ -1190,59 +881,5 @@ void CSpectrumDlg::initColorList()
 
 void CSpectrumDlg::readData(LPCTSTR szFile, RawData &rawData)
 {
-		CDataFile data;
-		char szName[_MAX_FNAME]={0};
-		char ext[_MAX_EXT]={0};
 
-		_splitpath(szFile, NULL, NULL, szName, ext );
-
-	while (data.Open(szFile) && data.Load())
-		{
-			rawData.strName = szName;
-			rawData.strName+= ext;
-			rawData.strPath = szFile;
-			memset(rawData.nSpetrum,0,4000);
-			Data_Line data_rec={0};
-			memcpy(rawData.nSpetrum,data.nSpectrum,sizeof(rawData.nSpetrum));
-		
-			data.GetDataLine(data_rec);
-
-			rawData.strAGROSS = CString(data_rec.data.A_GROSS,sizeof(data_rec.data.A_GROSS));
-			rawData.strAGROSS.TrimLeft();
-			rawData.strAGROSS.TrimRight();
-		
-			rawData.strBGROSS = CString(data_rec.data.B_GROSS,sizeof(data_rec.data.B_GROSS));
-			rawData.strBGROSS.TrimLeft();
-			rawData.strBGROSS.TrimRight();
-
-			rawData.strSCCR = CString(data_rec.data.STD_ESCR_SCCR,sizeof(data_rec.data.STD_ESCR_SCCR));
-			rawData.strSCCR.TrimLeft();
-			rawData.strSCCR.TrimRight();
-			
-			rawData.strESCR = CString(data_rec.data.ESCR_SCCR,sizeof(data_rec.data.ESCR_SCCR));
-			rawData.strESCR.TrimLeft();
-			rawData.strESCR.TrimRight();
-			
-			rawData.strADPM = CString(data_rec.data.A_DPM,sizeof(data_rec.data.A_DPM));
-			rawData.strADPM.TrimLeft();
-			rawData.strADPM.TrimRight();
-
-			rawData.strBDPM = CString(data_rec.data.B_DPM,sizeof(data_rec.data.B_DPM));
-			rawData.strBDPM.TrimLeft();
-			rawData.strBDPM.TrimRight();
-
-			rawData.strAEFF = CString(data_rec.data.A_EFF,sizeof(data_rec.data.A_EFF));
-			rawData.strAEFF.TrimLeft();
-			rawData.strAEFF.TrimRight();
-
-			rawData.strBEFF = CString(data_rec.data.B_EFF,sizeof(data_rec.data.B_EFF));
-			rawData.strBEFF.TrimLeft();
-			rawData.strBEFF.TrimRight();
-			
-			rawData.strTime = CString(data_rec.data.TIME,sizeof(data_rec.data.TIME));
-			rawData.strTime.TrimLeft();
-			rawData.strTime.TrimRight();
-
-			return;
-		}
 }

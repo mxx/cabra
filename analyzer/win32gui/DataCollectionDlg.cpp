@@ -5,8 +5,6 @@
 #include "Analyzer.h"
 #include "DataCollectionDlg.h"
 #include "SerialPort.h"
-#include "Packet.h"
-#include "DataFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,44 +15,8 @@ static char THIS_FILE[] = __FILE__;
 UINT CommThreadProc( LPVOID pParam )
 {
 	//Open Port;
-	CDataCollectionDlg& UI=*(CDataCollectionDlg*)pParam;;
-	CPacket packet;
-	CPacket send;
-	do
-	{
-		if (packet.ReceiveFrame(UI.m_port)>0)
-		{
-			//UI.SetStatus(packet);
-			UI.SendMessage(WM_UPDATE_DATA,(WPARAM)&packet,NULL);
-			if (!UI.m_port.IsOpen()) return 0;
-			switch(packet.GetPacketType())
-			{
-				case TYPE_GROUP:
-					send.SendAck(UI.m_port);
-					if (UI.NeedCollect(packet.GetMYNo()))
-					{
-						send.SendSCmd(UI.m_port);
-						UI.SendMessage(WM_UPDATE_DATA,(WPARAM)&packet,1);						
-					}
-					else
-					{
-						send.SendNCmd(UI.m_port);
-					}
-				    break;
-				case TYPE_TITLE:
-				case TYPE_DATA:
-				case TYPE_SPECTRUM:
-					UI.SendMessage(WM_UPDATE_DATA,(WPARAM)&packet,1);
-					send.SendAck(UI.m_port);
-					break;
-				default:
-					if (packet.IsValid())
-						send.SendAck(UI.m_port);
-			}
-		}
-		
-	}while(!UI.m_bStop);//(UI.m_hWnd && UI.m_port.IsOpen());
-    UI.m_bStop = false;
+
+   
 	return 0;
 }
 
@@ -66,11 +28,11 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CDataCollectionDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CDataCollectionDlg)
-	m_strFileName = _T("");
-	m_strMYNo = _T("");
-	m_strStartTime = _T("");
-	m_strStatus = _T("Unreceived");
-	m_strCurrentTime = _T("");
+	m_strPrompt = _T("");
+	m_strTime = _T("");
+	m_strUniqNo = _T("");
+	m_strVersion = _T("");
+	m_strStatus = _T("");
 	//}}AFX_DATA_INIT
 	pWorking = NULL;
 	m_bStop = false;
@@ -81,11 +43,11 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDataCollectionDlg)
-	DDX_Text(pDX, IDC_EDIT_FILE_NAME, m_strFileName);
-	DDX_Text(pDX, IDC_STATIC_MYNO, m_strMYNo);
-	DDX_Text(pDX, IDC_STATIC_STARTTIME, m_strStartTime);
+	DDX_Text(pDX, IDC_EDIT_PROMPT, m_strPrompt);
+	DDX_Text(pDX, IDC_STATIC_TIME, m_strTime);
+	DDX_Text(pDX, IDC_STATIC_UNIQNO, m_strUniqNo);
+	DDX_Text(pDX, IDC_STATIC_VERSION, m_strVersion);
 	DDX_Text(pDX, IDC_STATIC_STATUS, m_strStatus);
-	DDX_Text(pDX, IDC_STATIC_CURRENTTIME, m_strCurrentTime);
 	//}}AFX_DATA_MAP
 }
 
@@ -102,6 +64,7 @@ BEGIN_MESSAGE_MAP(CDataCollectionDlg, CDialog)
 	ON_WM_COPYDATA()
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_VERSION, OnButtonVersion)
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
 END_MESSAGE_MAP()
@@ -211,80 +174,35 @@ void CDataCollectionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 }
 
 
-void CDataCollectionDlg::SetStatus(CPacket &packet)
-{
-	if (packet.GetPacketType() == TYPE_GROUP)
-	{
-		m_strMYNo = packet.GetMYNo();
-		m_strStatus = "Received";
-		m_strStartTime = packet.GetDate() + " " + packet.GetTime();
-	}
+//DEL void CDataCollectionDlg::SetStatus(CString str)
+//DEL {
+//DEL 	if (packet.GetPacketType() == TYPE_GROUP)
+//DEL 	{
+//DEL 		
+//DEL 		m_strStatus = "Received";
+//DEL 	
+//DEL 	}
+//DEL 
+//DEL 	if (packet.GetPacketType() == TYPE_UNKNOW
+//DEL 		|| packet.GetPacketType() == TYPE_END)
+//DEL 	{
+//DEL 		
+//DEL 		m_strStatus = "Unreceived";
+//DEL 		
+//DEL 		
+//DEL 	}
+//DEL 
+//DEL 	if (IsWindowVisible())	UpdateData(FALSE);
+//DEL 
+//DEL }
 
-	if (packet.GetPacketType() == TYPE_UNKNOW
-		|| packet.GetPacketType() == TYPE_END)
-	{
-		m_strMYNo.Empty();
-		m_strStatus = "Unreceived";
-		m_strStartTime.Empty();
-		m_strFileName.Empty();
-	}
-
-	if (IsWindowVisible())	UpdateData(FALSE);
-
-}
-
-void CDataCollectionDlg::SaveData(CPacket& packet)
-{
-	CDataFile file;
-	if (packet.GetPacketType() == TYPE_GROUP)
-	{
-		m_GroupPacket = packet;
-		m_strMYNo = packet.GetMYNo();
-		m_strFileName.Empty();
-
-		if (NeedCollect(m_strMYNo))
-		{
-			int i = atoi(m_strMYNo);
-			m_strFileName = g_SetArray[i].m_strFileName+"."+
-					g_SetArray[i].m_Extension;
-		}
-		UpdateData(FALSE);
-		return;
-	}
-
-	if (packet.GetPacketType() == TYPE_TITLE)
-	{
-		m_TitlePacket = packet;
-		return;
-	}
-
-	if (packet.GetPacketType() == TYPE_DATA)
-	{
-		int i = atoi(m_strMYNo);
-		
-		if (NeedCollect(m_strMYNo))
-		{
-			m_strFileName = g_SetArray[i].m_strFileName+"."+
-					g_SetArray[i].m_Extension;
-			file.Save(m_strFileName,m_GroupPacket);
-			file.Save(m_strFileName,m_TitlePacket);
-			g_SetArray[i].m_Extension.Format("%.03d",
-				atoi(g_SetArray[i].m_Extension)+1);
-		}
-		
-	}
-
-	if (NeedCollect(m_strMYNo))
-		file.Save(m_strFileName,packet);
-	UpdateData(FALSE);
-}
 
 void CDataCollectionDlg::OnTimer(UINT nIDEvent) 
 {
 	if (nIDEvent = 1)
 	{
 		CTime now = CTime::GetCurrentTime();
-		m_strCurrentTime = now.Format("%Y/%m/%d %H:%M:%S");
+		
 		UpdateData(FALSE);
 	}
 	
@@ -312,9 +230,9 @@ BOOL CDataCollectionDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 {
-	CPacket& packet=*(CPacket*)wParam;
-	SetStatus(packet);
-	if (lParam) SaveData(packet);
+	//CPacket& packet=*(CPacket*)wParam;
+	//SetStatus(packet);
+	
 	return 0;
 }
 
@@ -343,4 +261,9 @@ void CDataCollectionDlg::OnDestroy()
 {
 	CDialog::OnDestroy();
 	ClosePort();
+}
+
+void CDataCollectionDlg::OnButtonVersion() 
+{
+	
 }

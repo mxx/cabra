@@ -50,6 +50,7 @@
 #include "atmel_dataflash.h"
 #include<rtdef.h>
 #include<rtconfig.h>
+#include<string.h>
 
 /**iclude the host usb lib**/ //modify by leiyq 20120318
 #include <usbh_core.h>
@@ -62,12 +63,14 @@ static rt_uint8_t led_stack[ 512 ];
 //static rt_uint8_t usb_stack[ 512 ];//modify by leiyq 20130215
 static struct rt_thread led_thread;
 //static struct rt_thread usb_thread;//modify by leiyq 20130215
-rt_uint8_t testwritebuff;
-rt_uint8_t testreadbuff;
+u8 testwritebuff[512];
+u8 testreadbuff[512];
+unsigned long  jonhbak;
 static void led_thread_entry(void* parameter)
 {
     unsigned int count=0;
-    testwritebuff = 10;
+    unsigned int i;
+    unsigned long jonh;
 //    rt_hw_led_init();
 
     while (1)
@@ -88,10 +91,35 @@ static void led_thread_entry(void* parameter)
         rt_thread_delay( RT_TICK_PER_SECOND/2 );
        // testreadbuff=I2C_Master_BufferWrite(I2C1,OwnAddress1,0,1,&testwritebuff);
         //SPI_FLASH_Sector4kErase(0x00);
-        //SPI_FLASH_BufferWrite(&testwritebuff,0,1);
+#if 0
+        SPI_FLASH_BulkErase();
+        for (jonh = 0;jonh<0x100000;jonh=jonh+512)
+        {
+			for (i = 0;i<512;i++ )
+			{
+				if (i< 256)
+				{
+					testwritebuff[i] = i;
+				}
+				else
+				{
+					testwritebuff[i] = i-256;
+				}
+			}
+			SPI_FLASH_BufferWrite(&testwritebuff,jonh,512);
+	        SPI_FLASH_BufferRead(&testreadbuff,jonh,512);
+	        if (strcmp(testwritebuff,testreadbuff)== 0)
+	        {
+	               	rt_hw_led_off(0);
+	               	jonhbak = jonh;
+
+	        }
+	        else
+	        	break;
+        }
         rt_hw_led_on(0);
-        rt_thread_delay( RT_TICK_PER_SECOND/2 );
-        //SPI_FLASH_BufferRead(&testreadbuff,0,1);
+        jonhbak = jonh;
+#endif
         //I2C_Master_BufferRead(I2C1,OwnAddress1,0,1,&testreadbuff);
 
 

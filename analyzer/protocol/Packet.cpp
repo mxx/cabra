@@ -7,7 +7,9 @@
 
 #include "Packet.h"
 #include <stdio.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 
 Packet::Packet()
 {
@@ -23,8 +25,8 @@ Packet::~Packet()
 void Packet::SetCmdPacket(CmdWord cmd)
 {
 //      Full Packet
-	data.clear();
-	data=0xAA;
+
+	data=(char)0xAA;
 	data+=0x75;
 	data+=cmd;
 	data.append(3,0);

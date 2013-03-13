@@ -7,7 +7,7 @@
 
 #ifndef RS232PORT_H_
 #define RS232PORT_H_
-
+#ifndef _WIN32_
 #include <string>
 using namespace std;
 
@@ -28,5 +28,5 @@ protected:
 	int timeout;
 	string strDevName;
 };
-
+#endif
 #endif /* RS232PORT_H_ */

@@ -11,19 +11,26 @@
 #include "RS232Port.h"
 
 using namespace std;
+
+#ifdef _WIN32
+#pragma pack(1)
+#define PACK
+#else
+#define PACK  __attribute__ ((packed))
+#endif
 struct PacketHead
 {
         unsigned char cTag[2];
         unsigned char cCmdWord;
         unsigned char Len[2];
         unsigned char dummy;
-}  __attribute__ ((packed));
+}  PACK;
 
 typedef struct
 {
     unsigned char Speed;
     unsigned char SwitchState;
-} __attribute__ ((packed)) BeforeStopState;
+} PACK BeforeStopState;
 
 struct AccidentData {
         unsigned char bcdYear;
@@ -33,7 +40,7 @@ struct AccidentData {
         unsigned char bcdMinute;
         unsigned char bcdSecond;
         BeforeStopState State[100];
-}  __attribute__ ((packed));
+}  PACK;
 
 struct RealTime {
                 unsigned char bcdYear;
@@ -42,7 +49,7 @@ struct RealTime {
                 unsigned char bcdHour;
                 unsigned char bcdMinute;
                 unsigned char bcdSecond;
-}  __attribute__ ((packed));
+}  PACK;
 
 struct RecordTime {
                         unsigned char bcdYear;
@@ -50,21 +57,21 @@ struct RecordTime {
                         unsigned char bcdDay;
                         unsigned char bcdHour;
                         unsigned char bcdMinute;
-        }  __attribute__ ((packed));
+        }  PACK;
 
 struct VehicleFeature
 {
         unsigned char FeatureHi;
         unsigned char FeatureM;
         unsigned char FeatureLo;
-}  __attribute__ ((packed));
+}  PACK;
 
 struct VINNumberClass
 {
         char VIN[17];
         char Number[9];
         char Class[12];
-} __attribute__ ((packed));
+} PACK;
 
 struct Mileage {
         unsigned char bcd10Mileage;
@@ -74,27 +81,30 @@ struct Mileage {
         unsigned char bcdHour;
         unsigned char bcdMinute;
         unsigned char bcdSecond;
-} __attribute__ ((packed));
+} PACK;
 
 struct DriverInfo
 {
         unsigned char DriverCode[3];
         char LicenceNumber[18];
-} __attribute__ ((packed));
+} PACK;
 
 struct OverWorkRecord
 {
         char LicenceNumber[18];
         struct RecordTime start;
         struct RecordTime end;
-} __attribute__ ((packed));
+} PACK;
 
 struct SpeedRecord
 {
         struct RecordTime startTime;
         unsigned char speed[60];
-} __attribute__ ((packed));
+} PACK;
 
+#ifdef _WIN32
+#pragma pack()
+#endif
 
 class Packet
 {

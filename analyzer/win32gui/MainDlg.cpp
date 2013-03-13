@@ -195,7 +195,7 @@ void CMainDlg::OnClose()
 	CString strTitle;
 	
 	GetWindowText(strTitle);
-	if (strTitle == "Spectrum" || strTitle.Find("AWS")!=-1)
+	if (strTitle != "数据采集" )
 	{
 		::PostMessage(m_hWnd,WM_OPEN_DLG,OPEN_DATA_COLLECTION,0);
 		return;
@@ -216,14 +216,6 @@ void CMainDlg::OnDestroy()
 	
 	CString strSec="Setting";
 	CString strEnt;
-	for(int i =1;i<=12;i++)
-	{
-		strEnt.Format("Path%d",i);
-		theApp.WriteProfileString(strSec,strEnt,g_SetArray[i].m_strFileName);
-		strEnt.Format("Collect%d",i);
-		theApp.WriteProfileInt(strSec,strEnt,g_SetArray[i].m_DataCollection);
-		strEnt.Format("Ext%d",i);
-		theApp.WriteProfileString(strSec,strEnt,g_SetArray[i].m_Extension);
-	}
+
 	
 }

@@ -209,17 +209,7 @@ void CDataCollectionDlg::OnTimer(UINT nIDEvent)
 	CDialog::OnTimer(nIDEvent);
 }
 
-bool CDataCollectionDlg::NeedCollect(CString &strMYNo)
-{
-		for(int i=1;i<13;i++)
-		{
-			if ((!strMYNo.IsEmpty()) && (!g_SetArray[i].m_strID.IsEmpty()) && atoi(g_SetArray[i].m_strID) == atoi(strMYNo))
-			{
-				return g_SetArray[i].m_DataCollection==TRUE;
-			}
-		}
-		return false;
-}
+
 
 BOOL CDataCollectionDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct) 
 {

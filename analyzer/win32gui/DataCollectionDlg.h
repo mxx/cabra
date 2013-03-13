@@ -15,7 +15,6 @@ class CDataCollectionDlg : public CDialog
 // Construction
 public:
 	void ClosePort();
-	bool NeedCollect(CString& strMYNo);
 	CDataCollectionDlg(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data

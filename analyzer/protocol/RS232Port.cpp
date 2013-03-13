@@ -4,6 +4,7 @@
  *  Created on: 2010-4-14
  *      Author: mxx
  */
+#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -149,7 +150,7 @@ void RS232Port::Close()
 	}
 }
 
-
+#endif
 
 
 

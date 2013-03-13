@@ -20,14 +20,7 @@
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include "ErrorMsg.h"
-typedef struct _MYNOSet
-{
-	CString m_strID;
-	CString m_strFileName;	
-	BOOL m_DataCollection;
-	CString m_Extension;
-}MYNOSet;
-extern MYNOSet g_SetArray[13];
+
 
 #define OPEN_FILE_SETTING			1
 #define OPEN_DATA_COLLECTION		2

@@ -124,7 +124,15 @@ SOURCE=.\MainDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SelectList.cpp
+SOURCE=..\protocol\Packet.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\protocol\Protocol.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\protocol\RS232Port.cpp
 # End Source File
 # Begin Source File
 
@@ -132,7 +140,15 @@ SOURCE=.\SerialPort.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\sqlite3\shell.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\SpectrumDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\sqlite3\sqlite3.c
 # End Source File
 # Begin Source File
 
@@ -172,11 +188,19 @@ SOURCE=.\MainDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\protocol\Packet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\protocol\Protocol.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SelectList.h
+SOURCE=..\protocol\RS232Port.h
 # End Source File
 # Begin Source File
 
@@ -185,6 +209,14 @@ SOURCE=.\SerialPort.h
 # Begin Source File
 
 SOURCE=.\SpectrumDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sqlite3\sqlite3.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sqlite3\sqlite3ext.h
 # End Source File
 # Begin Source File
 

@@ -9,6 +9,7 @@
 #define PACKET_H_
 #include <string>
 #include "RS232Port.h"
+#include "SerialPort.h"
 
 using namespace std;
 
@@ -138,7 +139,11 @@ public:
 	const char* GetData() { return data.data();}
 	int GetSize() {return data.size();}
 	void SetCmdPacket(CmdWord cmd);
+#ifdef _WIN32
+	void ReceiveFrameFrom(CSerialPort & port,int wait_s=1);
+#else
 	void ReceiveFrameFrom(RS232Port & port,int wait_ms=10000);
+#endif
 	int GetDriverCode(void);
 	string GetLicenseID(void);
 	struct AccidentData*  GetAccidentData(unsigned int& num);

@@ -152,9 +152,7 @@ int CSerialPort::Write(const char* buf, int len)
 		if (Open((LPCTSTR)strDevName)<0) return -1;
 	}
 
-//	DUMP(buf,len);
-
-	unsigned long n ;//write(handle, buf, len);
+	unsigned long n ;
 	if (WriteFile(handle,buf,len,&n,NULL))
 		return n;
 	else

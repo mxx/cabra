@@ -4,12 +4,15 @@
  *  Created on: 2010-4-14
  *      Author: mxx
  */
-
+#include <time.h>
 #include "Packet.h"
 #include <stdio.h>
 #ifndef _WIN32
 #include <sys/time.h>
+#else
+#include <Windows.h>
 #endif
+#define TRACE(args) 
 
 Packet::Packet()
 {
@@ -98,31 +101,31 @@ unsigned char Packet::XOR()
     return sum;
 }
 
-void Packet::ReceiveFrameFrom(RS232Port & port,int wait_ms)
+void Packet::ReceiveFrameFrom(CSerialPort & port,int wait_s)
 {
 	char buff;
 	int n;
 	int count = 0;
 	int err=0;
-	struct timeval now, start, diff;
-	gettimeofday(&start, 0);
-	data.clear();
+	time_t now, start, diff;
+	start = time(NULL);
+	
 	frameState = NONE;
 	do
 	{
 		n = port.Read(&buff, 1);
-		gettimeofday(&now, 0);
+		now = time(&now);
 		if (n == 0)
 		{
-		       timersub(&now,&start,&diff);
-		       if ((diff.tv_sec*1000 + diff.tv_usec/1000) < wait_ms)
-		         {
-                          usleep(100000);
-                          //if (data.size()) start = now;
-		            continue;
-		         }
-
-			ERROR("Receive time out %d.",wait_ms);
+			diff = now -start;
+			if (diff < wait_s)
+			{
+				Sleep(1000);
+				//if (data.size()) start = now;
+				continue;
+			}
+			
+			ERROR("Receive time out %d.",wait_s);
 			return;
 		}
 		start = now;
@@ -132,11 +135,11 @@ void Packet::ReceiveFrameFrom(RS232Port & port,int wait_ms)
 		{
 		case NONE:
 			if (buff == 0x55) frameState = SOF1;
-			else {err++; frameState = NONE;	data.clear();}
+			else {err++; frameState = NONE;	data="";}
 			break;
 		case SOF1:
 			if (buff == 0x7A) frameState = SOF2;
-			else { err++; frameState = NONE; data.clear();}
+			else { err++; frameState = NONE; data="";}
 			break;
 		case SOF2:
 			frameState = CMD;
@@ -178,8 +181,7 @@ void Packet::ReceiveFrameFrom(RS232Port & port,int wait_ms)
 			}
 			else
 			{
-				DEBUG("CHECK SUM ERROR");
-				data.clear();
+				data="";
 			}
 			return;
 		};
@@ -199,7 +201,7 @@ void Packet::Dump()
 		n = strlen(buf);
 		if (n>1000) break;
 	}
-	DEBUG(buf);
+
 }
 
 

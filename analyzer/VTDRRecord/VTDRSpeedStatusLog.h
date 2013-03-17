@@ -40,8 +40,8 @@ protected:
 		{
 			unsigned char recSpeed;
 			unsigned char refSpeed;
-		} __attribute__ ((packed)) Speeds[60];
-	} __attribute__ ((packed)) SpeedStatusLog;
+		}PACK Speeds[60];
+	}PACK SpeedStatusLog;
 };
 
 #endif /* VTDRSPEEDSTATUSLOG_H_ */

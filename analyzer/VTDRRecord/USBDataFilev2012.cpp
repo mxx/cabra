@@ -5,12 +5,17 @@
  *      Author: mxx
  */
 #include "USBDataFilev2012.h"
-#include <arpa/inet.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#ifndef _WIN32
 #include <iconv.h>
 #include "TraceLog.h"
+#else
+#define TRACE(args)
+#endif
+
 
 map<int, const char*> USBDataFilev2012::DataBlockName;
 
@@ -112,7 +117,7 @@ string& USBDataFilev2012::GenerateFileName()
 {
 	struct tm tmTime;
 	tRecordTime = (tRecordTime) ? tRecordTime : time(NULL);
-	localtime_r(&tRecordTime, &tmTime);
+	tmTime = *localtime(&tRecordTime);
 	char buf[64] =
 	{ 0 };
 	sprintf(buf, "D%02u%02u%02u_%02u%02u_%s.VDR", tmTime.tm_year + 1900 - 2000,
@@ -124,6 +129,7 @@ string& USBDataFilev2012::GenerateFileName()
 
 void USBDataFilev2012::initMap()
 {
+#ifndef _WIN32
 	if (DataBlockName.empty())
 	{
 		DataBlockName[0] = "æ‰§è¡Œæ ‡å‡†ç‰ˆæœ¬å¹´å·";
@@ -143,6 +149,27 @@ void USBDataFilev2012::initMap()
 		DataBlockName[0x14] = "å‚æ•°ä¿®æ”¹è®°å½•";
 		DataBlockName[0x15] = "é€Ÿåº¦çŠ¶æ€æ—¥å¿—";
 	}
+#else
+	if (DataBlockName.empty())
+	{
+		DataBlockName[0] = "Ö´ĞĞ±ê×¼°æ±¾ÄêºÅ";
+		DataBlockName[1] = "µ±Ç°¼İÊ»ÈËĞÅÏ¢";
+		DataBlockName[2] = "ÊµÊ±Ê±¼ä";
+		DataBlockName[3] = "ÀÛ¼ÆĞĞÊ»Àï³Ì";
+		DataBlockName[4] = "Âö³åÏµÊı";
+		DataBlockName[5] = "³µÁ¾ĞÅÏ¢";
+		DataBlockName[6] = "×´Ì¬ĞÅºÅÅäÖÃĞÅÏ¢";
+		DataBlockName[7] = "¼ÇÂ¼ÒÇÎ¨Ò»ĞÔ±àºÅ";
+		DataBlockName[8] = "ĞĞÊ»ËÙ¶È¼ÇÂ¼";
+		DataBlockName[9] = "Î»ÖÃĞÅÏ¢¼ÇÂ¼";
+		DataBlockName[0x10] = "ÊÂ¹ÊÒÉµã¼ÇÂ¼";
+		DataBlockName[0x11] = "³¬Ê±¼İÊ»¼ÇÂ¼";
+		DataBlockName[0x12] = "¼İÊ»ÈËÉí·İ¼ÇÂ¼";
+		DataBlockName[0x13] = "Íâ²¿¹©µç¼ÇÂ¼";
+		DataBlockName[0x14] = "²ÎÊıĞŞ¸Ä¼ÇÂ¼";
+		DataBlockName[0x15] = "ËÙ¶È×´Ì¬ÈÕÖ¾";
+	}
+#endif
 }
 
 bool USBDataFilev2012::ParseFileName(const char* szFileName)

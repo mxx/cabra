@@ -38,14 +38,15 @@ string& VTDROderMeter::Write(string& buf)
 	ToBCDTime(tNow, meter.vTime);
 	ToBCDTime(tInstall, meter.installTime);
 	int v = (int) (startMeter * 10.0);
-	for (int i = 0; i < sizeof(meter.startValue); i++)
+	int i;
+	for (i = 0; i < sizeof(meter.startValue); i++)
 	{
 		meter.startValue[sizeof(meter.startValue) - i] = INT2BCDchar(v % 100);
 		v = v / 100;
 		if (v == 0)
 			break;
 	}
-	for (int i = 0; i < sizeof(meter.oderMeter); i++)
+	for (i = 0; i < sizeof(meter.oderMeter); i++)
 	{
 		meter.oderMeter[sizeof(meter.startValue) - i] = INT2BCDchar(v % 100);
 		v = v / 100;

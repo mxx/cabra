@@ -26,7 +26,7 @@ protected:
 		VTDRTime vTime;
 		unsigned char cHighByte;
 		unsigned char cLowByet;
-	}__attribute__ ((packed)) PulseModulus;
+	}PACK PulseModulus;
 };
 
 #endif /* VTDRPULSEMODULUS_H_ */

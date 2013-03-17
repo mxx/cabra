@@ -34,7 +34,7 @@ protected:
 		unsigned char bcdDay;
 		unsigned int  SerialNumber;
 		unsigned char reserved[5];
-	}__attribute__ ((packed)) UniqCode;
+	} PACK UniqCode;
 };
 
 #endif /* VTDRUNIQCODE_H_ */

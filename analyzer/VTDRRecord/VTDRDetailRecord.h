@@ -36,9 +36,9 @@ protected:
 		{
 			unsigned char speed;
 			unsigned char state;
-		} __attribute__ ((packed)) record[100];
+		} PACK record[100];
 		Position position;
-	} __attribute__ ((packed)) DetailRecord;
+	} PACK DetailRecord;
 };
 
 #endif /* VTDRDETAILRECORD_H_ */

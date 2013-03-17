@@ -31,8 +31,8 @@ protected:
 		struct {
 			Position pos;
 			unsigned char speed;
-		} __attribute__ ((packed)) record[60];
-	} __attribute__ ((packed)) PositionRecord;
+		} PACK record[60];
+	} PACK PositionRecord;
 };
 
 #endif /* VTDRPOSITIONRECORD_H_ */

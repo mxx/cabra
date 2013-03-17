@@ -27,7 +27,7 @@ protected:
 		VTDRTime vTime;
 		char cStataByte;
 		unsigned char NameOfD[8][10];
-	}__attribute__ ((packed)) Config;
+	}PACK Config;
 };
 
 #endif /* VTDRVEHICLECONFIGURE_H_ */

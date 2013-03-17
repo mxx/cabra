@@ -30,8 +30,8 @@ protected:
 		{
 			unsigned char speed;
 			unsigned char state;
-		}  __attribute__ ((packed)) record[60];
-	}  __attribute__ ((packed)) SpeedRecord;
+		} PACK record[60];
+	} PACK SpeedRecord;
 
 };
 

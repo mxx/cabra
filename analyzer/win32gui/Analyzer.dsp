@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 setupapi.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 setupapi.lib  Ws2_32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
 
@@ -154,6 +154,78 @@ SOURCE=..\sqlite3\sqlite3.c
 
 SOURCE=.\stdafx.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\USBDataFilev2012.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRDetailRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRDriverIDRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRDriverInfo.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDROderMeter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDROutPoweredRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDROvertimeDriveRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRParameterModifyRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRPositionRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRPulseModulus.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRRealTime.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRSpeedRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRSpeedStatusLog.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRUniqCode.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRVehicleConfigure.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRVehicleInfo.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRVersion.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -221,6 +293,78 @@ SOURCE=..\sqlite3\sqlite3ext.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\USBDataFilev2012.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRDetailRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRDriverIDRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRDriverInfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDROderMeter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDROutPoweredRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDROvertimeDriveRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRParameterModifyRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRPositionRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRPulseModulus.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRRealTime.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRSpeedRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRSpeedStatusLog.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRUniqCode.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRVehicleConfigure.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRVehicleInfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\VTDRVersion.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

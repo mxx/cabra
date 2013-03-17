@@ -67,7 +67,7 @@ protected:
 		unsigned char cDataCode;
 		unsigned char cDataName[18];
 		unsigned int nDataLength;
-	}__attribute__ ((packed)) USBDataBlock;
+	} PACK USBDataBlock;
 
 	unsigned short nDataBlockNumber;
 	typedef list<VTDRRecord*> DataSet;

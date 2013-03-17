@@ -4,16 +4,20 @@
  *  Created on: 2010-4-14
  *      Author: mxx
  */
+
 #include <time.h>
-#include "Packet.h"
 #include <stdio.h>
 #ifndef _WIN32
 #include <sys/time.h>
 #else
+#include "stdafx.h"
 #include <Windows.h>
-#endif
-#define TRACE(args) 
 
+#endif
+
+#define TRACE(args)
+ 
+#include "Packet.h"
 Packet::Packet()
 {
 	// TODO Auto-generated constructor stub

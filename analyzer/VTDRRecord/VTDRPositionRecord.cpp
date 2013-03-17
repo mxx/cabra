@@ -4,7 +4,6 @@
  *  Created on: Dec 9, 2012
  *      Author: mxx
  */
-#include <arpa/inet.h>
 #include "VTDRPositionRecord.h"
 
 VTDRPositionRecord::VTDRPositionRecord() :

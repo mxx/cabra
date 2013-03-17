@@ -24,7 +24,7 @@ protected:
 	{
 		VTDRTime vTime;
 		unsigned char cType;
-	} __attribute__ ((packed)) ModifyLog ;
+	} PACK ModifyLog ;
 };
 
 #endif /* VTDRPARAMETERMODIFYRECORD_H_ */

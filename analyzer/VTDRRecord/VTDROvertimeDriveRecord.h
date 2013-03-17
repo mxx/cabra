@@ -35,7 +35,7 @@ protected:
 		VTDRTime endTime;
 		Position startPos;
 		Position endPos;
-	} __attribute__ ((packed)) OvertimeDriveRecord ;
+	} PACK OvertimeDriveRecord ;
 };
 
 #endif /* VTDROVERTIMEDRIVERECORD_H_ */

@@ -28,7 +28,7 @@ protected:
 		VTDRTime startTime;
 		unsigned char License[18];
 		char cType;
-	} __attribute__ ((packed)) DriverIDRecord;
+	} PACK DriverIDRecord;
 	static const char* decodeType[];
 	int mapType(char n)
 	{

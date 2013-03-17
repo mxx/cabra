@@ -4,7 +4,9 @@
  *  Created on: 2010-4-16
  *      Author: mxx
  */
-
+#ifdef _WIN32
+#include "stdafx.h"
+#endif
 #include "Protocol.h"
 #include <stdio.h>
 #include <time.h>

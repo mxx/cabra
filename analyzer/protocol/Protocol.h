@@ -8,7 +8,13 @@
 #ifndef PROTOCOL_H_
 #define PROTOCOL_H_
 #include "Packet.h"
+#ifdef _WIN32
+#include "SerialPort.h"
+#define RS232Port CSerialPort
+#else
 #include "RS232Port.h"
+#endif
+
 class Protocol
 {
 public:

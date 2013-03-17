@@ -14,9 +14,20 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <arpa/inet.h>
+#endif
 #include <math.h>
 using namespace std;
+
+#ifdef _WIN32
+#pragma pack(1)
+#define PACK
+#else
+#define PACK  __attribute__ ((packed))
+#endif
 
 #define SET(x,y) set(x,y,sizeof(x))
 #define ASSIGN(x,y) assign(x,y,sizeof(y))
@@ -29,7 +40,7 @@ typedef struct _VTDRTime
 	unsigned char bcdHour;
 	unsigned char bcdMinute;
 	unsigned char bcdSecond;
-}__attribute__ ((packed)) VTDRTime;
+}PACK VTDRTime;
 
 class VTDRRecord
 {
@@ -113,7 +124,7 @@ protected:
 		int longititude;
 		int latitude;
 		short altitude;
-	}__attribute__ ((packed)) Position;
+	}PACK Position;
 
 	bool validPosition(const int pos)
 	{
@@ -125,9 +136,17 @@ protected:
 
 		Long = validPosition(pos.longititude) ? ntohl(pos.longititude)
 				/ 10000.0 :
+#ifdef _WIN32
+				sqrt(-1);
+#else
 				nanf("NAN");
+#endif
 		Lat = validPosition(pos.latitude) ? ntohl(pos.latitude) / 10000.0 :
+#ifdef _WIN32
+				sqrt(-1);
+#else
 				nanf("NAN");
+#endif
 		Alt = ntohs(pos.altitude);
 
 	}

@@ -25,7 +25,7 @@ protected:
 	typedef struct _DriverInfo
 	{
 		unsigned char license[18];
-	} __attribute__ ((packed)) DriverInfo;
+	} PACK DriverInfo;
 };
 
 #endif /* VTDRDRIVERINFO_H_ */

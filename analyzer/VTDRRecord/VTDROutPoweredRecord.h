@@ -25,7 +25,7 @@ protected:
 	{
 		VTDRTime vTime;
 		char cType;
-	}__attribute__ ((packed)) PowerLog;
+	}PACK PowerLog;
 
 	static const char* decodeType[];
 };

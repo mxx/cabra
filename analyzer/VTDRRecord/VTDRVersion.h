@@ -26,7 +26,7 @@ protected:
 	{
 		unsigned char cYear;
 		unsigned char cModi;
-	}__attribute__ ((packed)) VERSION;
+	}PACK VERSION;
 };
 
 #endif /* VTDRVERSION_H_ */

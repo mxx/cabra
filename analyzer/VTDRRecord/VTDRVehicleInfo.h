@@ -27,7 +27,7 @@ protected:
 		unsigned char TypeCode[17];
 		unsigned char PlateNumber[12];
 		unsigned char PlateClass[12];
-	}__attribute__ ((packed)) VehicleInfo;
+	}PACK VehicleInfo;
 
 };
 

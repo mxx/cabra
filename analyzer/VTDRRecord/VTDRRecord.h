@@ -125,7 +125,12 @@ protected:
 		int latitude;
 		short altitude;
 	}PACK Position;
-
+	int mapType(char n)
+	{
+		if (n > 2 || n < 1)
+			return 0;
+		return n;
+	}
 	bool validPosition(const int pos)
 	{
 		return (ntohl(pos) != 0x7FFFFFFF) && (ntohl(pos) != 0xFFFFFFFF);

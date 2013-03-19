@@ -7,8 +7,6 @@
 
 #include "VTDRDetailRecord.h"
 
-
-
 VTDRDetailRecord::VTDRDetailRecord() :
 		tEnd(0), Longititude(0.0), Latitude(0.0), Altitude(0)
 
@@ -24,7 +22,8 @@ int VTDRDetailRecord::Read(const char* buf)
 {
 	DetailRecord* ptrRec = (DetailRecord*) buf;
 	tEnd = ToSystime(ptrRec->endTime);
-	strLicenseNumber.assign((const char*)(ptrRec->License),sizeof(ptrRec->License));
+	strLicenseNumber.assign((const char*) (ptrRec->License),
+			sizeof(ptrRec->License));
 	for (int i = 0; i < 100; i++)
 	{
 		Speed[i] = ptrRec->record[i].speed;
@@ -52,15 +51,18 @@ string& VTDRDetailRecord::Write(string& buf)
 string& VTDRDetailRecord::Dump(string& buf)
 {
 	stringstream s;
+
 	s << VTDRRecord::Dump(buf) << endl;
 	s << "Driver License:" << strLicenseNumber.c_str() << endl;
 	s << "Last End Time:" << ctime(&tEnd);
-	s << "AT (" << Longititude << "," << Latitude << "," << Altitude  << ")" << endl;
+	s << "AT (" << Latitude / 60 << "," << Longititude / 60 << "," << Altitude
+			<< ")" << endl;
 	s << "Time\tSpeed\tState:" << endl;
 
 	for (int i = 0; i < 100; i++)
 	{
-		s << i/5 << "." << i%5*2 << "\t" << Speed[i] << "\t" << State[i] << endl;
+		s << i / 5 << "." << i % 5 * 2 << "\t" << Speed[i] << "\t" << State[i]
+				<< endl;
 	}
 
 	return buf = s.str();

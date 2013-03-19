@@ -22,6 +22,7 @@ public:
 	virtual ~VTDRSpeedStatusLog();
 	int Read(const char* buf);
 	string& Write(string& buf);
+	string& Dump(string& buf);
 	eSpeedStatus Status;
 	time_t tStart;
 	time_t tEnd;
@@ -29,7 +30,7 @@ public:
 	int refSpeed[60];
 protected:
 	// Table A.32
-
+	static const char* decodeType[];
 
 	typedef struct _SpeedStatusLog
 	{

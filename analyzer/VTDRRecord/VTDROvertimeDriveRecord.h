@@ -17,6 +17,7 @@ public:
 	virtual ~VTDROvertimeDriveRecord();
 	int Read(const char* buf);
 	string& Write(string& buf);
+	string& Dump(string& buf);
 	string strLicese;
 	time_t tStartTime;
 	time_t tEndTime;

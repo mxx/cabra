@@ -45,7 +45,7 @@ string& VTDROutPoweredRecord::Dump(string& buf)
 {
 	stringstream stream;
 	stream << VTDRRecord::Dump(buf) << " Time:" << ctime(&tTime);
-	stream << " Type:" << decodeType[cType];
+	stream << " Type:" << decodeType[mapType(cType)];
 	return buf = stream.str();
 }
 

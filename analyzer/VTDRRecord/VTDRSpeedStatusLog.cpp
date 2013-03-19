@@ -7,6 +7,12 @@
 
 #include "VTDRSpeedStatusLog.h"
 
+const char* VTDRSpeedStatusLog::decodeType[]={
+		"",
+		"Normal",
+		"Abnormal"
+};
+
 VTDRSpeedStatusLog::VTDRSpeedStatusLog() :
 		tStart(0), tEnd(0), Status(Normal)
 {
@@ -45,4 +51,20 @@ string& VTDRSpeedStatusLog::Write(string& buf)
 	}
 	buf.append((const char*) &log, sizeof(log));
 	return buf;
+}
+
+string& VTDRSpeedStatusLog::Dump(string& buf)
+{
+	stringstream stream;
+	stream << VTDRRecord::Dump(buf) << endl;
+	stream << "Type:" << decodeType[mapType(Status)] << endl;
+	stream << "start time:" << ctime(&tStart);
+	stream << "end time:" << ctime(&tEnd);
+	stream <<  "seconds" << "\t" << "speed" << "\t" << "refSpeed" << endl;;
+	for(int i=0;i<60;i++)
+	{
+		stream << i << "\t" << recSpeed[i] << "\t" << refSpeed[i] << endl;
+	}
+	stream << endl;
+	return buf = stream.str();
 }

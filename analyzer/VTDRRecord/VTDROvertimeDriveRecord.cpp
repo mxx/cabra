@@ -25,8 +25,9 @@ int VTDROvertimeDriveRecord::Read(const char* buf)
 	ASSIGN(strLicese, ptrRec->DriverLicense);
 	tStartTime = ToSystime(ptrRec->startTime);
 	tEndTime = ToSystime(ptrRec->endTime);
-	readPosition(ptrRec->startPos,startLongititude,startLatitude,startAltitude);
-	readPosition(ptrRec->endPos,endLogititude,endLatitude,endAltitude);
+	readPosition(ptrRec->startPos, startLongititude, startLatitude,
+			startAltitude);
+	readPosition(ptrRec->endPos, endLogititude, endLatitude, endAltitude);
 	return sizeof(*ptrRec);
 }
 
@@ -37,8 +38,22 @@ string& VTDROvertimeDriveRecord::Write(string& buf)
 	SET(rec.DriverLicense, strLicese);
 	ToBCDTime(tStartTime, rec.startTime);
 	ToBCDTime(tEndTime, rec.endTime);
-	writePosition(rec.startPos,startLongititude,startLatitude,startAltitude);
-	writePosition(rec.endPos,endLogititude,endLatitude,endAltitude);
-	buf.append((const char*)&rec,sizeof(rec));
+	writePosition(rec.startPos, startLongititude, startLatitude, startAltitude);
+	writePosition(rec.endPos, endLogititude, endLatitude, endAltitude);
+	buf.append((const char*) &rec, sizeof(rec));
 	return buf;
+}
+
+string& VTDROvertimeDriveRecord::Dump(string& buf)
+{
+	stringstream stream;
+	stream << VTDRRecord::Dump(buf) << endl;
+	stream << strLicese.c_str() << ":";
+	stream << "start:" << ctime(&tStartTime);
+	stream << "(" << startLatitude / 60 << "," << startLongititude / 60 << ","
+			<< startAltitude << ")" << endl;
+	stream << "end:" << ctime(&tEndTime);
+	stream << "(" << endLatitude / 60 << "," << endLogititude / 60 << ","
+				<< endAltitude << ")" << endl;
+	return buf = stream.str();
 }

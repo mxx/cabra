@@ -53,7 +53,7 @@ string& VTDRPositionRecord::Dump(string& buf)
 	for (int i = 0; i < 60; i++)
 	{
 		stream << i << "\t" << Speed[i];
-		stream << "\t(" << Latitude[i] << "," << Longititude[i] << ",";
+		stream << "\t(" << Latitude[i]/60 << "," << Longititude[i]/60 << ",";
 		stream << Altitude[i] << ")" << endl;
 	}
 	stream << endl;

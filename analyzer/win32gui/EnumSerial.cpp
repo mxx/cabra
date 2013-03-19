@@ -34,7 +34,7 @@
 // The next 3 includes are needed for serial port enumeration
 #include <objbase.h>
 #include <initguid.h>
-#include <Setupapi.h>
+#include <setupapi.h>
 
 #include "EnumSerial.h"
 

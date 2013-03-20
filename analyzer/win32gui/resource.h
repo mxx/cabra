@@ -107,6 +107,22 @@
 #define IDC_BUTTON_PRINT                1063
 #define IDC_BUTTON_PRNT                 1064
 #define IDC_BUTTON_VERSION              1065
+#define IDC_BUTTON_DRIVER               1066
+#define IDC_BUTTON_RTC                  1067
+#define IDC_BUTTON_ODERMETER            1068
+#define IDC_BUTTON_VINFO                1069
+#define IDC_BUTTON_STATCONF             1070
+#define IDC_BUTTON_UNIQNO               1071
+#define IDC_BUTTON_SPD                  1072
+#define IDC_BUTTON_POS                  1073
+#define IDC_BUTTON_ACDR                 1074
+#define IDC_BUTTON_OTD                  1075
+#define IDC_BUTTON_DRI                  1076
+#define IDC_BUTTON_PWR                  1077
+#define IDC_BUTTON_PARA                 1078
+#define IDC_BUTTON_STLOG                1079
+#define IDC_BUTTON_PLUS                 1080
+#define IDC_TAB_COMM                    1081
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
@@ -115,7 +131,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1066
+#define _APS_NEXT_CONTROL_VALUE         1082
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

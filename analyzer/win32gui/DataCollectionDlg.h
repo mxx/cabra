@@ -20,6 +20,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CDataCollectionDlg)
 	enum { IDD = IDD_DIALOG_DATA_COLLECTION };
+	CTabCtrl	m_tabComm;
 	CString	m_strPrompt;
 	CString	m_strTime;
 	CString	m_strUniqNo;

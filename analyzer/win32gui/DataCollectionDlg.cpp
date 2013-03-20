@@ -43,6 +43,7 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDataCollectionDlg)
+	DDX_Control(pDX, IDC_TAB_COMM, m_tabComm);
 	DDX_Text(pDX, IDC_EDIT_PROMPT, m_strPrompt);
 	DDX_Text(pDX, IDC_STATIC_TIME, m_strTime);
 	DDX_Text(pDX, IDC_STATIC_UNIQNO, m_strUniqNo);
@@ -75,7 +76,12 @@ END_MESSAGE_MAP()
 BOOL CDataCollectionDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-	
+	TCITEM tcItem;
+   tcItem.mask = TCIF_TEXT;
+   tcItem.pszText = _T("Tab #1");
+
+   m_tabComm.InsertItem(0, &tcItem);
+
 	// TODO: Add extra initialization here
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -172,29 +178,6 @@ void CDataCollectionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 	}
 
 }
-
-
-//DEL void CDataCollectionDlg::SetStatus(CString str)
-//DEL {
-//DEL 	if (packet.GetPacketType() == TYPE_GROUP)
-//DEL 	{
-//DEL 		
-//DEL 		m_strStatus = "Received";
-//DEL 	
-//DEL 	}
-//DEL 
-//DEL 	if (packet.GetPacketType() == TYPE_UNKNOW
-//DEL 		|| packet.GetPacketType() == TYPE_END)
-//DEL 	{
-//DEL 		
-//DEL 		m_strStatus = "Unreceived";
-//DEL 		
-//DEL 		
-//DEL 	}
-//DEL 
-//DEL 	if (IsWindowVisible())	UpdateData(FALSE);
-//DEL 
-//DEL }
 
 
 void CDataCollectionDlg::OnTimer(UINT nIDEvent) 

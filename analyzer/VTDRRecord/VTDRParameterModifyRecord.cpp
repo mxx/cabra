@@ -35,3 +35,13 @@ string& VTDRParameterModifyRecord::Write(string& buf)
 	buf.append((const char*) &log, sizeof(log));
 	return buf;
 }
+
+string& VTDRParameterModifyRecord::Dump(string& buf)
+{
+	stringstream stream;
+	stream << VTDRRecord::Dump(buf) << endl ;
+	stream << ctime(&tTime);
+	stream << "OperationCode:" << (int)cType;
+	return buf = stream.str();
+}
+

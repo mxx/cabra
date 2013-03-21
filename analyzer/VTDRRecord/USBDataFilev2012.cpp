@@ -152,22 +152,22 @@ void USBDataFilev2012::initMap()
 #else
 	if (DataBlockName.empty())
 	{
-		DataBlockName[0] = "Ö´ÐÐ±ê×¼°æ±¾ÄêºÅ";
-		DataBlockName[1] = "µ±Ç°¼ÝÊ»ÈËÐÅÏ¢";
-		DataBlockName[2] = "ÊµÊ±Ê±¼ä";
-		DataBlockName[3] = "ÀÛ¼ÆÐÐÊ»Àï³Ì";
-		DataBlockName[4] = "Âö³åÏµÊý";
-		DataBlockName[5] = "³µÁ¾ÐÅÏ¢";
-		DataBlockName[6] = "×´Ì¬ÐÅºÅÅäÖÃÐÅÏ¢";
-		DataBlockName[7] = "¼ÇÂ¼ÒÇÎ¨Ò»ÐÔ±àºÅ";
-		DataBlockName[8] = "ÐÐÊ»ËÙ¶È¼ÇÂ¼";
-		DataBlockName[9] = "Î»ÖÃÐÅÏ¢¼ÇÂ¼";
-		DataBlockName[0x10] = "ÊÂ¹ÊÒÉµã¼ÇÂ¼";
-		DataBlockName[0x11] = "³¬Ê±¼ÝÊ»¼ÇÂ¼";
-		DataBlockName[0x12] = "¼ÝÊ»ÈËÉí·Ý¼ÇÂ¼";
-		DataBlockName[0x13] = "Íâ²¿¹©µç¼ÇÂ¼";
-		DataBlockName[0x14] = "²ÎÊýÐÞ¸Ä¼ÇÂ¼";
-		DataBlockName[0x15] = "ËÙ¶È×´Ì¬ÈÕÖ¾";
+		DataBlockName[0] = "Ö´ï¿½Ð±ï¿½×¼ï¿½æ±¾ï¿½ï¿½ï¿½";
+		DataBlockName[1] = "ï¿½ï¿½Ç°ï¿½ï¿½Ê»ï¿½ï¿½ï¿½ï¿½Ï¢";
+		DataBlockName[2] = "ÊµÊ±Ê±ï¿½ï¿½";
+		DataBlockName[3] = "ï¿½Û¼ï¿½ï¿½ï¿½Ê»ï¿½ï¿½ï¿½";
+		DataBlockName[4] = "ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½";
+		DataBlockName[5] = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢";
+		DataBlockName[6] = "×´Ì¬ï¿½Åºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢";
+		DataBlockName[7] = "ï¿½ï¿½Â¼ï¿½ï¿½Î¨Ò»ï¿½Ô±ï¿½ï¿½";
+		DataBlockName[8] = "ï¿½ï¿½Ê»ï¿½Ù¶È¼ï¿½Â¼";
+		DataBlockName[9] = "Î»ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Â¼";
+		DataBlockName[0x10] = "ï¿½Â¹ï¿½ï¿½Éµï¿½ï¿½Â¼";
+		DataBlockName[0x11] = "ï¿½ï¿½Ê±ï¿½ï¿½Ê»ï¿½ï¿½Â¼";
+		DataBlockName[0x12] = "ï¿½ï¿½Ê»ï¿½ï¿½ï¿½ï¿½Ý¼ï¿½Â¼";
+		DataBlockName[0x13] = "ï¿½â²¿ï¿½ï¿½ï¿½ï¿½ï¿½Â¼";
+		DataBlockName[0x14] = "ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸Ä¼ï¿½Â¼";
+		DataBlockName[0x15] = "ï¿½Ù¶ï¿½×´Ì¬ï¿½ï¿½Ö¾";
 	}
 #endif
 }
@@ -312,6 +312,12 @@ size_t USBDataFilev2012::readBlock(const string& str, int index)
 			sizeof(ptrBlock->cDataName), szBlockName, 64);
 	TRACE("blockName:%s",szBlockName);
 	size_t n = 0;
+	if (nLength == 0)
+	{
+		TRACE("skip block");
+		nDataBlockNumber++;
+	}
+
 	while (nLength > n)
 	{
 		ptrRecord = generateRecord((VTDRRecord::DataCode) ptrBlock->cDataCode);

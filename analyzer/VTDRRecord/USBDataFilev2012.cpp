@@ -14,6 +14,7 @@
 #include "TraceLog.h"
 #else
 #define TRACE(args)
+#include "define_gbk.h"
 #endif
 
 
@@ -149,25 +150,11 @@ void USBDataFilev2012::initMap()
 		DataBlockName[0x14] = "参数修改记录";
 		DataBlockName[0x15] = "速度状态日志";
 	}
+
 #else
 	if (DataBlockName.empty())
 	{
-		DataBlockName[0] = "ִ�б�׼�汾���";
-		DataBlockName[1] = "��ǰ��ʻ����Ϣ";
-		DataBlockName[2] = "ʵʱʱ��";
-		DataBlockName[3] = "�ۼ���ʻ���";
-		DataBlockName[4] = "����ϵ��";
-		DataBlockName[5] = "������Ϣ";
-		DataBlockName[6] = "״̬�ź�������Ϣ";
-		DataBlockName[7] = "��¼��Ψһ�Ա��";
-		DataBlockName[8] = "��ʻ�ٶȼ�¼";
-		DataBlockName[9] = "λ����Ϣ��¼";
-		DataBlockName[0x10] = "�¹��ɵ��¼";
-		DataBlockName[0x11] = "��ʱ��ʻ��¼";
-		DataBlockName[0x12] = "��ʻ����ݼ�¼";
-		DataBlockName[0x13] = "�ⲿ�����¼";
-		DataBlockName[0x14] = "�����޸ļ�¼";
-		DataBlockName[0x15] = "�ٶ�״̬��־";
+		DATA_GBK
 	}
 #endif
 }

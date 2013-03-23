@@ -22,6 +22,7 @@ public:
 	time_t tInstall;
 	float startMeter;
 	float sumMeter;
+	int sumMeterRaw;
 protected:
 	typedef struct _OderMeter
 		{

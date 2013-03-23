@@ -11,32 +11,13 @@
 
 using namespace std;
 
-#ifdef _WIN32
-#pragma pack(1)
-#define PACK
-#else
-#define PACK  __attribute__ ((packed))
-#endif
-
-typedef struct _PacketHead
-{
-	unsigned char cTag[2];
-	unsigned char cCmdWord;
-	unsigned char Len[2];
-	unsigned char dummy;
-} PACK PackHead;
-
-#ifdef _WIN32
-#pragma pack()
-#endif
-
 class Packet
 {
 public:
 	enum CmdWord
 	{
-		GET_STD_VERSION=0,
-		GET_Driver_LicenceID ,
+		GET_STD_VERSION = 0,
+		GET_Driver_LicenceID,
 		GET_RealTime,
 		GET_Odometer,
 		GET_Pulse_Param,
@@ -62,8 +43,29 @@ public:
 		CHECK_Output_Speed_Pulse,
 		CHECK_Output_RTC_Pulse,
 		CHECK_Leave,
+		GET_ERROR = 0xFA,
+		SET_ERROR = 0xFB,
 		CMD_OVER
 	};
+
+#ifdef _WIN32
+#pragma pack(1)
+#define PACK
+#else
+#define PACK  __attribute__ ((packed))
+#endif
+
+	typedef struct _PacketHead
+	{
+		unsigned char cTag[2];
+		unsigned char cCmdWord;
+		unsigned char Len[2];
+		unsigned char dummy;
+	}PACK PackHead;
+
+#ifdef _WIN32
+#pragma pack()
+#endif
 
 	Packet();
 	virtual ~Packet();
@@ -76,20 +78,14 @@ public:
 		return data.size();
 	}
 	void SetCmdPacket(CmdWord cmd);
-	const char* Extract(string& buf);
+	const PackHead* Extract(string& buf);
 
 	void Dump();
 protected:
-	enum PacketState
-	{
-		NONE = 0, SOF, CMD, SIZE, DUMMY, DATA, CHECKSUM
-	} frameState;
-	unsigned char get_xor(string& data);
+
+	unsigned char get_xor(const char* data, int size);
 	string::size_type posFrameStart;
-	int nFrameIndex;
-	int nDataSize;
 	string data;
-	CmdWord cmd;
 };
 
 #endif /* PACKET_H_ */

@@ -7,7 +7,6 @@
 
 #include "VTDROderMeter.h"
 
-
 VTDROderMeter::VTDROderMeter() :
 		tNow(0), tInstall(0), startMeter(0.0), sumMeter(0.0)
 {
@@ -25,6 +24,7 @@ int VTDROderMeter::Read(const char* buf)
 	tInstall = ToSystime(ptrMeter->installTime);
 	startMeter = BCD2INT((const char*) (ptrMeter->startValue),
 			sizeof(ptrMeter->startValue)) / 10.0;
+	sumMeterRaw = ntohl(*(int*)(ptrMeter->oderMeter));
 	sumMeter = BCD2INT((const char*) (ptrMeter->oderMeter),
 			sizeof(ptrMeter->oderMeter)) / 10.0;
 	return sizeof(*ptrMeter);
@@ -63,6 +63,8 @@ string& VTDROderMeter::Dump(string& buf)
 	stream << VTDRRecord::Dump(buf) << " Time:" << ctime(&tNow);
 	stream << " InstallTime:" << ctime(&tInstall);
 	stream << " StartMeter:" << startMeter;
-	stream << " AccumulateMeter:" << sumMeter;
+	stream << " AccumulateMeter:" << sumMeter << "(" ;
+	stream.setf(stream.hex,stream.basefield);
+	stream	<< sumMeterRaw << ")";
 	return buf = stream.str();
 }

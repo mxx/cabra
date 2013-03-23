@@ -16,12 +16,15 @@
 #endif
 
 #define TRACE(args)
- 
-#include "Packet.h"
-Packet::Packet()
-{
-	// TODO Auto-generated constructor stub
 
+#include "Packet.h"
+Packet::Packet() :
+		posFrameStart(string::npos)
+{
+	frameState = NONE;
+	nFrameIndex = 0;
+	cmd = CMD_OVER;
+	nDataSize = 0;
 }
 
 Packet::~Packet()
@@ -33,179 +36,164 @@ void Packet::SetCmdPacket(CmdWord cmd)
 {
 //      Full Packet
 
-	data=(char)0xAA;
-	data+=0x75;
-	data+=cmd;
-	data.append(3,0);
-	data+=XOR();
+	data = (char) 0xAA;
+	data += 0x75;
+	data += cmd;
+	data.append(3, 0);
+	data += xor();
 }
 
 int Packet::GetDriverCode(void)
 {
-	struct PacketHead *Head = (struct PacketHead *)GetData();
+	struct PacketHead *Head = (struct PacketHead *) GetData();
 	if (Head->cCmdWord == GET_DriverID_LicenceID)
 	{
-		struct DriverInfo* info = (struct DriverInfo*)(Head+1);
-		return ((info->DriverCode[0]<<16)&0xFF0000)|
-				((info->DriverCode[1]<<8)&0xFF00)|
-				info->DriverCode[2];
+		struct DriverInfo* info = (struct DriverInfo*) (Head + 1);
+		return ((info->DriverCode[0] << 16) & 0xFF0000)
+				| ((info->DriverCode[1] << 8) & 0xFF00) | info->DriverCode[2];
 	}
 	return -1;
 }
 
 string Packet::GetLicenseID(void)
 {
-	struct PacketHead *Head = (struct PacketHead *)GetData();
+	struct PacketHead *Head = (struct PacketHead *) GetData();
 
 	if (Head->cCmdWord == GET_DriverID_LicenceID)
 	{
-		struct DriverInfo* info = (struct DriverInfo*)(Head+1);
-		string id(info->LicenceNumber,18);
+		struct DriverInfo* info = (struct DriverInfo*) (Head + 1);
+		string id(info->LicenceNumber, 18);
 		return id;
 	}
 	return "";
 }
 
-
 struct AccidentData* Packet::GetAccidentData(unsigned int& num)
 {
-	struct PacketHead *Head = (struct PacketHead *)GetData();
+	struct PacketHead *Head = (struct PacketHead *) GetData();
 	num = 0;
 	if (Head->cCmdWord == GET_Accident_Data)
 	{
-		int n = ((Head->Len[0]<< 8)&0xFF00) | (Head->Len[1]);
+		int n = ((Head->Len[0] << 8) & 0xFF00) | (Head->Len[1]);
 		num = n / sizeof(struct AccidentData);
-		return (struct AccidentData*)(Head+1);
+		return (struct AccidentData*) (Head + 1);
 	}
 	return NULL;
 }
 
 struct SpeedRecord* Packet::GetSpeedData(unsigned int& num)
 {
-        struct PacketHead *Head = (struct PacketHead *)GetData();
-        num = 0;
-        if (Head->cCmdWord == GET_360Hour_Speed || Head->cCmdWord == GET_2Day_Speed)
-        {
-                unsigned int n = ((Head->Len[0]<< 8)&0xFF00) | (Head->Len[1]);
-                num = n;
-                return (struct SpeedRecord*)(Head+1);
-        }
-        return NULL;
+	struct PacketHead *Head = (struct PacketHead *) GetData();
+	num = 0;
+	if (Head->cCmdWord == GET_360Hour_Speed || Head->cCmdWord == GET_2Day_Speed)
+	{
+		unsigned int n = ((Head->Len[0] << 8) & 0xFF00) | (Head->Len[1]);
+		num = n;
+		return (struct SpeedRecord*) (Head + 1);
+	}
+	return NULL;
 }
 
-unsigned char Packet::XOR()
+unsigned char Packet::get_xor(string& data)
 {
 	string::iterator it;
-	unsigned char sum=0;
+	unsigned char sum = 0;
+	string str = data.substr(posFrameStart,nDataSize+6);
 	it = data.begin();
 	sum = *it;
 	it++;
-    for ( ; it < data.end(); it++ )
-	    sum ^= *it;
-    return sum;
+	for (; it < data.end(); it++)
+	{
+
+		sum ^= *it;
+	}
+	return sum;
 }
 
-void Packet::ReceiveFrameFrom(CSerialPort & port,int wait_s)
+const char* Packet::Extract(string& buf)
 {
-	char buff;
-	int n;
-	int count = 0;
-	int err=0;
-	time_t now, start, diff;
-	start = time(NULL);
-	
-	frameState = NONE;
 	do
 	{
-		n = port.Read(&buff, 1);
-		now = time(&now);
-		if (n == 0)
-		{
-			diff = now -start;
-			if (diff < wait_s)
-			{
-				Sleep(1000);
-				//if (data.size()) start = now;
-				continue;
-			}
-			
-			ERROR("Receive time out %d.",wait_s);
-			return;
-		}
-		start = now;
-		TRACE("%02hhX ",buff);
-
 		switch (frameState)
 		{
 		case NONE:
-			if (buff == 0x55) frameState = SOF1;
-			else {err++; frameState = NONE;	data="";}
+			posFrameStart = buf.find("\0x55\0x7A");
+			if (posFrameStart != string::npos)
+			{
+				frameState = SOF;
+				nFrameIndex = 2;
+			}
+			else
+			{
+				buf.erase(0,buf.size()); //buf clear,for compatible win win32
+				return NULL;
+			}
 			break;
-		case SOF1:
-			if (buff == 0x7A) frameState = SOF2;
-			else { err++; frameState = NONE; data="";}
-			break;
-		case SOF2:
+		case SOF:
 			frameState = CMD;
+			nFrameIndex = 3;
 			break;
 		case CMD:
-			if (buff == GET_CMD_ERROR || buff == SET_CMD_ERROR)
-			{
-				frameState = DUMMY;
-			}
-			else
-			{
-				frameState = SIZE1;
-				count = ((buff&0xFF) << 8);
-			}
+			cmd = (CmdWord)buf[posFrameStart + 2];
+			frameState = SIZE;
+			nFrameIndex = 5;
 			break;
-		case SIZE1:
-			frameState = SIZE2;
-			count = (count&0xFF00)|(buff&0xFF);
-			TRACE("Shold recv %u bytes",count);
-			break;
-		case SIZE2:
+		case SIZE:
+			nDataSize = buf[posFrameStart + 3] * 256 + buf[posFrameStart + 4];
 			frameState = DUMMY;
+			nFrameIndex = 6;
 			break;
 		case DUMMY:
-			if (!count) frameState = CHECKSUM;
-			else frameState = DATA;
-			break;
-		case DATA:
-			count--;
-			TRACE("%u bytes left",count);
-			frameState = DATA;
-			if (!(count-1)) frameState=CHECKSUM;
-			break;
-		case CHECKSUM:
-			TRACE("FRAME[CHECKSUM]");
-			if (buff == XOR())
+			if (!nDataSize)
 			{
-				data.append(&buff,1);
+				frameState = CHECKSUM;
+				nFrameIndex = 7;
 			}
 			else
 			{
-				data="";
+				frameState = DATA;
+				nFrameIndex = nDataSize + 6;
 			}
-			return;
+			break;
+		case DATA:
+			if (buf.size()>(posFrameStart + nFrameIndex -1))
+			{
+				frameState = CHECKSUM;
+				nFrameIndex = nDataSize + 7;
+			}
+			break;
+		case CHECKSUM:
+			if (get_xor(buf)==0)
+			{
+				data = buf.substr(posFrameStart+6,nDataSize);
+				buf.erase(0,posFrameStart+nDataSize + 7);
+				return data.data();
+			}
+			else
+			{
+				buf.erase(0, posFrameStart+2);
+				frameState = NONE;
+				nFrameIndex = 1;
+				posFrameStart = 0;
+			}
+			break;
 		};
-		TRACE("FRAME[%d]",frameState);
-		if (frameState!=NONE) data.append(&buff,1);
-
-	} while (err < 0xFFFF);
+	} while (buf.size() > (posFrameStart + nFrameIndex - 1));
+	return NULL;
 }
 
 void Packet::Dump()
 {
-	char buf[1024]={0};
-	int n=0;
-	for(unsigned int i=0;i < data.size();i++)
+	char buf[1024] =
+	{ 0 };
+	int n = 0;
+	for (unsigned int i = 0; i < data.size(); i++)
 	{
-		sprintf(buf+n,"%02hhX ",data[i]);
+		sprintf(buf + n, "%02hhX ", data[i]);
 		n = strlen(buf);
-		if (n>1000) break;
+		if (n > 1000)
+			break;
 	}
 
 }
-
 

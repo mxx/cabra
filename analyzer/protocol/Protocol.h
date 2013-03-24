@@ -22,7 +22,7 @@ public:
 	virtual ~Protocol();
 	int ReadDriverIDLicenceID(RS232Port & port,Packet& packet);
 	int ReadRealTime(RS232Port & port,Packet& packet);
-       int Read360HourMileage(RS232Port & port,Packet& packet);
+    int Read360HourMileage(RS232Port & port,Packet& packet);
 	int ReadVehicleFeature(RS232Port & port,Packet& packet);
 	int Read360HourSpeed(RS232Port & port,Packet& packet);
 	int ReadVehicleVIN_Number_Class(RS232Port & port,Packet& packet);

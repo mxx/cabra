@@ -30,12 +30,13 @@ Packet::~Packet()
 
 }
 
-void Packet::SetCmdPacket(CmdWord cmd)
+void Packet::SetCmdPacket(CmdWord cmd,string& content)
 {
 	data = (char) 0xAA;
 	data += 0x75;
 	data += cmd;
-	data.append(3, 0);
+	data.append(1,0);
+	data.append(content);
 	data += get_xor(data.data(),data.size());
 }
 

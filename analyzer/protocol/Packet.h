@@ -11,42 +11,44 @@
 
 using namespace std;
 
+enum CmdWord
+{
+	GET_STD_VERSION = 0,
+	GET_Driver_LicenceID,
+	GET_RealTime,
+	GET_Odometer,
+	GET_Pulse_Param,
+	GET_Vehicle_Info,
+	GET_State_Config,
+	GET_Uniq_No,
+	GET_Speed_Record,
+	GET_Postion_Record,
+	GET_Suspious_Record = 0x10,
+	GET_OverDrive_Record,
+	GET_Driver_Record,
+	GET_Power_Record,
+	GET_Param_Record,
+	GET_Speed_State_Log,
+	SET_Vehicle_Info = 0x82,
+	SET_Install_Date,
+	SET_Param_Config,
+	SET_Clock = 0xC2,
+	SET_Pulse_Param,
+	SET_Odometer,
+	CHECK_Enter = 0xE0,
+	CHECK_Input_Speed_Pulse,
+	CHECK_Output_Speed_Pulse,
+	CHECK_Output_RTC_Pulse,
+	CHECK_Leave,
+	GET_ERROR = 0xFA,
+	SET_ERROR = 0xFB,
+	CMD_OVER
+};
+
 class Packet
 {
 public:
-	enum CmdWord
-	{
-		GET_STD_VERSION = 0,
-		GET_Driver_LicenceID,
-		GET_RealTime,
-		GET_Odometer,
-		GET_Pulse_Param,
-		GET_Vehicle_Info,
-		GET_State_Config,
-		GET_Uniq_No,
-		GET_Speed_Record,
-		GET_Postion_Record,
-		GET_Suspious_Record = 0x10,
-		GET_OverDrive_Record,
-		GET_Driver_Record,
-		GET_Power_Record,
-		GET_Param_Record,
-		GET_Speed_State_Log,
-		SET_Vehicle_Info = 0x82,
-		SET_Install_Date,
-		SET_Param_Config,
-		SET_Clock = 0xC2,
-		SET_Pulse_Param,
-		SET_Odometer,
-		CHECK_Enter = 0xE0,
-		CHECK_Input_Speed_Pulse,
-		CHECK_Output_Speed_Pulse,
-		CHECK_Output_RTC_Pulse,
-		CHECK_Leave,
-		GET_ERROR = 0xFA,
-		SET_ERROR = 0xFB,
-		CMD_OVER
-	};
+
 
 #ifdef _WIN32
 #pragma pack(1)
@@ -71,13 +73,13 @@ public:
 	virtual ~Packet();
 	const char* GetData()
 	{
-		return data.data();
+		return data.size()? data.data():NULL;
 	}
 	int GetSize()
 	{
 		return data.size();
 	}
-	void SetCmdPacket(CmdWord cmd);
+	void SetCmdPacket(CmdWord cmd,string& content);
 	const PackHead* Extract(string& buf);
 
 	void Dump();

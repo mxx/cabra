@@ -71,23 +71,29 @@ public:
 
 	Packet();
 	virtual ~Packet();
-	const char* GetData()
+	const string& GetData()
 	{
-		return data.size()? data.data():NULL;
-	}
-	int GetSize()
-	{
-		return data.size();
-	}
+		return packet;
+	};
 	void SetCmdPacket(CmdWord cmd,string& content);
-	const PackHead* Extract(string& buf);
-
+	const string& Extract(string& buf);
+	const string& GetContent()
+	{
+		return data;
+	};
+	CmdWord GetCmd()
+	{
+		return cmd;
+	};
 	void Dump();
 protected:
 
 	unsigned char get_xor(const char* data, int size);
 	string::size_type posFrameStart;
+	CmdWord cmd;
+	int nDataSize;
 	string data;
+	string packet;
 };
 
 #endif /* PACKET_H_ */

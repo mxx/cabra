@@ -32,12 +32,14 @@ Packet::~Packet()
 
 void Packet::SetCmdPacket(CmdWord cmd,string& content)
 {
-	data = (char) 0xAA;
-	data += 0x75;
-	data += cmd;
-	data.append(1,0);
-	data.append(content);
-	data += get_xor(data.data(),data.size());
+	data = content;
+	this->cmd = cmd;
+	packet = (char) 0xAA;
+	packet += 0x75;
+	packet += cmd;
+	packet.append(1,0);
+	packet.append(data);
+	packet += get_xor(data.data(),data.size());
 }
 
 unsigned char Packet::get_xor(const char* data, int size)
@@ -51,7 +53,7 @@ unsigned char Packet::get_xor(const char* data, int size)
 	return sum;
 }
 
-const Packet::PackHead*  Packet::Extract(string& buf)
+const string&  Packet::Extract(string& buf)
 {
 
 	PackHead* ptrPacket = NULL;
@@ -72,9 +74,11 @@ const Packet::PackHead*  Packet::Extract(string& buf)
 
 			if (get_xor(buf.data()+posFrameStart,sizeof(*ptrPacket)+data_size+1)==0)
 			{
-				data = buf.substr(posFrameStart,data_size + sizeof(*ptrPacket)+1);
+				cmd = ptrPacket->cCmdWord;
+				nDataSize = data_size;
+				data = buf.substr(posFrameStart+sizeof(PackHead),data_size);
 				buf.erase(0,posFrameStart + data_size + sizeof(*ptrPacket) +1);
-				return (PackHead*)data.data();
+				break;
 			}
 			else
 			{
@@ -87,10 +91,10 @@ const Packet::PackHead*  Packet::Extract(string& buf)
 		else
 		{
 			buf.erase(0, buf.size()); //buffer clear,for compatible win win32
-			return NULL;
+			break;
 		}
 	} while (buf.size() > sizeof(ptrPacket->cTag));
-	return NULL;
+	return data;
 }
 
 void Packet::Dump()

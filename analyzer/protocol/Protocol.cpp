@@ -40,10 +40,28 @@ Protocol::~Protocol()
 
 VTDRRecord* Protocol::Parse(Packet& packet)
 {
-	return NULL;
+	switch(packet.GetCmd())
+	{
+
+	}
+
 }
 
 Packet Protocol::Command(CmdWord cmd, time_t tStart, time_t tEnd, int size)
 {
-	return Packet();
+	VTDRTime vTime;
+	string strData;
+	if (tStart)
+	{
+		VTDRRecord::ToBCDTime(tStart,vTime);
+		strData.append((const char*)&vTime,sizeof(vTime));
+		VTDRRecord::ToBCDTime(tEnd,vTime);
+		strData.append((const char*)&vTime,sizeof(vTime));
+		unsigned short data = htons((short)size);
+		strData.append((const char*) &data,sizeof(data));
+	}
+	Packet packet;
+	packet.SetCmdPacket(cmd,strData);
+
+	return packet;
 }

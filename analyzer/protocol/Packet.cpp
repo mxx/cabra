@@ -15,7 +15,6 @@
 
 #endif
 
-#define TRACE(args)
 
 #include "Packet.h"
 Packet::Packet() :
@@ -64,7 +63,7 @@ const string&  Packet::Extract(string& buf)
 
 		if (posFrameStart != string::npos)
 		{
-			PackHead* ptrPacket = buf.data() + posFrameStart;
+			PackHead* ptrPacket = (PackHead*)(buf.data() + posFrameStart);
 			if (buf.size() < posFrameStart + sizeof(ptrPacket->dummy))
 				break;
 
@@ -74,7 +73,7 @@ const string&  Packet::Extract(string& buf)
 
 			if (get_xor(buf.data()+posFrameStart,sizeof(*ptrPacket)+data_size+1)==0)
 			{
-				cmd = ptrPacket->cCmdWord;
+				cmd = (CmdWord)ptrPacket->cCmdWord;
 				nDataSize = data_size;
 				data = buf.substr(posFrameStart+sizeof(PackHead),data_size);
 				buf.erase(0,posFrameStart + data_size + sizeof(*ptrPacket) +1);

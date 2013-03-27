@@ -5,17 +5,45 @@
 #include "Analyzer.h"
 #include "DataCollectionDlg.h"
 #include "SerialPort.h"
-
+#include <string>
+#include "protocol/Packet.h"
+#include "protocol/Protocol.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
 
+using namespace std;
+
 UINT CommThreadProc( LPVOID pParam )
 {
-	//Open Port;
+	CDataCollectionDlg* ptrUI = (CDataCollectionDlg*)pParam;
+	Packet packet;
+	Protocol pro;
+	string strCache;
+	do
+	{
+		char buf[256];
+		int n = ptrUI->m_port.Read(buf,256);
+		if (n)
+		{
+			strCache.append(buf,n);
+			if (packet.Extract(strCache).size())
+			{
+				VTDRRecord* ptrRecord = pro.Parse(packet);
+				if (ptrRecord)
+				{
+					//Save and Dump data
+					string strDump;
+					ptrRecord->Dump(strDump);
+					ptrUI->SendMessage(WM_UPDATE_DATA,(WPARAM)&packet,NULL);
+				}
+			}
+		}
 
+	}
+	while(!ptrUI->m_bStop);
    
 	return 0;
 }
@@ -238,5 +266,6 @@ void CDataCollectionDlg::OnDestroy()
 
 void CDataCollectionDlg::OnButtonVersion() 
 {
+
 	
 }

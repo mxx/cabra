@@ -44,7 +44,7 @@ VTDRRecord* Protocol::Parse(Packet& packet)
 	{
 
 	}
-
+	return NULL;
 }
 
 Packet Protocol::Command(CmdWord cmd, time_t tStart, time_t tEnd, int size)

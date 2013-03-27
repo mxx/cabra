@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../VTDRRecord" /I "../" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 setupapi.lib  Ws2_32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 setupapi.lib Ws2_32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
 
@@ -129,10 +129,6 @@ SOURCE=..\protocol\Packet.cpp
 # Begin Source File
 
 SOURCE=..\protocol\Protocol.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\protocol\RS232Port.cpp
 # End Source File
 # Begin Source File
 
@@ -241,6 +237,10 @@ SOURCE=.\Config.h
 # Begin Source File
 
 SOURCE=.\DataCollectionDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\VTDRRecord\define_gbk.h
 # End Source File
 # Begin Source File
 

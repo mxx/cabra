@@ -41,7 +41,10 @@ UINT CommThreadProc( LPVOID pParam )
 				}
 			}
 		}
-
+		else
+		{
+			Sleep(5);
+		}
 	}
 	while(!ptrUI->m_bStop);
    
@@ -266,6 +269,7 @@ void CDataCollectionDlg::OnDestroy()
 
 void CDataCollectionDlg::OnButtonVersion() 
 {
-
-	
+	Protocol pro;
+	Packet packet = pro.Command(GET_STD_VERSION,0,0,0);
+	m_port.Write(packet.GetData().data(),packet.GetData().size());
 }

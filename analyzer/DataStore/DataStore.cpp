@@ -45,9 +45,18 @@ void DataStore::initDataStore(void)
 {
 	char* err_msg = NULL;
 	const char* create_sql[] =
-	{ CREATE_DRIVER, CREATE_DRIVE_RECORD, CREATE_ODERMETER, CREATE_OVERDRIVE,
-			CREATE_POWERLOG, CREATE_MODIFYLOG, CREATE_POSTION_RECORD,
-			CREATE_SPEED_RECORD, CREATE_ABNORMAL_SPEED, CREATE_VINFO };
+	{
+			CREATE_DRIVER,
+			CREATE_DRIVE_RECORD,
+			CREATE_ODERMETER,
+			CREATE_OVERDRIVE,
+			CREATE_POWERLOG,
+			CREATE_MODIFYLOG,
+			CREATE_POSTION_RECORD,
+			CREATE_SPEED_RECORD,
+			CREATE_ABNORMAL_SPEED,
+			CREATE_VINFO
+	};
 	for (int i = 0; i < sizeof(create_sql)/sizeof(const char*); i++)
 	{
 		if (SQLITE_OK != sqlite3_exec(db, create_sql[i], 0, 0, &err_msg))

@@ -36,9 +36,12 @@ void Packet::SetCmdPacket(CmdWord cmd,string& content)
 	packet = (char) 0xAA;
 	packet += 0x75;
 	packet += cmd;
-	packet.append(1,0);
+	short len = (short)data.size();
+	packet.append(1,(len/256)&0x0FF);
+	packet.append(1,len%256);
+	packet.append(1,0); //dummy word
 	packet.append(data);
-	packet += get_xor(data.data(),data.size());
+	packet += get_xor(packet.data(),packet.size());
 }
 
 unsigned char Packet::get_xor(const char* data, int size)

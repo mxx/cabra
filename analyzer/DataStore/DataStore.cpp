@@ -47,7 +47,7 @@ void DataStore::initDataStore(void)
 	const char* create_sql[] =
 	{
 			CREATE_DRIVER,          //for driver name to license
-			CREATE_DRIVE_RECORD,    //driving stata
+			CREATE_DRIVE_RECORD,    //driving state
 			CREATE_ODERMETER,       //
 			CREATE_OVERDRIVE,		//
 			CREATE_POWERLOG,		//

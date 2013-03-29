@@ -25,10 +25,10 @@ CFileSettingDlg::CFileSettingDlg(CWnd* pParent /*=NULL*/)
 
 	//}}AFX_DATA_INIT
 	memset(&m_dcbConf,0,sizeof(m_dcbConf));
-	m_dcbConf.BaudRate = CBR_9600;
-	m_dcbConf.ByteSize = 7;
-	m_dcbConf.Parity = EVENPARITY;        // no parity bit
-	m_dcbConf.StopBits =TWOSTOPBITS;    // one stop bit
+	m_dcbConf.BaudRate = CBR_115200;
+	m_dcbConf.ByteSize = 8;
+	m_dcbConf.Parity = ODDPARITY;        // no parity bit
+	m_dcbConf.StopBits =ONESTOPBIT;    // one stop bit
 
 }
 

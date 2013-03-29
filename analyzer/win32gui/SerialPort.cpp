@@ -20,10 +20,10 @@ CSerialPort::CSerialPort()
 {
 	handle = INVALID_HANDLE_VALUE;
 	memset(&m_dcb,0,sizeof(m_dcb));
-	m_dcb.BaudRate = CBR_9600;
-	m_dcb.ByteSize = 7;
-	m_dcb.Parity = EVENPARITY;        // no parity bit
-	m_dcb.StopBits =TWOSTOPBITS;    // one stop bit
+	m_dcb.BaudRate = CBR_115200;
+	m_dcb.ByteSize = 8;
+	m_dcb.Parity = ODDPARITY;        // no parity bit
+	m_dcb.StopBits =ONESTOPBIT;    // one stop bit
 }
 
 CSerialPort::~CSerialPort()

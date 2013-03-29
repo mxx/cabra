@@ -7,3 +7,8 @@
 
 #include "DataStore.h"
 
+int main(int argc ,const char** argv)
+{
+	DataStore ds;
+	ds.Open();
+}

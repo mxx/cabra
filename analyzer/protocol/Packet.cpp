@@ -66,7 +66,7 @@ const string&  Packet::Extract(string& buf)
 
 		if (posFrameStart != string::npos)
 		{
-			PackHead* ptrPacket = (PackHead*)(buf.data() + posFrameStart);
+			ptrPacket = (PackHead*)(buf.data() + posFrameStart);
 			if (buf.size() < posFrameStart + sizeof(ptrPacket->dummy))
 				break;
 

@@ -160,7 +160,7 @@ void CMainDlg::OnOpenDlg(WPARAM wParam, LPARAM lParam)
 			m_FileSettingDlg.SetFocus();
 			break;
 		case OPEN_DATA_COLLECTION:
-			m_DataCollectionDlg.m_dcb.BaudRate = m_FileSettingDlg.m_dcbConf.BaudRate;
+			m_DataCollectionDlg.m_dcb = m_FileSettingDlg.m_dcbConf;
 			if (lParam == OPEN_FILE_SETTING)
 				m_DataCollectionDlg.m_strDev = m_FileSettingDlg.m_strDev;
 			m_DataCollectionDlg.ShowWindow(SW_SHOW);

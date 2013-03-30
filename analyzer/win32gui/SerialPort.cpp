@@ -74,7 +74,12 @@ bool CSerialPort::SetCom(void)
 		return false;
     }
 
-	fSuccess = SetCommState(handle, &m_dcb);
+	dcb.BaudRate = m_dcb.BaudRate;
+	dcb.ByteSize = m_dcb.ByteSize;
+	dcb.StopBits = m_dcb.StopBits;
+	dcb.Parity = m_dcb.Parity;
+
+	fSuccess = SetCommState(handle, &dcb);
 	
 	if (!fSuccess) {
 		// Handle the error.

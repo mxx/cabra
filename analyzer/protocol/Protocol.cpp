@@ -40,11 +40,18 @@ Protocol::~Protocol()
 
 VTDRRecord* Protocol::Parse(Packet& packet)
 {
+	VTDRRecord* ptrRec = NULL;
 	switch(packet.GetCmd())
 	{
-
+	case GET_STD_VERSION:
+		ptrRec = new VTDRVersion;
+		break;
 	}
-	return NULL;
+	if (ptrRec)
+	{
+		ptrRec->Read(packet.GetContent().c_str());
+	}
+	return ptrRec;
 }
 
 Packet Protocol::Command(CmdWord cmd, time_t tStart, time_t tEnd, int size)

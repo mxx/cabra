@@ -4,6 +4,10 @@
 //
 #define IDS_SENDING                     1
 #define IDS_RECEIVE                     2
+#define IDS_WAITING                     3
+#define IDS_READTAB                     4
+#define IDS_SETTAB                      5
+#define IDS_CHECKTAB                    6
 #define IDD_LSC_DIALOG                  102
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     130

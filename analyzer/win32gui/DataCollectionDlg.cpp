@@ -92,7 +92,6 @@ BEGIN_MESSAGE_MAP(CDataCollectionDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_SPECTRUM, OnButtonSpectrum)
 	ON_WM_CTLCOLOR()
 	ON_WM_SHOWWINDOW()
-	ON_WM_TIMER()
 	ON_WM_COPYDATA()
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
@@ -108,14 +107,15 @@ BOOL CDataCollectionDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	TCITEM tcItem;
-   tcItem.mask = TCIF_TEXT;
-   tcItem.pszText = _T("Tab #1");
-
-   m_tabComm.InsertItem(0, &tcItem);
-
-	// TODO: Add extra initialization here
+	tcItem.mask = TCIF_TEXT;
+	tcItem.pszText = _T("Tab #1");
+	
+	m_tabComm.InsertItem(0, &tcItem);
+	
+	strSending.LoadString(IDS_SENDING);
+	strReceive.LoadString(IDS_RECEIVE);
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CDataCollectionDlg::PreTranslateMessage(MSG* pMsg) 
@@ -161,14 +161,21 @@ HBRUSH CDataCollectionDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	HBRUSH brush_green = ::CreateSolidBrush(RGB(0,255,0));
+	HBRUSH brush_blue = ::CreateSolidBrush(RGB(0,255,255));
     LOGBRUSH log={0};
+	CString str;
 	int nID = pWnd->GetDlgCtrlID();
 	if (nID == IDC_STATIC_STATUS)
 	{
-		if (m_strStatus == "Received")
+		if (m_strStatus == strReceive)
 		{
 			pDC->SetBkColor(RGB(0,255,0));
 			return brush_green;
+		}
+		else if (m_strStatus == strSending)
+		{
+			pDC->SetBkColor(RGB(0,255,255));
+			return brush_blue;
 		}
 		else
 		{
@@ -198,31 +205,7 @@ void CDataCollectionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		}
 		pWorking = AfxBeginThread(CommThreadProc,this);
 	}
-
-	if (bShow && pWorking)
-	{
-		SetTimer(1,1000,0);
-	}
-	else
-	{
-		KillTimer(1);
-	}
-
 }
-
-
-void CDataCollectionDlg::OnTimer(UINT nIDEvent) 
-{
-	if (nIDEvent = 1)
-	{
-		CTime now = CTime::GetCurrentTime();
-		
-		UpdateData(FALSE);
-	}
-	
-	CDialog::OnTimer(nIDEvent);
-}
-
 
 
 BOOL CDataCollectionDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct) 
@@ -234,8 +217,8 @@ BOOL CDataCollectionDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 {
-	//CPacket& packet=*(CPacket*)wParam;
-	//SetStatus(packet);
+	Packet& packet=*(Packet*)wParam;
+	
 	
 	return 0;
 }
@@ -256,8 +239,6 @@ void CDataCollectionDlg::ClosePort()
 
 void CDataCollectionDlg::OnClose() 
 {
-	// TODO: Add your message handler code here and/or call default
-	
 	CDialog::OnClose();
 }
 
@@ -271,5 +252,9 @@ void CDataCollectionDlg::OnButtonVersion()
 {
 	Protocol pro;
 	Packet packet = pro.Command(GET_STD_VERSION,0,0,0);
+	m_strStatus.LoadString(IDS_SENDING);
+	UpdateData(FALSE);
 	m_port.Write(packet.GetData().data(),packet.GetData().size());
+	m_strStatus = "";
+	UpdateData(FALSE);
 }

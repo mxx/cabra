@@ -30,6 +30,10 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1185807954" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/home/mxx/workspace/MFC/win/Include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mfc/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MFC/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MFC/MFC/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MFC/ATL/Include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/analyzer}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2115987405" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

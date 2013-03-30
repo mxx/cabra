@@ -2,6 +2,8 @@
 // Microsoft Developer Studio generated include file.
 // Used by Analyzer.rc
 //
+#define IDS_SENDING                     1
+#define IDS_RECEIVE                     2
 #define IDD_LSC_DIALOG                  102
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     130

@@ -23,6 +23,27 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\LSC.ico"
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Dialog
 //
 
@@ -151,6 +172,26 @@ BEGIN
     PUSHBUTTON      "&Print",IDC_BUTTON_PRINT,363,196,50,14
 END
 
+IDD_LSC_DIALOG DIALOGEX 0, 0, 407, 238
+STYLE DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "记录仪通讯与分析"
+FONT 10, "新宋体", 0, 0, 0x1
+BEGIN
+END
+
+IDD_DIALOG_FILE_SETTING DIALOG DISCARDABLE  0, 0, 286, 180
+STYLE WS_CHILD
+FONT 11, "新宋体"
+BEGIN
+    CONTROL         "",IDC_COMBO_COMNO,"ComboBoxEx32",CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP,73,79,95,30
+    PUSHBUTTON      "&C配置",IDC_BUTTON_COMCONF,178,79,35,14
+    PUSHBUTTON      "数据采集&D",IDC_BUTTON_DATA_COLLECTION,111,133,65,15
+    GROUPBOX        "串口选择",IDC_STATIC,62,58,162,47
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -183,65 +224,7 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 265
     END
-END
-#endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\LSC.ico"
-#endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Chinese (P.R.C.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
-LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
-#pragma code_page(936)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_LSC_DIALOG DIALOGEX 0, 0, 407, 238
-STYLE DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | 
-    WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_APPWINDOW
-CAPTION "记录仪通讯与分析"
-FONT 10, "新宋体", 0, 0, 0x1
-BEGIN
-END
-
-IDD_DIALOG_FILE_SETTING DIALOG DISCARDABLE  0, 0, 286, 180
-STYLE WS_CHILD
-FONT 11, "新宋体"
-BEGIN
-    CONTROL         "",IDC_COMBO_COMNO,"ComboBoxEx32",CBS_DROPDOWN | 
-                    CBS_SORT | WS_VSCROLL | WS_TABSTOP,73,79,95,30
-    PUSHBUTTON      "&C配置",IDC_BUTTON_COMCONF,178,79,35,14
-    PUSHBUTTON      "数据采集&D",IDC_BUTTON_DATA_COLLECTION,111,133,65,15
-    GROUPBOX        "串口选择",IDC_STATIC,62,58,162,47
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
-BEGIN
     IDD_LSC_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -324,14 +307,14 @@ BEGIN
         BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "LSC Manager\0"
+            VALUE "FileDescription", "Data Analysis\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
             VALUE "InternalName", "LSC\0"
             VALUE "LegalCopyright", " (C) 2010\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "LSC.EXE\0"
+            VALUE "OriginalFilename", "analyzer.exe\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "LSC  Application\0"
+            VALUE "ProductName", "VTDR Application\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
             VALUE "SpecialBuild", "\0"
         END
@@ -351,6 +334,18 @@ END
 //
 
 IDB_BITMAP1             BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_SENDING             "发送"
+    IDS_RECEIVE             "接收"
+END
+
 #endif    // Chinese (P.R.C.) resources
 /////////////////////////////////////////////////////////////////////////////
 

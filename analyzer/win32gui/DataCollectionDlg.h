@@ -43,9 +43,8 @@ public:
 // Implementation
 protected:
 
-
-	CString strCurrentFile;
-	
+	CString strSending;
+	CString strReceive;
 	CWinThread *pWorking;
 
 	// Generated message map functions

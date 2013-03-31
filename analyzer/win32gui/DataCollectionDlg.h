@@ -2,6 +2,7 @@
 #define AFX_DATACOLLECTIONDLG_H__A17B0148_F445_4D87_9680_B4D64B73D864__INCLUDED_
 
 #include "SerialPort.h"	// Added by ClassView
+#include "SetProp.h"
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -46,7 +47,8 @@ protected:
 	CString strSending;
 	CString strReceive;
 	CWinThread *pWorking;
-
+    CSetProp dlgSet;
+    void hideGETbuttons(int cmd);
 	// Generated message map functions
 	//{{AFX_MSG(CDataCollectionDlg)
 	virtual BOOL OnInitDialog();
@@ -56,14 +58,14 @@ protected:
 	afx_msg void OnButtonSpectrum();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg void OnClose();
 	afx_msg void OnDestroy();
 	afx_msg void OnButtonVersion();
+	afx_msg void OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()
+
 };
 
 //{{AFX_INSERT_LOCATION}}

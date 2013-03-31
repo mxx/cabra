@@ -69,7 +69,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../VTDRRecord" /I "../" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../VTDRRecord" /I "../" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "_DEBUG" /d "_AFXDLL"
@@ -133,6 +134,10 @@ SOURCE=..\protocol\Protocol.cpp
 # Begin Source File
 
 SOURCE=.\SerialPort.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SetProp.cpp
 # End Source File
 # Begin Source File
 
@@ -277,6 +282,10 @@ SOURCE=..\protocol\RS232Port.h
 # Begin Source File
 
 SOURCE=.\SerialPort.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SetProp.h
 # End Source File
 # Begin Source File
 

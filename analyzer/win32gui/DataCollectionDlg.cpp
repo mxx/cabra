@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Analyzer.h"
+#include "VTDRVersion.h"
 #include "DataCollectionDlg.h"
 #include "SerialPort.h"
 #include <string>
@@ -80,21 +81,22 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_STATIC_STATUS, m_strStatus);
 	//}}AFX_DATA_MAP
 }
-BEGIN_MESSAGE_MAP(CDataCollectionDlg, CDialog)
-//{{AFX_MSG_MAP(CDataCollectionDlg)
-ON_BN_CLICKED(IDC_BUTTON_FILE_SETTING, OnButtonFileSetting)
-ON_BN_CLICKED(IDC_BUTTON_AWS_FACTOR, OnButtonAwsFactor)
-ON_BN_CLICKED(IDC_BUTTON_SHUT_DOWN, OnButtonShutDown)
-ON_BN_CLICKED(IDC_BUTTON_SPECTRUM, OnButtonSpectrum)
-ON_WM_CTLCOLOR()
-ON_WM_SHOWWINDOW()
-ON_WM_COPYDATA()
-ON_WM_CLOSE()
-ON_WM_DESTROY()
-ON_BN_CLICKED(IDC_BUTTON_VERSION, OnButtonVersion)
-//}}AFX_MSG_MAP
-ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
-END_MESSAGE_MAP()
+
+    BEGIN_MESSAGE_MAP(CDataCollectionDlg, CDialog)
+    //{{AFX_MSG_MAP(CDataCollectionDlg)
+    ON_BN_CLICKED(IDC_BUTTON_FILE_SETTING, OnButtonFileSetting)
+    ON_BN_CLICKED(IDC_BUTTON_SHUT_DOWN, OnButtonShutDown)
+    ON_BN_CLICKED(IDC_BUTTON_SPECTRUM, OnButtonSpectrum)
+    ON_WM_CTLCOLOR()
+    ON_WM_SHOWWINDOW()
+    ON_WM_COPYDATA()
+    ON_WM_CLOSE()
+    ON_WM_DESTROY()
+    ON_BN_CLICKED(IDC_BUTTON_VERSION, OnButtonVersion)
+    ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_COMM, OnSelchangeTabComm)
+    //}}AFX_MSG_MAP
+    ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
+    END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CDataCollectionDlg message handlers
@@ -116,8 +118,22 @@ BOOL CDataCollectionDlg::OnInitDialog()
 
 	strSending.LoadString(IDS_SENDING);
 	strReceive.LoadString(IDS_RECEIVE);
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+
+    
+    dlgSet.Create(IDD_PROPPAGE_SET,this);
+    dlgSet.ShowWindow(SW_HIDE);
+    
+    CRect rect,itemRect; 
+    m_tabComm.GetClientRect(&rect); 
+    m_tabComm.GetItemRect(0,&itemRect);
+    rect.top+=itemRect.bottom+itemRect.top;  
+    rect.bottom-=4;  
+    rect.left+=4;  
+    rect.right-=4;  
+    dlgSet.MoveWindow(&rect); 
+   
+    return TRUE;  // return TRUE unless you set the focus to a control
+	
 }
 
 BOOL CDataCollectionDlg::PreTranslateMessage(MSG* pMsg)
@@ -141,12 +157,6 @@ BOOL CDataCollectionDlg::PreTranslateMessage(MSG* pMsg)
 void CDataCollectionDlg::OnButtonFileSetting()
 {
 	::PostMessage(this->GetParent()->m_hWnd, WM_OPEN_DLG, OPEN_FILE_SETTING, 0);
-}
-
-void CDataCollectionDlg::OnButtonAwsFactor()
-{
-
-	::PostMessage(this->GetParent()->m_hWnd, WM_OPEN_DLG, OPEN_AWS_FACTOR, 0);
 }
 
 void CDataCollectionDlg::OnButtonShutDown()
@@ -212,12 +222,6 @@ void CDataCollectionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 	}
 }
 
-BOOL CDataCollectionDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
-{
-	// TODO: Add your message handler code here and/or call default
-
-	return CDialog::OnCopyData(pWnd, pCopyDataStruct);
-}
 
 LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 {
@@ -239,6 +243,12 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
         int n = strPrompt.GetLength();
         m_ctlPrompt.SetSel(n,n);
 		m_strStatus.LoadString(IDS_RECEIVE);
+        if (ptrRec->GetDataCode() == VTDRRecord::Version)
+        {
+            VTDRVersion* p = (VTDRVersion*)ptrRec;
+            m_strVersion.Format("%d.%d",p->year,p->modify);
+             
+        }
 		delete ptrRec;
 	}
 	else
@@ -264,11 +274,14 @@ void CDataCollectionDlg::ClosePort()
 
 void CDataCollectionDlg::OnClose()
 {
+    
 	CDialog::OnClose();
 }
 
 void CDataCollectionDlg::OnDestroy()
 {
+ 
+ 
 	CDialog::OnDestroy();
 	ClosePort();
 }
@@ -282,4 +295,32 @@ void CDataCollectionDlg::OnButtonVersion()
 	m_port.Write(packet.GetData().data(), packet.GetData().size());
 	m_strStatus = "";
 	UpdateData(FALSE);
+}
+
+void CDataCollectionDlg::hideGETbuttons(int cmd)
+{
+    for(int i=0;i < 16 ;i++)
+    {
+        CWnd* pWnd = GetDlgItem(IDC_BUTTON_VERSION+i);
+        if (pWnd)
+            pWnd->ShowWindow(cmd);   
+    }
+}
+void CDataCollectionDlg::OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	switch (m_tabComm.GetCurFocus())
+    {
+    case 0:
+	    hideGETbuttons(SW_SHOW);
+        dlgSet.ShowWindow(SW_HIDE);
+        break;
+    case 1:
+        dlgSet.ShowWindow(SW_SHOW);
+        hideGETbuttons(SW_HIDE);
+        break;
+    case 2:
+        hideGETbuttons(SW_HIDE);
+        break;
+    }
+	*pResult = 0;
 }

@@ -38,7 +38,7 @@ void CFileSettingDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CFileSettingDlg)
 	DDX_Control(pDX, IDC_BUTTON_COMCONF, m_btnConf);
-	DDX_Control(pDX, IDC_COMBO_COMNO, m_ComboComNo);
+    DDX_Control(pDX, IDC_COMBO_COMNO, m_ComboComNo);
 	//}}AFX_DATA_MAP
 }
 

@@ -325,7 +325,7 @@ void CSpectrumDlg::OnButtonPrint()
 	memset(&di,0,sizeof (DOCINFO));
 	di.cbSize=sizeof (DOCINFO);
 	
-	BOOL bPrintingOK=dc.StartDoc(&di); //©╙й╪р╩╦Ж╢Рс║хннЯ
+	BOOL bPrintingOK=dc.StartDoc(&di); //О©╫О©╫й╪р╩О©╫О©╫О©╫О©╫с║О©╫О©╫О©╫О©╫
 	CPrintInfo Info;
 	
 	int cx,cy;
@@ -356,19 +356,19 @@ void CSpectrumDlg::OnButtonPrint()
 		DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
 		"Times New Roman");                 // lpszFacename
 	old_pf = dc.SelectObject(&font);
-	dc.StartPage(); //©╙й╪р╩╦Жпб╣д╢Рс║рЁ
+	dc.StartPage(); //О©╫О©╫й╪р╩О©╫О©╫О©╫б╣д╢О©╫с║рЁ
 	Info.m_nCurPage=1;
 	
 	DrawPage(dc,mcx,mcy,Info.m_rectDraw.Width(),Info.m_rectDraw.Height());
 		
-	bPrintingOK=(dc.EndPage() > 0); //╢Рс║рЁ╫АйЬ
+	bPrintingOK=(dc.EndPage() > 0); //О©╫О©╫с║рЁО©╫О©╫О©╫О©╫
 	
 	if (bPrintingOK)
-		dc.EndDoc(); //р╩╦Ж╢Рс║хннЯ╫АйЬ
+		dc.EndDoc(); //р╩О©╫О©╫О©╫О©╫с║О©╫О©╫О©╫О©╫О©╫О©╫О©╫
 	else
-		dc.AbortDoc(); //жуж╧╢Рс║хннЯ
+		dc.AbortDoc(); //О©╫О©╫ж╧О©╫О©╫с║О©╫О©╫О©╫О©╫
 	dc.SelectObject(old_pf);
-	dc.Detach(); //йм╥е╢Рс║╩ЗDC
+	dc.Detach(); //О©╫м╥е╢О©╫с║О©╫О©╫DC
 
 }
 

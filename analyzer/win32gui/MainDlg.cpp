@@ -55,7 +55,7 @@ BOOL CMainDlg::OnInitDialog()
 	this->GetWindowRect(&m_IniRect);
 	m_FileSettingDlg.Create(IDD_DIALOG_FILE_SETTING,this);
 	m_FileSettingDlg.ShowWindow(SW_SHOW);
-	//this->SetWindowText("File Setting");
+
 	CRect rect;
 	m_FileSettingDlg.GetClientRect(&rect);
 	CRect rc,rc2;
@@ -213,9 +213,5 @@ void CMainDlg::OnClose()
 void CMainDlg::OnDestroy() 
 {
 	CDialog::OnDestroy();
-	
-	CString strSec="Setting";
-	CString strEnt;
-
 	
 }

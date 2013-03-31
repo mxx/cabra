@@ -26,7 +26,7 @@ public:
 
 // Dialog Data
 	//{{AFX_DATA(CLSCDlg)
-	enum { IDD = IDD_LSC_DIALOG };
+	enum { IDD = IDD_MAIN_DIALOG };
 
 	//}}AFX_DATA
 

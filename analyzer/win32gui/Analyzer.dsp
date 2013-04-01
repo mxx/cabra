@@ -137,10 +137,6 @@ SOURCE=.\SerialPort.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\SetProp.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\sqlite3\shell.c
 # End Source File
 # Begin Source File
@@ -282,10 +278,6 @@ SOURCE=..\protocol\RS232Port.h
 # Begin Source File
 
 SOURCE=.\SerialPort.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\SetProp.h
 # End Source File
 # Begin Source File
 

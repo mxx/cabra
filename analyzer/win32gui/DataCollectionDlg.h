@@ -2,7 +2,7 @@
 #define AFX_DATACOLLECTIONDLG_H__A17B0148_F445_4D87_9680_B4D64B73D864__INCLUDED_
 
 #include "SerialPort.h"	// Added by ClassView
-#include "SetProp.h"
+
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -47,13 +47,14 @@ protected:
 	CString strSending;
 	CString strReceive;
 	CWinThread *pWorking;
-    CSetProp dlgSet;
-    void hideGETbuttons(int cmd);
+ 
+    void showGETbuttons(int cmd);
+    void showSETbuttons(int cmd);
+    void showCHKbuttons(int cmd);
 	// Generated message map functions
 	//{{AFX_MSG(CDataCollectionDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnButtonFileSetting();
-	afx_msg void OnButtonAwsFactor();
 	afx_msg void OnButtonShutDown();
 	afx_msg void OnButtonSpectrum();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);

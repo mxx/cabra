@@ -82,6 +82,8 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+
+
     BEGIN_MESSAGE_MAP(CDataCollectionDlg, CDialog)
     //{{AFX_MSG_MAP(CDataCollectionDlg)
     ON_BN_CLICKED(IDC_BUTTON_FILE_SETTING, OnButtonFileSetting)
@@ -119,19 +121,20 @@ BOOL CDataCollectionDlg::OnInitDialog()
 	strSending.LoadString(IDS_SENDING);
 	strReceive.LoadString(IDS_RECEIVE);
 
-    
-    dlgSet.Create(IDD_PROPPAGE_SET,this);
-    dlgSet.ShowWindow(SW_HIDE);
-    
-    CRect rect,itemRect; 
-    m_tabComm.GetClientRect(&rect); 
-    m_tabComm.GetItemRect(0,&itemRect);
-    rect.top+=itemRect.bottom+itemRect.top;  
-    rect.bottom-=4;  
-    rect.left+=4;  
-    rect.right-=4;  
-    dlgSet.MoveWindow(&rect); 
-   
+	CRect rect,itemRect;
+	m_tabComm.GetWindowRect(&rect);
+
+
+    for(int i=0;i<1;i++)
+    {
+        CWnd* pWnd = GetDlgItem(IDC_BUTTON_SETVINFO);
+        pWnd->GetWindowRect(&itemRect);
+        pWnd->MoveWindow(rect.CenterPoint().x - itemRect.Width()/2,
+            rect.top + (i+2)*itemRect.Height(),
+            itemRect.Width(),itemRect.Height());
+        
+    }
+
     return TRUE;  // return TRUE unless you set the focus to a control
 	
 }
@@ -245,8 +248,8 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 		m_strStatus.LoadString(IDS_RECEIVE);
         if (ptrRec->GetDataCode() == VTDRRecord::Version)
         {
-            VTDRVersion* p = (VTDRVersion*)ptrRec;
-            m_strVersion.Format("%d.%d",p->year,p->modify);
+      //      VTDRVersion* p = (VTDRVersion*)ptrRec;
+        //    m_strVersion.Format("%d.%d",p->year,p->modify);
              
         }
 		delete ptrRec;
@@ -297,7 +300,7 @@ void CDataCollectionDlg::OnButtonVersion()
 	UpdateData(FALSE);
 }
 
-void CDataCollectionDlg::hideGETbuttons(int cmd)
+void CDataCollectionDlg::showGETbuttons(int cmd)
 {
     for(int i=0;i < 16 ;i++)
     {
@@ -306,20 +309,46 @@ void CDataCollectionDlg::hideGETbuttons(int cmd)
             pWnd->ShowWindow(cmd);   
     }
 }
+
+void CDataCollectionDlg::showSETbuttons(int cmd)
+{
+    for(int i=0;i < 6 ;i++)
+    {
+        CWnd* pWnd = GetDlgItem(IDC_BUTTON_SETVINFO+i);
+        if (pWnd)
+            pWnd->ShowWindow(cmd);
+    }
+
+}
+
+void CDataCollectionDlg::showCHKbuttons(int cmd)
+{
+    for(int i=0;i < 5 ;i++)
+    {
+        CWnd* pWnd = GetDlgItem(IDC_BUTTON_ENTCHECK+i);
+        if (pWnd)
+            pWnd->ShowWindow(cmd);
+    }
+}
+
 void CDataCollectionDlg::OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	switch (m_tabComm.GetCurFocus())
     {
     case 0:
-	    hideGETbuttons(SW_SHOW);
-        dlgSet.ShowWindow(SW_HIDE);
+	    showGETbuttons(SW_SHOW);
+	    showSETbuttons(SW_HIDE);
+	    showCHKbuttons(SW_HIDE);
         break;
     case 1:
-        dlgSet.ShowWindow(SW_SHOW);
-        hideGETbuttons(SW_HIDE);
+    	showSETbuttons(SW_SHOW);
+        showCHKbuttons(SW_HIDE);
+        showGETbuttons(SW_HIDE);
         break;
     case 2:
-        hideGETbuttons(SW_HIDE);
+        showGETbuttons(SW_HIDE);
+        showSETbuttons(SW_HIDE);
+        showCHKbuttons(SW_SHOW);
         break;
     }
 	*pResult = 0;

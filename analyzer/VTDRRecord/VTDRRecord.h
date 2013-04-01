@@ -42,6 +42,10 @@ typedef struct _VTDRTime
 	unsigned char bcdSecond;
 }PACK VTDRTime;
 
+#ifdef _WIN32
+#pragma pack()
+#endif
+
 class VTDRRecord
 {
 public:
@@ -118,13 +122,19 @@ public:
 	}
 	;
 protected:
-
+#ifdef _WIN32
+#pragma pack(1)
+#endif
 	typedef struct _Position
 	{
 		int longititude;
 		int latitude;
 		short altitude;
 	}PACK Position;
+#ifdef _WIN32
+#pragma pack()
+#endif
+
 	int mapType(char n)
 	{
 		if (n > 2 || n < 1)

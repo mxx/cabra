@@ -50,6 +50,16 @@
 #define IDC_BUTTON_PLUS                 1080
 #define IDC_TAB_COMM                    1081
 #define IDC_BUTTON_SETVINFO             1082
+#define IDC_BUTTON_INSTDATE             1084
+#define IDC_BUTTON_SETCONF              1085
+#define IDC_BUTTON_CLOCK                1086
+#define IDC_BUTTON_SETPARA              1087
+#define IDC_BUTTON_INITODR              1088
+#define IDC_BUTTON_ENTCHECK             1089
+#define IDC_BUTTON_CJKODR               1090
+#define IDC_BUTTON_CHKPARA              1091
+#define IDC_BUTTON_CHKCLK               1092
+#define IDC_BUTTON_EXITCHK              1093
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
@@ -58,7 +68,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1083
+#define _APS_NEXT_CONTROL_VALUE         1094
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

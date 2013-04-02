@@ -47,7 +47,7 @@ protected:
 	CString strSending;
 	CString strReceive;
 	CWinThread *pWorking;
- 
+	void groupButtonSet(int first,int number);
     void showGETbuttons(int cmd);
     void showSETbuttons(int cmd);
     void showCHKbuttons(int cmd);

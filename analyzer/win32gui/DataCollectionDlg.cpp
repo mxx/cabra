@@ -82,7 +82,24 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-
+void CDataCollectionDlg::groupButtonSet(int first,int number)
+{
+	CRect rect,itemRect;
+	m_tabComm.GetWindowRect(&rect);
+	ScreenToClient(&rect);
+	
+	for(int i=0;i<number;i++)
+    {
+		CWnd* pWnd = GetDlgItem(first+i);
+        pWnd->GetWindowRect(&itemRect);
+		
+        pWnd->MoveWindow(rect.CenterPoint().x - itemRect.Width()/2,
+            rect.top + (i+2)*itemRect.Height(),
+            itemRect.Width(),itemRect.Height());
+		pWnd->ShowWindow(SW_HIDE);
+		pWnd->BringWindowToTop();
+    }
+}
 
     BEGIN_MESSAGE_MAP(CDataCollectionDlg, CDialog)
     //{{AFX_MSG_MAP(CDataCollectionDlg)
@@ -121,20 +138,8 @@ BOOL CDataCollectionDlg::OnInitDialog()
 	strSending.LoadString(IDS_SENDING);
 	strReceive.LoadString(IDS_RECEIVE);
 
-	CRect rect,itemRect;
-	m_tabComm.GetWindowRect(&rect);
-
-
-    for(int i=0;i<1;i++)
-    {
-        CWnd* pWnd = GetDlgItem(IDC_BUTTON_SETVINFO);
-        pWnd->GetWindowRect(&itemRect);
-        pWnd->MoveWindow(rect.CenterPoint().x - itemRect.Width()/2,
-            rect.top + (i+2)*itemRect.Height(),
-            itemRect.Width(),itemRect.Height());
-        
-    }
-
+	groupButtonSet(IDC_BUTTON_SETVINFO,6);
+	groupButtonSet(IDC_BUTTON_ENTCHECK,5);
     return TRUE;  // return TRUE unless you set the focus to a control
 	
 }
@@ -248,8 +253,8 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 		m_strStatus.LoadString(IDS_RECEIVE);
         if (ptrRec->GetDataCode() == VTDRRecord::Version)
         {
-      //      VTDRVersion* p = (VTDRVersion*)ptrRec;
-        //    m_strVersion.Format("%d.%d",p->year,p->modify);
+            VTDRVersion* p = (VTDRVersion*)ptrRec;
+            m_strVersion.Format("%d.%d",p->year,p->modify);
              
         }
 		delete ptrRec;

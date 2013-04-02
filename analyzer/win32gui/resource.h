@@ -50,11 +50,11 @@
 #define IDC_BUTTON_PLUS                 1080
 #define IDC_TAB_COMM                    1081
 #define IDC_BUTTON_SETVINFO             1082
-#define IDC_BUTTON_INSTDATE             1084
-#define IDC_BUTTON_SETCONF              1085
-#define IDC_BUTTON_CLOCK                1086
-#define IDC_BUTTON_SETPARA              1087
-#define IDC_BUTTON_INITODR              1088
+#define IDC_BUTTON_INSTDATE             1083
+#define IDC_BUTTON_SETCONF              1084
+#define IDC_BUTTON_CLOCK                1085
+#define IDC_BUTTON_SETPARA              1086
+#define IDC_BUTTON_INITODR              1087
 #define IDC_BUTTON_ENTCHECK             1089
 #define IDC_BUTTON_CJKODR               1090
 #define IDC_BUTTON_CHKPARA              1091

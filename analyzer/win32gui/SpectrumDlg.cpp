@@ -80,7 +80,7 @@ BOOL CSpectrumDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	pSpectrumWnd = GetDlgItem(IDC_SPECTRUM);
+	pSpectrumWnd = GetDlgItem(IDC_GRAPH);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -110,11 +110,11 @@ void CSpectrumDlg::OnPaint()
 void CSpectrumDlg::DrawGraph(CDC *pDC, int x, int y, int cx, int cy)
 {
 	pDC->SetBkMode(TRANSPARENT);
-	CRect rect = DrawAxis(pDC,x,y,cx,cy);
-	if (listData.size())
-	{
-		DrawData(pDC,rect.left,rect.top,rect.Width(),rect.Height());
-	}
+//	CRect rect = DrawAxis(pDC,x,y,cx,cy);
+//	if (listData.size())
+//	{
+//		DrawData(pDC,rect.left,rect.top,rect.Width(),rect.Height());
+//	}
 }
 
 CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)

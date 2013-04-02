@@ -2,7 +2,7 @@
 #define AFX_DATACOLLECTIONDLG_H__A17B0148_F445_4D87_9680_B4D64B73D864__INCLUDED_
 
 #include "SerialPort.h"	// Added by ClassView
-
+#include "protocol/Packet.h"
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -51,6 +51,7 @@ protected:
     void showGETbuttons(int cmd);
     void showSETbuttons(int cmd);
     void showCHKbuttons(int cmd);
+    void sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int size);
 	// Generated message map functions
 	//{{AFX_MSG(CDataCollectionDlg)
 	virtual BOOL OnInitDialog();
@@ -63,6 +64,32 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnButtonVersion();
 	afx_msg void OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnButtonDriver();
+	afx_msg void OnButtonDri();
+	afx_msg void OnButtonRtc();
+	afx_msg void OnButtonOtd();
+	afx_msg void OnButtonAcdr();
+	afx_msg void OnButtonChkclk();
+	afx_msg void OnButtonChkpara();
+	afx_msg void OnButtonCjkodr();
+	afx_msg void OnButtonClock();
+	afx_msg void OnButtonEntcheck();
+	afx_msg void OnButtonExitchk();
+	afx_msg void OnButtonInitodr();
+	afx_msg void OnButtonInstdate();
+	afx_msg void OnButtonOdermeter();
+	afx_msg void OnButtonPara();
+	afx_msg void OnButtonPlus();
+	afx_msg void OnButtonPos();
+	afx_msg void OnButtonPwr();
+	afx_msg void OnButtonSetconf();
+	afx_msg void OnButtonSetpara();
+	afx_msg void OnButtonSetvinfo();
+	afx_msg void OnButtonSpd();
+	afx_msg void OnButtonStatconf();
+	afx_msg void OnButtonStlog();
+	afx_msg void OnButtonUniqno();
+	afx_msg void OnButtonVinfo();
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()

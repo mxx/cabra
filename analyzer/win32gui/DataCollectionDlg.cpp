@@ -108,12 +108,38 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
     ON_BN_CLICKED(IDC_BUTTON_SPECTRUM, OnButtonSpectrum)
     ON_WM_CTLCOLOR()
     ON_WM_SHOWWINDOW()
-    ON_WM_COPYDATA()
     ON_WM_CLOSE()
     ON_WM_DESTROY()
     ON_BN_CLICKED(IDC_BUTTON_VERSION, OnButtonVersion)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_COMM, OnSelchangeTabComm)
-    //}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_BUTTON_DRIVER, OnButtonDriver)
+	ON_BN_CLICKED(IDC_BUTTON_DRI, OnButtonDri)
+    ON_WM_COPYDATA()
+	ON_BN_CLICKED(IDC_BUTTON_RTC, OnButtonRtc)
+	ON_BN_CLICKED(IDC_BUTTON_OTD, OnButtonOtd)
+	ON_BN_CLICKED(IDC_BUTTON_ACDR, OnButtonAcdr)
+	ON_BN_CLICKED(IDC_BUTTON_CHKCLK, OnButtonChkclk)
+	ON_BN_CLICKED(IDC_BUTTON_CHKPARA, OnButtonChkpara)
+	ON_BN_CLICKED(IDC_BUTTON_CJKODR, OnButtonCjkodr)
+	ON_BN_CLICKED(IDC_BUTTON_CLOCK, OnButtonClock)
+	ON_BN_CLICKED(IDC_BUTTON_ENTCHECK, OnButtonEntcheck)
+	ON_BN_CLICKED(IDC_BUTTON_EXITCHK, OnButtonExitchk)
+	ON_BN_CLICKED(IDC_BUTTON_INITODR, OnButtonInitodr)
+	ON_BN_CLICKED(IDC_BUTTON_INSTDATE, OnButtonInstdate)
+	ON_BN_CLICKED(IDC_BUTTON_ODERMETER, OnButtonOdermeter)
+	ON_BN_CLICKED(IDC_BUTTON_PARA, OnButtonPara)
+	ON_BN_CLICKED(IDC_BUTTON_PLUS, OnButtonPlus)
+	ON_BN_CLICKED(IDC_BUTTON_POS, OnButtonPos)
+	ON_BN_CLICKED(IDC_BUTTON_PWR, OnButtonPwr)
+	ON_BN_CLICKED(IDC_BUTTON_SETCONF, OnButtonSetconf)
+	ON_BN_CLICKED(IDC_BUTTON_SETPARA, OnButtonSetpara)
+	ON_BN_CLICKED(IDC_BUTTON_SETVINFO, OnButtonSetvinfo)
+	ON_BN_CLICKED(IDC_BUTTON_SPD, OnButtonSpd)
+	ON_BN_CLICKED(IDC_BUTTON_STATCONF, OnButtonStatconf)
+	ON_BN_CLICKED(IDC_BUTTON_STLOG, OnButtonStlog)
+	ON_BN_CLICKED(IDC_BUTTON_UNIQNO, OnButtonUniqno)
+	ON_BN_CLICKED(IDC_BUTTON_VINFO, OnButtonVinfo)
+	//}}AFX_MSG_MAP
     ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
     END_MESSAGE_MAP()
 
@@ -255,7 +281,6 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
         {
             VTDRVersion* p = (VTDRVersion*)ptrRec;
             m_strVersion.Format("%d.%d",p->year,p->modify);
-             
         }
 		delete ptrRec;
 	}
@@ -288,22 +313,21 @@ void CDataCollectionDlg::OnClose()
 
 void CDataCollectionDlg::OnDestroy()
 {
- 
- 
 	CDialog::OnDestroy();
 	ClosePort();
 }
 
-void CDataCollectionDlg::OnButtonVersion()
+void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int size)
 {
 	Protocol pro;
-	Packet packet = pro.Command(GET_STD_VERSION, 0, 0, 0);
+	Packet packet = pro.Command(cmd, tStart, tEnd, size);
 	m_strStatus.LoadString(IDS_SENDING);
 	UpdateData(FALSE);
 	m_port.Write(packet.GetData().data(), packet.GetData().size());
 	m_strStatus = "";
 	UpdateData(FALSE);
 }
+
 
 void CDataCollectionDlg::showGETbuttons(int cmd)
 {
@@ -357,4 +381,151 @@ void CDataCollectionDlg::OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult)
         break;
     }
 	*pResult = 0;
+}
+
+void CDataCollectionDlg::OnButtonVersion()
+{
+	sendCmd(GET_STD_VERSION, 0, 0, 0);
+}
+
+void CDataCollectionDlg::OnButtonDriver() 
+{
+	sendCmd(GET_Driver_LicenceID, 0, 0, 0);	
+}
+
+void CDataCollectionDlg::OnButtonDri() 
+{
+	
+	sendCmd(GET_Driver_Record,0,0,0);
+}
+
+void CDataCollectionDlg::OnButtonRtc() 
+{
+	sendCmd(GET_RealTime,0,0,0);
+}
+
+void CDataCollectionDlg::OnButtonOtd() 
+{
+	sendCmd(GET_OverDrive_Record,0,0,0);	
+}
+
+void CDataCollectionDlg::OnButtonAcdr() 
+{
+	sendCmd(GET_Suspious_Record,0,0,0);	
+}
+
+void CDataCollectionDlg::OnButtonChkclk() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonChkpara() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonCjkodr() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonClock() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonEntcheck() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonExitchk() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonInitodr() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonInstdate() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonOdermeter() 
+{
+	sendCmd(GET_Odometer,0,0,0);	
+}
+
+void CDataCollectionDlg::OnButtonPara() 
+{
+	sendCmd(GET_Param_Record,0,0,0);
+}
+
+void CDataCollectionDlg::OnButtonPlus() 
+{
+	sendCmd(GET_Pulse_Param,0,0,0);
+}
+
+void CDataCollectionDlg::OnButtonPos() 
+{
+	sendCmd(GET_Postion_Record,0,0,0);	
+}
+
+void CDataCollectionDlg::OnButtonPwr() 
+{
+	sendCmd(GET_Power_Record,0,0,0);
+}
+
+void CDataCollectionDlg::OnButtonSetconf() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonSetpara() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonSetvinfo() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CDataCollectionDlg::OnButtonSpd() 
+{
+	sendCmd(GET_Speed_Record,0,0,0);	
+}
+
+void CDataCollectionDlg::OnButtonStatconf() 
+{
+	sendCmd(GET_State_Config,0,0,0);	
+}
+
+void CDataCollectionDlg::OnButtonStlog() 
+{
+	sendCmd(GET_Speed_State_Log,0,0,0);
+}
+
+void CDataCollectionDlg::OnButtonUniqno() 
+{
+	sendCmd(GET_Uniq_No,0,0,0);	
+}
+
+void CDataCollectionDlg::OnButtonVinfo() 
+{
+	sendCmd(GET_Vehicle_Info,0,0,0);
 }

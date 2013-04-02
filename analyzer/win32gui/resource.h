@@ -60,6 +60,8 @@
 #define IDC_BUTTON_CHKPARA              1091
 #define IDC_BUTTON_CHKCLK               1092
 #define IDC_BUTTON_EXITCHK              1093
+#define IDC_GRAPH                       1094
+#define IDC_DATETIMEPICKER1             1096
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
@@ -68,7 +70,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1094
+#define _APS_NEXT_CONTROL_VALUE         1097
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

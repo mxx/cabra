@@ -3,6 +3,7 @@
 
 #include "SerialPort.h"	// Added by ClassView
 #include "protocol/Packet.h"
+#include <time.h>
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -47,11 +48,15 @@ protected:
 	CString strSending;
 	CString strReceive;
 	CWinThread *pWorking;
+    time_t tStart;
+    time_t tEnd;
+    int nNum;
 	void groupButtonSet(int first,int number);
     void showGETbuttons(int cmd);
     void showSETbuttons(int cmd);
     void showCHKbuttons(int cmd);
     void sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int size);
+    bool getDateSetting(void);
 	// Generated message map functions
 	//{{AFX_MSG(CDataCollectionDlg)
 	virtual BOOL OnInitDialog();

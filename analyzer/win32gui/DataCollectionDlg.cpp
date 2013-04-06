@@ -6,6 +6,7 @@
 #include "VTDRVersion.h"
 #include "DataCollectionDlg.h"
 #include "SerialPort.h"
+#include "SeleteDate.h"
 #include <string>
 #include "protocol/Packet.h"
 #include "protocol/Protocol.h"
@@ -67,6 +68,9 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
 	//}}AFX_DATA_INIT
 	pWorking = NULL;
 	m_bStop = false;
+    tStart = 0;
+    tEnd = 0;
+    nNum = 0;
 }
 
 void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
@@ -317,6 +321,29 @@ void CDataCollectionDlg::OnDestroy()
 	ClosePort();
 }
 
+bool CDataCollectionDlg::getDateSetting(void)
+{
+    SeleteDate dlg;
+    dlg.m_nRec = nNum;
+    if (tStart || tEnd)
+    {
+        dlg.m_timeStart = CTime(tStart);
+        dlg.m_timeEnd = CTime(tEnd);
+    }
+    else
+        dlg.m_timeStart = CTime(0);
+
+    if (dlg.DoModal()==IDOK)
+    {
+        tStart = dlg.m_timeStart.GetTime();
+        tEnd = dlg.m_timeEnd.GetTime();
+        nNum = dlg.m_nRec;
+        return true;
+    }
+    return false;
+}
+
+
 void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int size)
 {
 	Protocol pro;
@@ -327,7 +354,6 @@ void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int si
 	m_strStatus = "";
 	UpdateData(FALSE);
 }
-
 
 void CDataCollectionDlg::showGETbuttons(int cmd)
 {
@@ -507,7 +533,10 @@ void CDataCollectionDlg::OnButtonSetvinfo()
 
 void CDataCollectionDlg::OnButtonSpd() 
 {
-	sendCmd(GET_Speed_Record,0,0,0);	
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Speed_Record,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonStatconf() 

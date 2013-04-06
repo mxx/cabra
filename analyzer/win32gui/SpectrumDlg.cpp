@@ -23,19 +23,15 @@ int round(double x)
 
 /////////////////////////////////////////////////////////////////////////////
 // CSpectrumDlg dialog
-char CSpectrumDlg::szDataFilter[] = "Data File|*.???||";
-char CSpectrumDlg::szAWSFilter[] = "AWS File(*.aws)|*.aws||";
 
 CSpectrumDlg::CSpectrumDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CSpectrumDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CSpectrumDlg)
 	//}}AFX_DATA_INIT
-	pSpectrumWnd = NULL;
-
-	nActiveIndex = 0;
-	
-	bLog = false;
+    pSpectrumWnd = NULL;
+    for(int i=0;i<100;i++)
+        rawData.Speed[i]=45;
 }
 
 
@@ -51,7 +47,6 @@ void CSpectrumDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CSpectrumDlg, CDialog)
 	//{{AFX_MSG_MAP(CSpectrumDlg)
 	ON_WM_PAINT()
-	ON_BN_CLICKED(IDC_BUTTON_PRINT, OnButtonPrint)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -110,48 +105,96 @@ void CSpectrumDlg::OnPaint()
 void CSpectrumDlg::DrawGraph(CDC *pDC, int x, int y, int cx, int cy)
 {
 	pDC->SetBkMode(TRANSPARENT);
-//	CRect rect = DrawAxis(pDC,x,y,cx,cy);
-//	if (listData.size())
-//	{
-//		DrawData(pDC,rect.left,rect.top,rect.Width(),rect.Height());
-//	}
+	CRect rect = DrawAxis(pDC,x,y,cx,cy);
+	DrawData(pDC,rect.left,rect.top,rect.Width(),rect.Height());
+}
+
+int CSpectrumDlg::GetMaxCount(void)
+{
+    int i=0;
+    int nMax = 0;
+    for(i=0;i<sizeof(rawData.Speed);i++)
+        nMax = max(rawData.Speed[i],nMax);
+    if (nMax < 50) nMax = 50;
+    return nMax;
+    
+}
+
+int CSpectrumDlg::GetScaleMax(void)
+{
+   int nScaleMax = GetMaxCount();
+   
+   if (nScaleMax>50)
+   {
+       //make the Scale 100 times
+       nScaleMax = ((nScaleMax/100) + ((nScaleMax%100)?1:0))*100;
+   }
+   return nScaleMax;
+}
+
+int CSpectrumDlg::AxisYScaleCount(int& nMax, int nMin)
+{
+        int count = nMax - nMin;
+       
+        double div = pow(10, floor(log10(count)-1));
+        int nDivSum=(int)div;
+        while (count>10)
+        {
+                count =(nMax-nMin)/nDivSum;
+                if (count > 10) nDivSum+=(int)div;
+        };
+        if (count * div < 100)
+        {
+                div =10;
+                count = (nMax - nMin)/div;
+        }
+        if (count==0)
+        {
+                count=1;
+        }
+        if ((nMax-nMin)%nDivSum)
+        {
+                count+=1;
+                nMax = count*nDivSum;
+        }
+        return count;
 }
 
 CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
 {
-	int nScaleMax = 0;
-	int nScaleCount =0;
+	int nScaleMax = 200;
+	int nScaleCount =10;
 	CString title;
 	CRect rect(x,y,x+cx,y+cy);
-	title.Format("%d",nScaleMax*100);
+	title.Format("%s","Ò»¶þÈýËÄÎåÁùÆß°Ë¾ÅÊ®");
 	pDC->FillSolidRect(&rect,RGB(250,250,150));
 	CSize size = pDC->GetTextExtent(title);
 	rect.DeflateRect(size.cx,size.cy+size.cy/2);
-	if(pDC->IsPrinting()) 
-		pDC->FillSolidRect(&rect,RGB(255,255,255));
-	else
-		pDC->FillSolidRect(&rect,RGB(0,0,0));
+
+	pDC->FillSolidRect(&rect,RGB(255,255,255));
 
 	pDC->SetTextColor(RGB(0,0,0));
 	pDC->SetBkColor(RGB(250,250,150));
-	int dx = size.cx/6; //space to border
+	int dx = size.cx; 
 	int dy = rect.Height()/nScaleCount;
 	
 	
-	for(int i =0;i <= nScaleCount ;i++)
+	for(int i =0;i < nScaleCount ;i++)
 	{
 		title.Format("%2d",(nScaleCount-i)*(nScaleMax/nScaleCount));
-		pDC->TextOut(x+dx,rect.top - size.cy/2 + dy * i, title );
+        size = pDC->GetTextExtent(title);
+		pDC->TextOut(x+dx-size.cx,rect.top - size.cy/2 + dy * i, title );
 	}
-    
+    pDC->MoveTo(x+dx/2,rect.bottom);
+    pDC->LineTo(rect.right+dx/2,rect.bottom);
 	dx = rect.Width() / 4;
 	for( i=0;i<5;i++)
 	{
-		title.Format("%d",i*1000);
+		title.Format("%d",i*5);
 		size = pDC->GetTextExtent(title);
 		pDC->TextOut(rect.left + i * dx - size.cx/2, rect.bottom , title);
 	}
-	pDC->TextOut(rect.left + 4 * dx + size.cx/2, rect.bottom,"ch");
+	pDC->TextOut(rect.left + 4 * dx + size.cx, rect.bottom,"Ê±¼ä/s");
 
 	return rect;
 
@@ -159,19 +202,16 @@ CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
 
 
 
-void CSpectrumDlg::DrawPix(CDC *pDC, int nPix, int x, int y, double dx, double dy, RawData &data)
+void CSpectrumDlg::DrawPix(CDC *pDC, int nPix, int x, int y, double dx, double dy)
 {
 	CPen Pen;
-	Pen.CreatePen(PS_SOLID,nPix,data.rgb);
+	Pen.CreatePen(PS_SOLID,nPix,RGB(0,0,0));
 	CPen* pen = pDC->SelectObject(&Pen);
-	for(int j=0;j<4000;j++)
+	for(int j=0;j<sizeof(rawData.Speed);j++)
 	{
 		int nx = x + round(j * dx);
 		int ny ;
-		if  (bLog)
-			ny = y - round(log10(data.nSpetrum[j]) * dy);
-		else
-			ny = y - round(data.nSpetrum[j] * dy);
+		ny = y - round(rawData.Speed[j] * dy);
 		pDC->MoveTo(nx,ny);
 		pDC->LineTo(nx,ny);
 	}
@@ -181,33 +221,19 @@ void CSpectrumDlg::DrawPix(CDC *pDC, int nPix, int x, int y, double dx, double d
 
 void CSpectrumDlg::DrawData(CDC *pDC, int x,int y, int cx, int cy)
 {
-	if (!listData.size()) return;
 	CPen pen, *old_pen;
 	pen.CreatePen(PS_SOLID,3,RGB(0,255,0));
 	old_pen = pDC->SelectObject(&pen);
-	list<RawData>::iterator it;
+	
 	int nPix = 3;
 	if (pDC->IsPrinting()) 
 		nPix = MulDiv(3, pDC->GetDeviceCaps(LOGPIXELSY), 96); 
 
-	double dy;
-
-	double dx = (double)cx / 4000.0;
+	double dy = cx/200.0;
+	double dx = (double)cx / 100.0;
 	int i=0;
-	RawData& curData = GetListItem(nActiveIndex);
-	for(it=listData.begin();it!=listData.end();it++)
-	{
-		if (nActiveIndex==i++)
-		{
-			if (pDC->IsPrinting()) break;
-		    continue;
-		}
-
-		if (!pDC->IsPrinting())
-			DrawPix(pDC,nPix,x,y+cy,dx,dy,*it);
-	}
 	
-	DrawPix(pDC,nPix,x,y+cy,dx,dy,curData);
+	DrawPix(pDC,nPix,x,y+cy,dx,dy);
 	
 	if (old_pen) pDC->SelectObject(old_pen);
 	DrawLegend(pDC,x,y,cx,cy);
@@ -231,49 +257,8 @@ void CSpectrumDlg::DrawLegend(CDC *pDC, int x,int y, int cx, int cy)
 
 	nx = rect.left+ 2*starX;
 	ny = rect.top+ spaceY;
-	for(int i=0;i<listData.size();i++)
-	{
-		if(i>4) break;
-		RawData& data = GetListItem(i);
-		CString str ;
-		int dx,dy;
-		dx = pDC->GetTextExtent(str).cx;
-		dy = pDC->GetTextExtent(str).cy;
-		if (dx > rect.Width()-2*spaceX)
-		{
-			formatString(str,dx, rect.Width()-2*spaceX);
-		}
-		
-		if (i==nActiveIndex) 
-		{
-			pDC->SetTextColor(RGB(0,0,0));
-			pDC->TextOut(nx - starX -starX/2,ny+spaceX/8,"*");
-		}
-		pDC->SetTextColor(data.rgb);
-		pDC->TextOut(nx,ny,str);
-		ny += dy;
-	}
 }
 
-
-bool CSpectrumDlg::LoadData(LPCTSTR szPath)
-{
-
-		return false;
-}
-
-
-
-RawData& CSpectrumDlg::GetListItem(int n)
-{
-	list<RawData>::iterator it;
-	int i=0;
-	for(it=listData.begin();it!=listData.end();it++)
-	{
-		if(i++==n) return (*it);
-	}
-	return listData.back();
-}
 
 void CSpectrumDlg::formatString(CString &str,int dx, int cx)
 {
@@ -301,83 +286,10 @@ void CSpectrumDlg::formatString(CString &str,int dx, int cx)
 }
 
 
-bool CSpectrumDlg::isOpenedAt(LPCTSTR szPath,int& n)
-{
-	list<RawData>::iterator it;
-	int i=0;
-
-	return false;
-}
-
-void CSpectrumDlg::OnButtonPrint() 
-{
-	CDC dc;
-	CPrintDialog printDlg(FALSE);
-	if (printDlg.DoModal() != IDOK)
-		return;
-
-	CWaitCursor wait;
-	
-	dc.Attach(printDlg.GetPrinterDC());
-	dc.m_bPrinting=TRUE;
-	
-	DOCINFO di; 
-	memset(&di,0,sizeof (DOCINFO));
-	di.cbSize=sizeof (DOCINFO);
-	
-	BOOL bPrintingOK=dc.StartDoc(&di); //ï¿½ï¿½Ê¼Ò»ï¿½ï¿½ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½
-	CPrintInfo Info;
-	
-	int cx,cy;
-	int mcx,mcy;//margin
-	cx = dc.GetDeviceCaps(HORZRES);
-	mcx = cx/15;
-	cy = dc.GetDeviceCaps(VERTRES);
-	mcy = cy/20;
-	Info.m_rectDraw.SetRect(mcx,mcy,cx-mcx,cy-mcy);
-	Info.SetMinPage(1);
-	Info.SetMaxPage(1);
-	
-	CFont font,*old_pf;
-	int lfH = MulDiv(12, dc.GetDeviceCaps(LOGPIXELSY), 72); 
-	font.CreateFont(
-		lfH,                        // nHeight
-		0,                         // nWidth
-		0,                         // nEscapement
-		0,                         // nOrientation
-		FW_NORMAL,                 // nWeight
-		FALSE,                     // bItalic
-		FALSE,                     // bUnderline
-		0,                         // cStrikeOut
-		ANSI_CHARSET,              // nCharSet
-		OUT_DEFAULT_PRECIS,        // nOutPrecision
-		CLIP_DEFAULT_PRECIS,       // nClipPrecision
-		DEFAULT_QUALITY,           // nQuality
-		DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
-		"Times New Roman");                 // lpszFacename
-	old_pf = dc.SelectObject(&font);
-	dc.StartPage(); //ï¿½ï¿½Ê¼Ò»ï¿½ï¿½ï¿½ÂµÄ´ï¿½Ó¡Ò³
-	Info.m_nCurPage=1;
-	
-	DrawPage(dc,mcx,mcy,Info.m_rectDraw.Width(),Info.m_rectDraw.Height());
-		
-	bPrintingOK=(dc.EndPage() > 0); //ï¿½ï¿½Ó¡Ò³ï¿½ï¿½ï¿½ï¿½
-	
-	if (bPrintingOK)
-		dc.EndDoc(); //Ò»ï¿½ï¿½ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	else
-		dc.AbortDoc(); //ï¿½ï¿½Ö¹ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½
-	dc.SelectObject(old_pf);
-	dc.Detach(); //ï¿½Í·Å´ï¿½Ó¡ï¿½ï¿½DC
-
-}
-
-
 void CSpectrumDlg::DrawPage(CDC &dc, int x, int y, int cx, int cy)
 {
 
 }
-
 
 void CSpectrumDlg::DrawTable(CDC& dc, int x, int y,int dx,int dy,int row,int column)
 {
@@ -424,7 +336,4 @@ void CSpectrumDlg::initColorList()
 	rgb.push_back(RGB(250,75,75));
 }
 
-void CSpectrumDlg::readData(LPCTSTR szFile, RawData &rawData)
-{
 
-}

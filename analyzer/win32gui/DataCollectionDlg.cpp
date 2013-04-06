@@ -36,12 +36,20 @@ UINT CommThreadProc(LPVOID pParam)
 			strCache.append(buf, n);
 			if (packet.Extract(strCache).size())
 			{
+				CmdWord cmd = packet.GetCmd();
+				if (cmd == GET_ERROR || cmd == SET_ERROR)
+				{
+					ptrUI->SendMessage(WM_UPDATE_DATA, NULL, cmd);
+					continue;
+				}
+
 				VTDRRecord* ptrRecord = pro.Parse(packet);
 				if (ptrRecord)
 				{
 					ptrUI->SendMessage(WM_UPDATE_DATA, (WPARAM) ptrRecord,
 							NULL);
 				}
+
 			}
 		}
 		else
@@ -212,6 +220,7 @@ HBRUSH CDataCollectionDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	HBRUSH brush_green = ::CreateSolidBrush(RGB(0,255,0) );
 	HBRUSH brush_blue = ::CreateSolidBrush(RGB(0,255,255) );
+    HBRUSH brush_red = ::CreateSolidBrush(RGB(255,127,127) );
 	LOGBRUSH log =
 	{ 0 };
 	CString str;
@@ -228,6 +237,11 @@ HBRUSH CDataCollectionDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 			pDC->SetBkColor(RGB(0,255,255) );
 			return brush_blue;
 		}
+        else if (m_strStatus.Find(_T("´íÎó"))>=0)
+        {
+            pDC->SetBkColor(RGB(255,127,127) );
+            return brush_red;
+        }
 		else
 		{
 			::GetObject(hbr, sizeof(log), &log);
@@ -290,7 +304,14 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 	}
 	else
 	{
-		m_strStatus.LoadString(IDS_WAITING);
+		CmdWord cmd = (CmdWord)lParam;
+
+		if (cmd == GET_ERROR)
+			m_strStatus.LoadString(IDS_GETERROR);
+		else if (cmd == SET_ERROR)
+			m_strStatus.LoadString(IDS_SETERROR);
+		else
+			m_strStatus.LoadString(IDS_WAITING);
 	}
 	UpdateData(FALSE);
 	return 0;

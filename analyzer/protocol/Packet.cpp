@@ -61,24 +61,32 @@ const string&  Packet::Extract(string& buf)
 	PackHead* ptrPacket = NULL;
 	do
 	{
-		if (posFrameStart == string::npos)
-			posFrameStart = buf.find("\0x55\0x7A");
+		posFrameStart = buf.find("Uz");
 
 		if (posFrameStart != string::npos)
 		{
 			ptrPacket = (PackHead*)(buf.data() + posFrameStart);
-			if (buf.size() < posFrameStart + sizeof(ptrPacket->dummy))
+			if (buf.size() < posFrameStart + sizeof(*ptrPacket) - sizeof(ptrPacket->dummy))
 				break;
 
 			int data_size = ptrPacket->Len[0] * 256 + ptrPacket->Len[1];
-			if (buf.size() < posFrameStart + sizeof(ptrPacket->dummy) + data_size)
+            int head_size = sizeof(*ptrPacket);
+            if ((ptrPacket->cCmdWord) == (unsigned char)GET_ERROR ||(ptrPacket->cCmdWord) ==(unsigned char) SET_ERROR)
+            {
+                data_size = 0;
+                head_size = 4;
+            }
+			if (buf.size() < posFrameStart + sizeof(*ptrPacket) - sizeof(ptrPacket->dummy) + data_size)
 				break;
 
-			if (get_xor(buf.data()+posFrameStart,sizeof(*ptrPacket)+data_size+1)==0)
+			if (get_xor(buf.data()+posFrameStart,head_size+data_size+1)==0)
 			{
 				cmd = (CmdWord)ptrPacket->cCmdWord;
 				nDataSize = data_size;
-				data = buf.substr(posFrameStart+sizeof(PackHead),data_size);
+				data = buf.substr(posFrameStart+head_size,data_size);
+                // Set the error report packet content and command word
+                if (data.size()==0)
+                    data += (unsigned char)cmd;
 				buf.erase(0,posFrameStart + data_size + sizeof(*ptrPacket) +1);
 				break;
 			}
@@ -86,6 +94,7 @@ const string&  Packet::Extract(string& buf)
 			{
 				buf.erase(posFrameStart,2);
 				posFrameStart = string::npos;
+                data.erase(0,data.size());
 				continue;
 			}
 

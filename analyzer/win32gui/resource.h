@@ -8,6 +8,8 @@
 #define IDS_READTAB                     4
 #define IDS_SETTAB                      5
 #define IDS_CHECKTAB                    6
+#define IDS_SETERROR                    7
+#define IDS_GETERROR                    8
 #define IDD_MAIN_DIALOG                 102
 #define IDD_PROPPAGE_SET                106
 #define IDR_MAINFRAME                   128

@@ -267,6 +267,8 @@ BEGIN
     IDS_READTAB             "读取"
     IDS_SETTAB              "设定"
     IDS_CHECKTAB            "标定"
+    IDS_SETERROR            "命令接收错误"
+    IDS_GETERROR            "参数接收错误"
 END
 
 #endif    // Chinese (P.R.C.) resources

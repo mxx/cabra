@@ -73,12 +73,9 @@ bool CSerialPort::SetCom(void)
 		m_strErr.GetErrorMsg("SetCom");
 		return false;
     }
-
-	dcb.BaudRate = m_dcb.BaudRate;
-	dcb.ByteSize = m_dcb.ByteSize;
-	dcb.StopBits = m_dcb.StopBits;
-	dcb.Parity = m_dcb.Parity;
-
+ 
+    memcpy(&dcb.BaudRate,&m_dcb.BaudRate,(unsigned int)&(((DCB*)(NULL))->wReserved)-sizeof(dcb.DCBlength));
+ 
 	fSuccess = SetCommState(handle, &dcb);
 	
 	if (!fSuccess) {

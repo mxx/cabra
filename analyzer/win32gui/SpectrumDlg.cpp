@@ -30,6 +30,7 @@ CSpectrumDlg::CSpectrumDlg(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CSpectrumDlg)
 	//}}AFX_DATA_INIT
     pSpectrumWnd = NULL;
+    pDC = NULL;
     for(int i=0;i<100;i++)
         rawData.Speed[i]=45;
 }
@@ -91,10 +92,10 @@ void CSpectrumDlg::OnPaint()
 	pSpectrumWnd->Invalidate();
 	pSpectrumWnd->UpdateWindow();
 	
-	CDC *pDC = pSpectrumWnd->GetDC();
+	pDC = pSpectrumWnd->GetDC();
 	CRect rect;
 	pSpectrumWnd->GetClientRect(&rect);
-
+    
 	DrawGraph(pDC,0,0,rect.Width(),rect.Height());
 
 	ReleaseDC(pDC);
@@ -113,7 +114,7 @@ int CSpectrumDlg::GetMaxCount(void)
 {
     int i=0;
     int nMax = 0;
-    for(i=0;i<sizeof(rawData.Speed);i++)
+    for(i=0;i<(sizeof(rawData.Speed)/sizeof(rawData.Speed[0]));i++)
         nMax = max(rawData.Speed[i],nMax);
     if (nMax < 50) nMax = 50;
     return nMax;
@@ -127,7 +128,7 @@ int CSpectrumDlg::GetScaleMax(void)
    if (nScaleMax>50)
    {
        //make the Scale 100 times
-       nScaleMax = ((nScaleMax/100) + ((nScaleMax%100)?1:0))*100;
+       nScaleMax = ((nScaleMax/50) + ((nScaleMax%50)?1:0))*50;
    }
    return nScaleMax;
 }
@@ -162,33 +163,44 @@ int CSpectrumDlg::AxisYScaleCount(int& nMax, int nMin)
 
 CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
 {
-	int nScaleMax = 200;
-	int nScaleCount =10;
+	int nScaleMax = GetScaleMax();
+	int nScaleCount = 10;
 	CString title;
 	CRect rect(x,y,x+cx,y+cy);
 	title.Format("%s","一二三四五六七八九十");
 	pDC->FillSolidRect(&rect,RGB(250,250,150));
 	CSize size = pDC->GetTextExtent(title);
-	rect.DeflateRect(size.cx,size.cy+size.cy/2);
+	rect.DeflateRect(size.cx,size.cy+size.cy);
 
 	pDC->FillSolidRect(&rect,RGB(255,255,255));
 
 	pDC->SetTextColor(RGB(0,0,0));
 	pDC->SetBkColor(RGB(250,250,150));
 	int dx = size.cx; 
-	int dy = rect.Height()/nScaleCount;
-	
+	int dy = (rect.Height()-(size.cy*10))/nScaleCount;
+
+    rectState  = CRect(rect.left,rect.top,rect.right,rect.top + size.cy*10);
+    rectSpeed  = CRect(rect.left,rect.top + size.cy*10,rect.right,rect.bottom);
 	
 	for(int i =0;i < nScaleCount ;i++)
 	{
 		title.Format("%2d",(nScaleCount-i)*(nScaleMax/nScaleCount));
         size = pDC->GetTextExtent(title);
-		pDC->TextOut(x+dx-size.cx,rect.top - size.cy/2 + dy * i, title );
-	}
+		pDC->TextOut(x+dx-size.cx, rectSpeed.top - size.cy/2 + dy * i, title );
+ 	}
+    // x axis
     pDC->MoveTo(x+dx/2,rect.bottom);
     pDC->LineTo(rect.right+dx/2,rect.bottom);
+    DrawArrow(pDC,rect.right+dx/2-1,rect.bottom,15,3,false);
+    //y axis
+    pDC->MoveTo(rect.left,rect.bottom + size.cy);
+    pDC->LineTo(rect.left,rect.top);
+    DrawArrow(pDC,rectSpeed.left,rectSpeed.top-10,3,-15,true);
+
 	dx = rect.Width() / 4;
-	for( i=0;i<5;i++)
+    size = pDC->GetTextExtent("0");
+    pDC->TextOut(rect.left - size.cx, rect.bottom , "0");
+	for( i=1;i<5;i++)
 	{
 		title.Format("%d",i*5);
 		size = pDC->GetTextExtent(title);
@@ -200,6 +212,22 @@ CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
 
 }
 
+void CSpectrumDlg::DrawArrow(CDC *pDC, int x, int y, int cx, int cy, bool bVer)
+{
+    pDC->MoveTo(x,y);
+    if (bVer)
+    {
+        pDC->LineTo(x-cx,y-cy);
+        pDC->MoveTo(x,y);
+        pDC->LineTo(x+cx,y-cy);
+    }
+    else
+    {
+        pDC->LineTo(x-cx,y-cy);
+        pDC->MoveTo(x,y);
+        pDC->LineTo(x-cx,y+cy);
+    }
+}
 
 
 void CSpectrumDlg::DrawPix(CDC *pDC, int nPix, int x, int y, double dx, double dy)
@@ -207,12 +235,13 @@ void CSpectrumDlg::DrawPix(CDC *pDC, int nPix, int x, int y, double dx, double d
 	CPen Pen;
 	Pen.CreatePen(PS_SOLID,nPix,RGB(0,0,0));
 	CPen* pen = pDC->SelectObject(&Pen);
-	for(int j=0;j<sizeof(rawData.Speed);j++)
+    pDC->MoveTo(x,y-round(rawData.Speed[0] * dy));
+	for(int j=1;j<sizeof(rawData.Speed)/sizeof(rawData.Speed[0]);j++)
 	{
 		int nx = x + round(j * dx);
 		int ny ;
 		ny = y - round(rawData.Speed[j] * dy);
-		pDC->MoveTo(nx,ny);
+		
 		pDC->LineTo(nx,ny);
 	}
 	pDC->SelectObject(pen);
@@ -225,13 +254,12 @@ void CSpectrumDlg::DrawData(CDC *pDC, int x,int y, int cx, int cy)
 	pen.CreatePen(PS_SOLID,3,RGB(0,255,0));
 	old_pen = pDC->SelectObject(&pen);
 	
-	int nPix = 3;
+	int nPix = 1;
 	if (pDC->IsPrinting()) 
 		nPix = MulDiv(3, pDC->GetDeviceCaps(LOGPIXELSY), 96); 
 
-	double dy = cx/200.0;
+	double dy = cy/GetScaleMax();
 	double dx = (double)cx / 100.0;
-	int i=0;
 	
 	DrawPix(pDC,nPix,x,y+cy,dx,dy);
 	
@@ -337,3 +365,8 @@ void CSpectrumDlg::initColorList()
 }
 
 
+
+void CSpectrumDlg::DrawStateAxis(int x, int y, int cx, int cy)
+{
+
+}

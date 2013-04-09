@@ -33,6 +33,19 @@ UINT CommThreadProc(LPVOID pParam)
 
 		if (n)
 		{
+            if (ptrUI->m_bDebug)
+            {
+                CString strDump;
+                char tmp[12];
+                strDump = "R: ";
+                for(int i=0;i<n;i++)
+                {
+                    sprintf(tmp,"%02X ",buf[i]);
+                    strDump += tmp;
+                }
+                strDump += "\r\n";
+                ptrUI->Prompt((LPCSTR)strDump);
+            }
 			strCache.append(buf, n);
 			if (packet.Extract(strCache).size())
 			{
@@ -73,6 +86,7 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
 	m_strUniqNo = _T("");
 	m_strVersion = _T("");
 	m_strStatus = _T("");
+	m_bDebug = FALSE;
 	//}}AFX_DATA_INIT
 	pWorking = NULL;
 	m_bStop = false;
@@ -91,6 +105,7 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_STATIC_UNIQNO, m_strUniqNo);
 	DDX_Text(pDX, IDC_STATIC_VERSION, m_strVersion);
 	DDX_Text(pDX, IDC_STATIC_STATUS, m_strStatus);
+	DDX_Check(pDX, IDC_CHECK_DEBUG, m_bDebug);
 	//}}AFX_DATA_MAP
 }
 
@@ -126,7 +141,6 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_COMM, OnSelchangeTabComm)
 	ON_BN_CLICKED(IDC_BUTTON_DRIVER, OnButtonDriver)
 	ON_BN_CLICKED(IDC_BUTTON_DRI, OnButtonDri)
-    ON_WM_COPYDATA()
 	ON_BN_CLICKED(IDC_BUTTON_RTC, OnButtonRtc)
 	ON_BN_CLICKED(IDC_BUTTON_OTD, OnButtonOtd)
 	ON_BN_CLICKED(IDC_BUTTON_ACDR, OnButtonAcdr)
@@ -151,6 +165,8 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
 	ON_BN_CLICKED(IDC_BUTTON_STLOG, OnButtonStlog)
 	ON_BN_CLICKED(IDC_BUTTON_UNIQNO, OnButtonUniqno)
 	ON_BN_CLICKED(IDC_BUTTON_VINFO, OnButtonVinfo)
+    ON_WM_COPYDATA()
+	ON_BN_CLICKED(IDC_CHECK_DEBUG, OnCheckDebug)
 	//}}AFX_MSG_MAP
     ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
     END_MESSAGE_MAP()
@@ -282,18 +298,10 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 	if (ptrRec)
 	{
 		string strDump;
-		CString strPrompt;
 		ptrRec->Dump(strDump);
-		m_ctlPrompt.GetWindowText(strPrompt);
-		strPrompt += strDump.c_str();
-        strPrompt += "\r\n";
-        while (strPrompt.GetLength() > m_ctlPrompt.GetLimitText())
-        {
-        	strPrompt = strPrompt.Right(strPrompt.GetLength()-m_ctlPrompt.LineLength(0));
-        };
-        m_ctlPrompt.SetWindowText((LPCTSTR)strPrompt);
-        int n = strPrompt.GetLength();
-        m_ctlPrompt.SetSel(n,n);
+        strDump += "\r\n";
+        Prompt(strDump.c_str());
+        
 		m_strStatus.LoadString(IDS_RECEIVE);
         if (ptrRec->GetDataCode() == VTDRRecord::Version)
         {
@@ -578,4 +586,25 @@ void CDataCollectionDlg::OnButtonUniqno()
 void CDataCollectionDlg::OnButtonVinfo() 
 {
 	sendCmd(GET_Vehicle_Info,0,0,0);
+}
+
+void CDataCollectionDlg::OnCheckDebug() 
+{
+    UpdateData();	
+}
+
+void CDataCollectionDlg::Prompt(LPCSTR szTxt)
+{
+    CString strPrompt;
+    
+    m_ctlPrompt.GetWindowText(strPrompt);
+    strPrompt += szTxt;
+    
+    while (strPrompt.GetLength() > m_ctlPrompt.GetLimitText())
+    {
+        strPrompt = strPrompt.Right(strPrompt.GetLength()-m_ctlPrompt.LineLength(0));
+    };
+    m_ctlPrompt.SetWindowText((LPCTSTR)strPrompt);
+    int n = strPrompt.GetLength();
+    m_ctlPrompt.SetSel(n,n);
 }

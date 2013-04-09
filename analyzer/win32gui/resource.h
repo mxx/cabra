@@ -71,6 +71,7 @@
 #define IDC_SPIN2                       1100
 #define IDC_DATETIMEPICKER_STIME        1101
 #define IDC_DATETIMEPICKER_ETIME        1102
+#define IDC_CHECK_DEBUG                 1103
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
@@ -79,7 +80,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1103
+#define _APS_NEXT_CONTROL_VALUE         1104
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

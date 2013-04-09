@@ -36,6 +36,7 @@ public:
 
 // Implementation
 protected:
+	void DrawStateAxis(int x,int y,int cx,int cy);
     CWnd* pSpectrumWnd;
 	void initColorList();
 	void DrawPix(CDC *pDC,int nPix, int x,int y, double dx, double dy);
@@ -48,12 +49,15 @@ protected:
 	//int nSpectrunData[5][4000];
 	void DrawData(CDC *pDC,int x,int y, int cx,int cy);
 	CRect DrawAxis(CDC *pDC, int x, int y, int cx, int cy);
+    void DrawArrow(CDC *pDC, int x, int y, int cx, int cy,bool bVer);
 	void DrawGraph(CDC* pDC, int x, int y, int cx, int cy);
 	void DrawLegend(CDC* pDC, int x, int y, int cx, int cy);
 	void DrawTableText(CDC& dc, int x, int y,int dx,int dy,int row,int column,CString str);
 	void DrawTableTextRight(CDC& dc, int x, int y,int dx,int dy,int row,int column,CString str);
 	void DrawTable(CDC& dc, int x, int y,int dx,int dy,int row,int column);
-
+    CDC* pDC;
+    CRect rectState;
+    CRect rectSpeed;
 	// Generated message map functions
 	//{{AFX_MSG(CSpectrumDlg)
 	virtual BOOL OnInitDialog();
@@ -61,7 +65,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-
+    int yUnit;
 	list<COLORREF> rgb;
 
 };

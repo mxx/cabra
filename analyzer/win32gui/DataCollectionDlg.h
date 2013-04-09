@@ -16,6 +16,7 @@ class CDataCollectionDlg : public CDialog
 {
 // Construction
 public:
+	void Prompt(LPCSTR szTxt);
 	void ClosePort();
 	CDataCollectionDlg(CWnd* pParent = NULL);   // standard constructor
 
@@ -28,6 +29,7 @@ public:
 	CString	m_strUniqNo;
 	CString	m_strVersion;
 	CString	m_strStatus;
+	BOOL	m_bDebug;
 	//}}AFX_DATA
     DCB m_dcb;
 	CSerialPort m_port;
@@ -95,6 +97,7 @@ protected:
 	afx_msg void OnButtonStlog();
 	afx_msg void OnButtonUniqno();
 	afx_msg void OnButtonVinfo();
+	afx_msg void OnCheckDebug();
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()

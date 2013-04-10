@@ -133,6 +133,10 @@ SOURCE=..\protocol\Protocol.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SeleteDate.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\SerialPort.cpp
 # End Source File
 # Begin Source File
@@ -274,6 +278,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=..\protocol\RS232Port.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SeleteDate.h
 # End Source File
 # Begin Source File
 

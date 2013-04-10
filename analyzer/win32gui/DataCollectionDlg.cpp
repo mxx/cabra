@@ -42,7 +42,11 @@ UINT CommThreadProc(LPVOID pParam)
                 strDump = "R: ";
                 for(int i=0;i<n;i++)
                 {
+<<<<<<< HEAD
                     sprintf(tmp,"%02X ",0x000000FF & buf[i]);
+=======
+                    sprintf(tmp,"%02X ",buf[i]);
+>>>>>>> origin/master
                     strDump += tmp;
                 }
                 strDump += "\r\n";

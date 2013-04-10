@@ -20,7 +20,7 @@
 Packet::Packet() :
 		posFrameStart(string::npos)
 {
-    cmd = CMD_OVER;
+
 
 }
 
@@ -59,7 +59,6 @@ const string&  Packet::Extract(string& buf)
 {
 
 	PackHead* ptrPacket = NULL;
-    cmd = CMD_OVER;
 	do
 	{
 		posFrameStart = buf.find("Uz");

@@ -46,6 +46,51 @@ VTDRRecord* Protocol::Parse(Packet& packet)
 	case GET_STD_VERSION:
 		ptrRec = new VTDRVersion;
 		break;
+	case GET_Driver_LicenceID:
+		ptrRec = new VTDRDriverInfo;
+		break;
+	case GET_RealTime:
+		ptrRec = new VTDRRealTime;
+		break;
+	case GET_Odometer:
+		ptrRec = new VTDROderMeter;
+		break;
+	case GET_Pulse_Param:
+		ptrRec = new VTDRPulseModulus;
+		break;
+	case GET_Vehicle_Info:
+		ptrRec = new VTDRVehicleInfo;
+		break;
+	case GET_State_Config:
+		ptrRec = new VTDRVehicleConfigure;
+		break;
+	case GET_Uniq_No:
+		ptrRec = new VTDRUniqCode;
+		break;
+	case GET_Speed_Record:
+		ptrRec = new VTDRSpeedRecord;
+		break;
+	case GET_Postion_Record:
+		ptrRec = new VTDRDriverInfo;
+		break;
+	case GET_Suspious_Record:
+		ptrRec = new VTDRDetailRecord;
+		break;
+	case GET_OverDrive_Record:
+		ptrRec = new VTDROvertimeDriveRecord;
+		break;
+	case GET_Driver_Record:
+		ptrRec = new VTDRDriverIDRecord;
+		break;
+	case GET_Power_Record:
+		ptrRec = new VTDROutPoweredRecord;
+		break;
+	case GET_Param_Record:
+		ptrRec = new VTDRParameterModifyRecord;
+		break;
+	case GET_Speed_State_Log:
+		ptrRec = new VTDRSpeedStatusLog;
+		break;
 	}
 	if (ptrRec)
 	{

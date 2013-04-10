@@ -3,6 +3,7 @@
 
 #include "SerialPort.h"	// Added by ClassView
 #include "protocol/Packet.h"
+#include <time.h>
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -15,6 +16,7 @@ class CDataCollectionDlg : public CDialog
 {
 // Construction
 public:
+	void Prompt(LPCSTR szTxt);
 	void ClosePort();
 	CDataCollectionDlg(CWnd* pParent = NULL);   // standard constructor
 
@@ -27,6 +29,7 @@ public:
 	CString	m_strUniqNo;
 	CString	m_strVersion;
 	CString	m_strStatus;
+	BOOL	m_bDebug;
 	//}}AFX_DATA
     DCB m_dcb;
 	CSerialPort m_port;
@@ -47,11 +50,15 @@ protected:
 	CString strSending;
 	CString strReceive;
 	CWinThread *pWorking;
+    time_t tStart;
+    time_t tEnd;
+    int nNum;
 	void groupButtonSet(int first,int number);
     void showGETbuttons(int cmd);
     void showSETbuttons(int cmd);
     void showCHKbuttons(int cmd);
     void sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int size);
+    bool getDateSetting(void);
 	// Generated message map functions
 	//{{AFX_MSG(CDataCollectionDlg)
 	virtual BOOL OnInitDialog();
@@ -90,6 +97,7 @@ protected:
 	afx_msg void OnButtonStlog();
 	afx_msg void OnButtonUniqno();
 	afx_msg void OnButtonVinfo();
+	afx_msg void OnCheckDebug();
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()

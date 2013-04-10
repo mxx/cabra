@@ -8,6 +8,8 @@
 #define IDS_READTAB                     4
 #define IDS_SETTAB                      5
 #define IDS_CHECKTAB                    6
+#define IDS_SETERROR                    7
+#define IDS_GETERROR                    8
 #define IDD_MAIN_DIALOG                 102
 #define IDD_PROPPAGE_SET                106
 #define IDR_MAINFRAME                   128
@@ -18,6 +20,7 @@
 #define IDD_DIALOG_AWS_FACTOR_SETTING   136
 #define IDD_DIALOG_AWS_FACTOR           137
 #define IDD_DIALOG_LIST                 138
+#define IDD_DIALOG_SENDPARA             138
 #define IDC_BUTTON_DATA_COLLECTION      1000
 #define IDC_BUTTON_FILE_SETTING         1009
 #define IDC_BUTTON_SPECTRUM             1010
@@ -62,6 +65,13 @@
 #define IDC_BUTTON_EXITCHK              1093
 #define IDC_GRAPH                       1094
 #define IDC_DATETIMEPICKER1             1096
+#define IDC_DATETIMEPICKER_START        1096
+#define IDC_DATETIMEPICKER_END          1097
+#define IDC_EDIT_REC                    1099
+#define IDC_SPIN2                       1100
+#define IDC_DATETIMEPICKER_STIME        1101
+#define IDC_DATETIMEPICKER_ETIME        1102
+#define IDC_CHECK_DEBUG                 1103
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
@@ -70,7 +80,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1097
+#define _APS_NEXT_CONTROL_VALUE         1104
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

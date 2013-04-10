@@ -34,6 +34,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MFC/MFC/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/MFC/ATL/Include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/analyzer}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mfc/win/Include}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2115987405" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -66,10 +67,8 @@
 		<project id="analyzer.null.42417734" name="analyzer"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Default">
-			<resource resourceType="PROJECT" workspacePath="/analyzer"/>
-		</configuration>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/analyzer"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>

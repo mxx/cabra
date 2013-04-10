@@ -6,6 +6,7 @@
 #include "VTDRVersion.h"
 #include "DataCollectionDlg.h"
 #include "SerialPort.h"
+#include "SeleteDate.h"
 #include <string>
 #include "protocol/Packet.h"
 #include "protocol/Protocol.h"
@@ -29,18 +30,41 @@ UINT CommThreadProc(LPVOID pParam)
 		{ 0 };
 		int n = 0;
 		n = ptrUI->m_port.Read(buf, 2048);
-
+		char a[]="\x55\x7A\x1\x0\x12\x0""1234567812345678\x0\x0\x3C"; 
+		memcpy(buf,a,26);
+		n=26;
 		if (n)
 		{
+            if (ptrUI->m_bDebug)
+            {
+                CString strDump;
+                char tmp[12];
+                strDump = "R: ";
+                for(int i=0;i<n;i++)
+                {
+                    sprintf(tmp,"%02X ",0x000000FF & buf[i]);
+                    strDump += tmp;
+                }
+                strDump += "\r\n";
+                ptrUI->Prompt((LPCSTR)strDump);
+            }
 			strCache.append(buf, n);
 			if (packet.Extract(strCache).size())
 			{
+				CmdWord cmd = packet.GetCmd();
+				if (cmd == GET_ERROR || cmd == SET_ERROR)
+				{
+					ptrUI->SendMessage(WM_UPDATE_DATA, NULL, cmd);
+					continue;
+				}
+
 				VTDRRecord* ptrRecord = pro.Parse(packet);
 				if (ptrRecord)
 				{
 					ptrUI->SendMessage(WM_UPDATE_DATA, (WPARAM) ptrRecord,
 							NULL);
 				}
+
 			}
 		}
 		else
@@ -64,9 +88,13 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
 	m_strUniqNo = _T("");
 	m_strVersion = _T("");
 	m_strStatus = _T("");
+	m_bDebug = FALSE;
 	//}}AFX_DATA_INIT
 	pWorking = NULL;
 	m_bStop = false;
+    tStart = 0;
+    tEnd = 0;
+    nNum = 0;
 }
 
 void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
@@ -79,6 +107,7 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_STATIC_UNIQNO, m_strUniqNo);
 	DDX_Text(pDX, IDC_STATIC_VERSION, m_strVersion);
 	DDX_Text(pDX, IDC_STATIC_STATUS, m_strStatus);
+	DDX_Check(pDX, IDC_CHECK_DEBUG, m_bDebug);
 	//}}AFX_DATA_MAP
 }
 
@@ -114,7 +143,6 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_COMM, OnSelchangeTabComm)
 	ON_BN_CLICKED(IDC_BUTTON_DRIVER, OnButtonDriver)
 	ON_BN_CLICKED(IDC_BUTTON_DRI, OnButtonDri)
-    ON_WM_COPYDATA()
 	ON_BN_CLICKED(IDC_BUTTON_RTC, OnButtonRtc)
 	ON_BN_CLICKED(IDC_BUTTON_OTD, OnButtonOtd)
 	ON_BN_CLICKED(IDC_BUTTON_ACDR, OnButtonAcdr)
@@ -139,6 +167,8 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
 	ON_BN_CLICKED(IDC_BUTTON_STLOG, OnButtonStlog)
 	ON_BN_CLICKED(IDC_BUTTON_UNIQNO, OnButtonUniqno)
 	ON_BN_CLICKED(IDC_BUTTON_VINFO, OnButtonVinfo)
+    ON_WM_COPYDATA()
+	ON_BN_CLICKED(IDC_CHECK_DEBUG, OnCheckDebug)
 	//}}AFX_MSG_MAP
     ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
     END_MESSAGE_MAP()
@@ -208,6 +238,7 @@ HBRUSH CDataCollectionDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	HBRUSH brush_green = ::CreateSolidBrush(RGB(0,255,0) );
 	HBRUSH brush_blue = ::CreateSolidBrush(RGB(0,255,255) );
+    HBRUSH brush_red = ::CreateSolidBrush(RGB(255,127,127) );
 	LOGBRUSH log =
 	{ 0 };
 	CString str;
@@ -224,6 +255,11 @@ HBRUSH CDataCollectionDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 			pDC->SetBkColor(RGB(0,255,255) );
 			return brush_blue;
 		}
+        else if (m_strStatus.Find(_T("´íÎó"))>=0)
+        {
+            pDC->SetBkColor(RGB(255,127,127) );
+            return brush_red;
+        }
 		else
 		{
 			::GetObject(hbr, sizeof(log), &log);
@@ -264,18 +300,10 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 	if (ptrRec)
 	{
 		string strDump;
-		CString strPrompt;
 		ptrRec->Dump(strDump);
-		m_ctlPrompt.GetWindowText(strPrompt);
-		strPrompt += strDump.c_str();
-        strPrompt += "\r\n";
-        while (strPrompt.GetLength() > m_ctlPrompt.GetLimitText())
-        {
-        	strPrompt = strPrompt.Right(strPrompt.GetLength()-m_ctlPrompt.LineLength(0));
-        };
-        m_ctlPrompt.SetWindowText((LPCTSTR)strPrompt);
-        int n = strPrompt.GetLength();
-        m_ctlPrompt.SetSel(n,n);
+        strDump += "\r\n";
+        Prompt(strDump.c_str());
+        
 		m_strStatus.LoadString(IDS_RECEIVE);
         if (ptrRec->GetDataCode() == VTDRRecord::Version)
         {
@@ -286,7 +314,14 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 	}
 	else
 	{
-		m_strStatus.LoadString(IDS_WAITING);
+		CmdWord cmd = (CmdWord)lParam;
+
+		if (cmd == GET_ERROR)
+			m_strStatus.LoadString(IDS_GETERROR);
+		else if (cmd == SET_ERROR)
+			m_strStatus.LoadString(IDS_SETERROR);
+		else
+			m_strStatus.LoadString(IDS_WAITING);
 	}
 	UpdateData(FALSE);
 	return 0;
@@ -317,6 +352,29 @@ void CDataCollectionDlg::OnDestroy()
 	ClosePort();
 }
 
+bool CDataCollectionDlg::getDateSetting(void)
+{
+    SeleteDate dlg;
+    dlg.m_nRec = nNum;
+    if (tStart || tEnd)
+    {
+        dlg.m_timeStart = CTime(tStart);
+        dlg.m_timeEnd = CTime(tEnd);
+    }
+    else
+        dlg.m_timeStart = CTime(0);
+
+    if (dlg.DoModal()==IDOK)
+    {
+        tStart = dlg.m_timeStart.GetTime();
+        tEnd = dlg.m_timeEnd.GetTime();
+        nNum = dlg.m_nRec;
+        return true;
+    }
+    return false;
+}
+
+
 void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int size)
 {
 	Protocol pro;
@@ -327,7 +385,6 @@ void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int si
 	m_strStatus = "";
 	UpdateData(FALSE);
 }
-
 
 void CDataCollectionDlg::showGETbuttons(int cmd)
 {
@@ -507,7 +564,10 @@ void CDataCollectionDlg::OnButtonSetvinfo()
 
 void CDataCollectionDlg::OnButtonSpd() 
 {
-	sendCmd(GET_Speed_Record,0,0,0);	
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Speed_Record,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonStatconf() 
@@ -528,4 +588,25 @@ void CDataCollectionDlg::OnButtonUniqno()
 void CDataCollectionDlg::OnButtonVinfo() 
 {
 	sendCmd(GET_Vehicle_Info,0,0,0);
+}
+
+void CDataCollectionDlg::OnCheckDebug() 
+{
+    UpdateData();	
+}
+
+void CDataCollectionDlg::Prompt(LPCSTR szTxt)
+{
+    CString strPrompt;
+    
+    m_ctlPrompt.GetWindowText(strPrompt);
+    strPrompt += szTxt;
+    
+    while (strPrompt.GetLength() > m_ctlPrompt.GetLimitText())
+    {
+        strPrompt = strPrompt.Right(strPrompt.GetLength()-m_ctlPrompt.LineLength(0));
+    };
+    m_ctlPrompt.SetWindowText((LPCTSTR)strPrompt);
+    int n = strPrompt.GetLength();
+    m_ctlPrompt.SetSel(n,n);
 }

@@ -30,9 +30,7 @@ UINT CommThreadProc(LPVOID pParam)
 		{ 0 };
 		int n = 0;
 		n = ptrUI->m_port.Read(buf, 2048);
-		char a[]="\x55\x7A\x1\x0\x12\x0""1234567812345678\x0\x0\x3C"; 
-		memcpy(buf,a,26);
-		n=26;
+
 		if (n)
 		{
             if (ptrUI->m_bDebug)
@@ -42,11 +40,7 @@ UINT CommThreadProc(LPVOID pParam)
                 strDump = "R: ";
                 for(int i=0;i<n;i++)
                 {
-<<<<<<< HEAD
                     sprintf(tmp,"%02X ",0x000000FF & buf[i]);
-=======
-                    sprintf(tmp,"%02X ",buf[i]);
->>>>>>> origin/master
                     strDump += tmp;
                 }
                 strDump += "\r\n";

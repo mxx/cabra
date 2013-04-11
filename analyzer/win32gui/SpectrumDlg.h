@@ -36,6 +36,7 @@ public:
 
 // Implementation
 protected:
+	void DrawScale(int stratX,int startY, int num, int minalD, int majorD, bool bHorizon);
 	void DrawStateAxis(int x,int y,int cx,int cy);
     CWnd* pSpectrumWnd;
 	void initColorList();

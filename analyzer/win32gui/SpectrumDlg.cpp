@@ -186,16 +186,19 @@ CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
 	{
 		title.Format("%2d",(nScaleCount-i)*(nScaleMax/nScaleCount));
         size = pDC->GetTextExtent(title);
-		pDC->TextOut(x+dx-size.cx, rectSpeed.top - size.cy/2 + dy * i, title );
+		pDC->TextOut(x+dx-size.cx-13, rectSpeed.top - size.cy/2 + dy * i, title );
+        pDC->MoveTo(x+dx,rectSpeed.top + dy * i);
+        pDC->LineTo(x+dx-10,rectSpeed.top + dy * i);
  	}
     // x axis
     pDC->MoveTo(x+dx/2,rect.bottom);
     pDC->LineTo(rect.right+dx/2,rect.bottom);
+    DrawScale(rectSpeed.left,rectSpeed.bottom,rectSpeed.Width(),5,20,true);
     DrawArrow(pDC,rect.right+dx/2-1,rect.bottom,15,3,false);
     //y axis
     pDC->MoveTo(rect.left,rect.bottom + size.cy);
     pDC->LineTo(rect.left,rect.top);
-    DrawArrow(pDC,rectSpeed.left,rectSpeed.top-10,3,-15,true);
+    DrawArrow(pDC,rectSpeed.left,rectSpeed.top-2*size.cy,3,-15,true);
 
 	dx = rect.Width() / 4;
     size = pDC->GetTextExtent("0");
@@ -204,7 +207,7 @@ CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
 	{
 		title.Format("%d",i*5);
 		size = pDC->GetTextExtent(title);
-		pDC->TextOut(rect.left + i * dx - size.cx/2, rect.bottom , title);
+		pDC->TextOut(rect.left + i * dx - size.cx/2, rect.bottom+12 , title);
 	}
 	pDC->TextOut(rect.left + 4 * dx + size.cx, rect.bottom,"Ê±¼ä/s");
 
@@ -369,4 +372,44 @@ void CSpectrumDlg::initColorList()
 void CSpectrumDlg::DrawStateAxis(int x, int y, int cx, int cy)
 {
 
+}
+
+void CSpectrumDlg::DrawScale(int startX, int startY, int nLongth, int minalD, int majorD, bool bHorizon)
+{
+    double deltaX = 0;
+    double deltaY = 0;
+    int zero ;
+    if (bHorizon)
+    {
+        zero = startX;
+        deltaX = (nLongth*1.0)/(minalD*majorD);
+        for(int i=0;i<majorD;i++)
+        {
+            pDC->MoveTo(startX,startY);
+            pDC->LineTo(startX,startY+10);
+            for(int j=1;j<minalD;j++)
+            {
+                pDC->MoveTo(startX+round(deltaX*j),startY);
+                pDC->LineTo(startX+round(deltaX*j),startY+5);
+            }
+            startX =zero + round(deltaX*minalD*(i+1));
+        }
+        pDC->MoveTo(startX,startY);
+        pDC->LineTo(startX,startY+10);
+    }
+    else
+    {
+        deltaY = nLongth/(minalD*majorD);
+        for(int i=0;i<majorD;i++)
+        {
+            pDC->MoveTo(startX,startY);
+            pDC->LineTo(startX-10,startY);
+            for(int j=0;i<minalD;j++)
+            {
+                pDC->MoveTo(startX,startY+round(deltaY*j));
+                pDC->LineTo(startX-5,startY+round(deltaY*j));
+            }
+            startY+=(nLongth/majorD);
+        }
+    }
 }

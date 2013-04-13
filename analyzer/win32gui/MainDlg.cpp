@@ -147,7 +147,7 @@ void CMainDlg::OnOpenDlg(WPARAM wParam, LPARAM lParam)
 	m_DataCollectionDlg.EnableWindow(FALSE);
 	m_SpectrumDlg.EnableWindow(FALSE);
 	
-	
+	CString str;
 	CRect rect;
 	switch (wParam)
 	{
@@ -172,7 +172,9 @@ void CMainDlg::OnOpenDlg(WPARAM wParam, LPARAM lParam)
 		case OPEN_SPECTRUM:
 			m_SpectrumDlg.ShowWindow(SW_SHOW);
 			m_SpectrumDlg.UpdateData(FALSE);
-			this->SetWindowText("疑点数据图示");
+            
+            str.LoadString(IDS_GRAPH_TITLE);
+            this->SetWindowText(str);
 			m_SpectrumDlg.EnableWindow();
 			m_SpectrumDlg.SetFocus();
 			m_SpectrumDlg.GetClientRect(&rect);

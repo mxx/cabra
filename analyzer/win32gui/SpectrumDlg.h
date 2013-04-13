@@ -11,20 +11,24 @@
 // CSpectrumDlg dialog
 #include <list>
 #include "VTDRDetailRecord.h"
+#include "VTDRVehicleConfigure.h"
 using namespace std;
 
 class CSpectrumDlg : public CDialog
 {
 // Construction
 public:
+	
 	CSpectrumDlg(CWnd* pParent = NULL);   // standard constructor
     VTDRDetailRecord rawData;
+    VTDRVehicleConfigure config;
 // Dialog Data
 	//{{AFX_DATA(CSpectrumDlg)
 	enum { IDD = IDD_DIALOG_SPECTRUM };
 	//}}AFX_DATA
 	double m_nTime;
-
+    CString m_strVIC;
+    CString m_strVType;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CSpectrumDlg)
@@ -36,8 +40,8 @@ public:
 
 // Implementation
 protected:
+    void DrawStateData(double dx);
 	void DrawScale(int stratX,int startY, int num, int minalD, int majorD, bool bHorizon);
-	void DrawStateAxis(int x,int y,int cx,int cy);
     CWnd* pSpectrumWnd;
 	void initColorList();
 	void DrawPix(CDC *pDC,int nPix, int x,int y, double dx, double dy);

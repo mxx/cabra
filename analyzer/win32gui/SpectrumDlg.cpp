@@ -32,7 +32,16 @@ CSpectrumDlg::CSpectrumDlg(CWnd* pParent /*=NULL*/)
     pSpectrumWnd = NULL;
     pDC = NULL;
     for(int i=0;i<100;i++)
+    {
         rawData.Speed[i]=100-i;
+        rawData.State[i]=(i>50)?0x55:0xAA;
+    }
+    rawData.Longititude = 123.0*60.0 + 45.0 + 12.34/60.0;
+    rawData.Latitude = 89.0*60.0 + 45.0 + 12.34/60.0;
+    rawData.Altitude = 123456;
+    rawData.strLicenseNumber = "XXXXXXXXXXXXXX";
+    m_strVIC="XXXXXX";
+    m_strVType="XXXX";
 }
 
 
@@ -108,6 +117,7 @@ void CSpectrumDlg::DrawGraph(CDC *pDC, int x, int y, int cx, int cy)
 	pDC->SetBkMode(TRANSPARENT);
 	CRect rect = DrawAxis(pDC,x,y,cx,cy);
 	DrawData(pDC,rect.left,rect.top,rect.Width(),rect.Height());
+    DrawLegend(pDC,rectSpeed.right+4,rectSpeed.top,(cx-rectSpeed.Width())/2,rectSpeed.Height());
 }
 
 int CSpectrumDlg::GetMaxCount(void)
@@ -172,11 +182,21 @@ CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
 	CSize size = pDC->GetTextExtent(title);
 	rect.DeflateRect(size.cx,size.cy+size.cy);
     rect.right = rect.left + (rect.Width()/4)*4;
+    rect.top = rect.top + size.cy;
 	pDC->FillSolidRect(&rect,RGB(255,255,255));
 
 	pDC->SetTextColor(RGB(0,0,0));
 	pDC->SetBkColor(RGB(250,250,150));
-	int dx = size.cx; 
+	
+    title.Format("车牌号码：%s，车牌分类：%s",m_strVIC,m_strVType);
+    size = pDC->GetTextExtent(title);
+    pDC->TextOut(x+(cx - size.cx)/2,y+size.cy/2,title);
+    title.Format("驾驶证号码：%s",rawData.strLicenseNumber.c_str());
+    pDC->TextOut(x+(cx - size.cx)/2,y+ size.cy + size.cy/2,title);
+    
+    
+    
+    int dx = size.cx; 
 	int dy = (rect.Height()-(size.cy*10))/nScaleCount;
 
     rectState  = CRect(rect.left,rect.top,rect.right,rect.top + size.cy*10);
@@ -203,7 +223,7 @@ CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
         if (old_pen) pDC->SelectObject(old_pen);
         pen.DeleteObject();
 	}
-	pDC->TextOut(rect.left + 4 * dx + size.cx, rect.bottom,"时间/s");
+	pDC->TextOut(rect.left + 4 * dx + size.cx, rect.bottom + size.cy/2,"时间/s");
     //y axis
     pDC->MoveTo(rect.left,rect.bottom + size.cy);
     pDC->LineTo(rect.left,rect.top);
@@ -217,7 +237,13 @@ CRect CSpectrumDlg::DrawAxis(CDC *pDC, int x, int y, int cx, int cy)
  	}
     title = "速度/(km/h)";
     size = pDC->GetTextExtent(title);
-    pDC->TextOut(rect.left - 5 - size.cx, rectSpeed.top-size.cy*2,title);
+    pDC->TextOut(rect.left - 5 - size.cx, rectSpeed.top-size.cy/2-size.cy,title);
+    for (i=0; i<8;i++)
+    {
+        title.Format("%s(D%d)",config.strNameOf[i].empty()?"信号":config.strNameOf[i].c_str(),i);
+        size = pDC->GetTextExtent(title);
+		pDC->TextOut(rectState.left-3-size.cx, rectState.top+i*size.cy, title );
+    }
 
 
 	return rect;
@@ -247,15 +273,36 @@ void CSpectrumDlg::DrawPix(CDC *pDC, int nPix, int x, int y, double dx, double d
 	CPen Pen;
 	Pen.CreatePen(PS_SOLID,nPix,RGB(0,0,0));
 	CPen* pen = pDC->SelectObject(&Pen);
-    pDC->MoveTo(x,y-round(rawData.Speed[0] * dy));
-	for(int j=1;j<sizeof(rawData.Speed)/sizeof(rawData.Speed[0]);j++)
+    pDC->MoveTo(x+round(dx/2.0),y-round(rawData.Speed[0] * dy));
+	for(int j=0;j<sizeof(rawData.Speed)/sizeof(rawData.Speed[0]);j++)
 	{
-		int nx = x + round(j * dx);
+    	int nx = x + round(j * dx + dx/2);
 		int ny ;
 		ny = y - round(rawData.Speed[j] * dy);
-		
-		pDC->LineTo(nx,ny);
+ 		pDC->LineTo(nx,ny);
 	}
+
+	pDC->SelectObject(pen);
+	Pen.DeleteObject();
+}
+
+void CSpectrumDlg::DrawStateData(double dx)
+{
+    CPen Pen;
+    Pen.CreatePen(PS_SOLID,1,RGB(0,0,0));
+    CPen* pen = pDC->SelectObject(&Pen);
+    for(int i=0;i<8;i++)
+    {
+        int ny = rectState.top+rectState.Height()/20+((rectState.Height()/10)*i);
+        pDC->MoveTo(rectState.left+round(dx/2.0), ny);
+        for(int j=0;j<sizeof(rawData.State)/sizeof(rawData.State[0]);j++)
+        {
+            int v = rawData.State[j] & (1<<i);
+            int nx = rectState.left + round(j * dx + dx/2);
+            if (v) pDC->LineTo(nx,ny);
+            else pDC->MoveTo(nx,ny);
+        }
+    }
 	pDC->SelectObject(pen);
 	Pen.DeleteObject();
 }
@@ -271,13 +318,8 @@ void CSpectrumDlg::DrawData(CDC *pDC, int x,int y, int cx, int cy)
 	double dx = (double)rectSpeed.Width() / 100.0;
 	
 	DrawPix(pDC,nPix,rectSpeed.left,rectSpeed.bottom,dx,dy);
-
-//    CPen pen, *old_pen;
-//	pen.CreatePen(PS_SOLID,3,RGB(0,255,0));
-//	old_pen = pDC->SelectObject(&pen);
+    DrawStateData(dx);
 	
-//	if (old_pen) pDC->SelectObject(old_pen);
-//	DrawLegend(pDC,x,y,cx,cy);
 }
 
 
@@ -288,16 +330,39 @@ void CSpectrumDlg::DrawLegend(CDC *pDC, int x,int y, int cx, int cy)
 	int nx,ny;
 	int spaceX,spaceY,starX;
 
-	spaceX = pDC->GetTextExtent("M").cx;
+	spaceX = pDC->GetTextExtent("M").cx/2;
 	spaceY = pDC->GetTextExtent("M").cy;
-	starX = pDC->GetTextExtent("*").cx;
-	CRect rect(x+(cx*4)/5,y+cy/7,x+cx-cx/20,y+cy/7+7*spaceY);
+	starX = pDC->GetTextExtent("*").cx/2;
+    CSize size = pDC->GetTextExtent(_T("停车日期、时间:"));
+	CRect rect(x,y,x+cx-4,y+size.cy*8);
 	pDC->FillSolidRect(&rect,RGB(255,255,255));
-	
+	pDC->DrawEdge(&rect,EDGE_ETCHED,BF_RECT);
 	pDC->SetBkColor(RGB(255,255,255));
 
 	nx = rect.left+ 2*starX;
 	ny = rect.top+ spaceY;
+    pDC->TextOut(nx,ny,_T("停车日期、时间:"));
+    CTime stopTime(rawData.tEnd);
+    ny += spaceY;
+    pDC->TextOut(nx,ny,stopTime.Format("%Y-%m-%d"));
+    ny += spaceY;
+    pDC->TextOut(nx,ny,stopTime.Format("%H:%M:%S"));
+    ny += spaceY;
+    CString str;
+    double minu,sec ;
+    sec = modf(rawData.Longititude,&minu);
+        
+    str.Format("经度:%.0f°%.0f\' %2.2f\"", floor(minu/60),fmod(minu,60.0),sec*60);
+    pDC->TextOut(nx,ny,str);
+
+    ny += spaceY;
+    sec = modf(rawData.Latitude,&minu);
+    str.Format("纬度:%.0f°%.0f\' %2.2f\"", floor(minu/60),fmod(minu,60.0),sec*60);
+    pDC->TextOut(nx,ny,str);
+
+    ny += spaceY;
+    str.Format("高度:%d m",rawData.Altitude);
+    pDC->TextOut(nx,ny,str);
 }
 
 
@@ -379,11 +444,6 @@ void CSpectrumDlg::initColorList()
 
 
 
-void CSpectrumDlg::DrawStateAxis(int x, int y, int cx, int cy)
-{
-
-}
-
 void CSpectrumDlg::DrawScale(int startX, int startY, int nLongth, int minalD, int majorD, bool bHorizon)
 {
     double deltaX = 0;
@@ -426,3 +486,5 @@ void CSpectrumDlg::DrawScale(int startX, int startY, int nLongth, int minalD, in
         pDC->LineTo(startX-10,startY);
     }
 }
+
+

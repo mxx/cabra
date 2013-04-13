@@ -4,6 +4,8 @@
 #include "SerialPort.h"	// Added by ClassView
 #include "protocol/Packet.h"
 #include <time.h>
+#include <map>
+
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -16,6 +18,8 @@ class CDataCollectionDlg : public CDialog
 {
 // Construction
 public:
+	static LPCTSTR Tanslate(CString& str);
+	static void InitDict(void);
 	void Prompt(LPCSTR szTxt);
 	void ClosePort();
 	CDataCollectionDlg(CWnd* pParent = NULL);   // standard constructor
@@ -43,7 +47,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
-
+	static map<CString,LPCTSTR> dict;
 // Implementation
 protected:
 

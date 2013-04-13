@@ -61,6 +61,7 @@ const string&  Packet::Extract(string& buf)
 	PackHead* ptrPacket = NULL;
 	do
 	{
+        cmd = CMD_OVER;
 		posFrameStart = buf.find("Uz");
 
 		if (posFrameStart != string::npos)

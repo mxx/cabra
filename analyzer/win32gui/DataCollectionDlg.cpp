@@ -17,6 +17,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 using namespace std;
+map<CString,LPCTSTR> CDataCollectionDlg::dict;
 
 UINT CommThreadProc(LPVOID pParam)
 {
@@ -93,6 +94,7 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
     tStart = 0;
     tEnd = 0;
     nNum = 0;
+    InitDict();
 }
 
 void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
@@ -596,9 +598,10 @@ void CDataCollectionDlg::OnCheckDebug()
 void CDataCollectionDlg::Prompt(LPCSTR szTxt)
 {
     CString strPrompt;
+    CString strN = szTxt;
     
     m_ctlPrompt.GetWindowText(strPrompt);
-    strPrompt += szTxt;
+    strPrompt += Tanslate(strN);
     
     while (strPrompt.GetLength() > m_ctlPrompt.GetLimitText())
     {
@@ -607,4 +610,19 @@ void CDataCollectionDlg::Prompt(LPCSTR szTxt)
     m_ctlPrompt.SetWindowText((LPCTSTR)strPrompt);
     int n = strPrompt.GetLength();
     m_ctlPrompt.SetSel(n,n);
+}
+
+void CDataCollectionDlg::InitDict()
+{
+    dict["License"] = _T("驾驶证号");
+    dict["Year"]=_T("标准年号");
+    dict["DataCode"]=_T("数据代码");
+}
+
+LPCTSTR CDataCollectionDlg::Tanslate(CString &str)
+{
+    map<CString,LPCTSTR>::iterator it;
+    for(it = dict.begin();it != dict.end(); it++)
+        str.Replace(it->first,it->second);
+    return str;
 }

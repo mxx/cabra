@@ -48,11 +48,11 @@ string& VTDROvertimeDriveRecord::Dump(string& buf)
 {
 	stringstream stream;
 	stream << VTDRRecord::Dump(buf) << endl;
-	stream << strLicese.c_str() << ":";
-	stream << "start:" << ctime(&tStartTime);
+	stream << "DriverLicense:" << strLicese.c_str() << endl;
+	stream << "startTime:" << ctime(&tStartTime);
 	stream << "(" << startLatitude / 60 << "," << startLongititude / 60 << ","
 			<< startAltitude << ")" << endl;
-	stream << "end:" << ctime(&tEndTime);
+	stream << "endTime:" << ctime(&tEndTime);
 	stream << "(" << endLatitude / 60 << "," << endLogititude / 60 << ","
 				<< endAltitude << ")" << endl;
 	return buf = stream.str();

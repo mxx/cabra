@@ -87,7 +87,7 @@ bool CSerialPort::SetCom(void)
 		return false;
     }
 	
-	SetTimeOut(1000000);
+	SetTimeOut(100000);
 	return true;
 }
 

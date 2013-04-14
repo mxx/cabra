@@ -57,6 +57,8 @@ public:
 	void WriteToFile(const char* szFolder);
 	void ReadFromFile(const char* szFileName);
 	string& GenerateFileName();
+	static void initMap();
+	static map<int, const char*> DataBlockName;
 
 protected:
 	string strPlateCode;
@@ -72,9 +74,6 @@ protected:
 	unsigned short nDataBlockNumber;
 	typedef list<VTDRRecord*> DataSet;
 	map<int, DataSet> Datas;
-
-	static map<int, const char*> DataBlockName;
-	static void initMap();
 
 	char checkSum(const string & str) const;
 	void parseFile(const string& str);

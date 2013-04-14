@@ -48,7 +48,7 @@ string& VTDRPositionRecord::Write(string& buf)
 string& VTDRPositionRecord::Dump(string& buf)
 {
 	stringstream stream;
-	stream << VTDRRecord::Dump(buf) << " Time:" << ctime(&tStart) ;
+	stream << VTDRRecord::Dump(buf) << " StartTime:" << ctime(&tStart) ;
 	stream << "minute\tSpeed\t(Latitude,Longitude,Altitude):" << endl;
 	for (int i = 0; i < 60; i++)
 	{

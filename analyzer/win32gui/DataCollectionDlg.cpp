@@ -4,17 +4,22 @@
 #include "stdafx.h"
 #include "Analyzer.h"
 #include "VTDRVersion.h"
+#include "define_gbk.h"
 #include "DataCollectionDlg.h"
 #include "SerialPort.h"
 #include "SeleteDate.h"
 #include <string>
 #include "protocol/Packet.h"
 #include "protocol/Protocol.h"
+#include "USBDataFilev2012.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+#define D(x,y)  dict[#x] = _T( #y )
 
 using namespace std;
 map<CString,LPCTSTR> CDataCollectionDlg::dict;
@@ -32,7 +37,7 @@ UINT CommThreadProc(LPVOID pParam)
 		int n = 0;
 		n = ptrUI->m_port.Read(buf, 2048);
 
-		if (n)
+		if (n || strCache.size())
 		{
             if (ptrUI->m_bDebug)
             {
@@ -95,6 +100,7 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
     tEnd = 0;
     nNum = 0;
     InitDict();
+    USBDataFilev2012::initMap();
 }
 
 void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
@@ -300,9 +306,13 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 	if (ptrRec)
 	{
 		string strDump;
+		string strTitle;
+        strTitle = USBDataFilev2012::DataBlockName[ptrRec->GetDataCode()];
+		strTitle += "\r\n";
 		ptrRec->Dump(strDump);
         strDump += "\r\n";
-        Prompt(strDump.c_str());
+        strTitle += strDump;
+        Prompt(strTitle.c_str());
         
 		m_strStatus.LoadString(IDS_RECEIVE);
         if (ptrRec->GetDataCode() == VTDRRecord::Version)
@@ -382,6 +392,7 @@ void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int si
 	m_strStatus.LoadString(IDS_SENDING);
 	UpdateData(FALSE);
 	m_port.Write(packet.GetData().data(), packet.GetData().size());
+    Sleep(500);
 	m_strStatus = "";
 	UpdateData(FALSE);
 }
@@ -605,7 +616,9 @@ void CDataCollectionDlg::Prompt(LPCSTR szTxt)
     
     while (strPrompt.GetLength() > m_ctlPrompt.GetLimitText())
     {
-        strPrompt = strPrompt.Right(strPrompt.GetLength()-m_ctlPrompt.LineLength(0));
+        int n = strPrompt.Find("\r\n");
+        if (n<0) break;
+        strPrompt = strPrompt.Right(strPrompt.GetLength()- n -2);
     };
     m_ctlPrompt.SetWindowText((LPCTSTR)strPrompt);
     int n = strPrompt.GetLength();
@@ -614,9 +627,47 @@ void CDataCollectionDlg::Prompt(LPCSTR szTxt)
 
 void CDataCollectionDlg::InitDict()
 {
-    dict["License"] = _T("驾驶证号");
+    dict[" License"] = _T(" 驾驶证号");
     dict["Year"]=_T("标准年号");
     dict["DataCode"]=_T("数据代码");
+    dict["Modify"]=_T("修改号");
+    D(Time,记录仪当前时间);
+    D(InstallTime,安装时间);
+    D(StartMeter,初始里程);
+    D(AccumulateMeter,累计行驶里程);
+    D(param,脉冲系数);
+    D(TypeCode,车辆识别代号);
+    D(PlateNo.,机动车号牌码);
+    D(PlateClass,机动车号牌分类);
+    D(StateByte,状态信号字节);
+    D(CCC-Code,生产厂CCC认证代码);
+    D(AuthrizedType,认证型号);
+    D(ProductDate,生产日期);
+    D(SN,产品生产流水号);
+    D(StartTime,开始时间);
+    D(SEC,秒);
+    D(SPEED,速度);
+    D(STATE,状态);
+    D(minute,分钟);
+    D(Speed,速度);
+    D(Latitude,纬度);
+    D(Longitude,经度);
+    D(Altitude,海拔);
+    D(DriverLicense,驾驶证号);
+    D(LastEndTime,行驶结束时间);
+    D(Position,位置坐标);
+    D(State,状态信号);
+    D(SECBEFORE,停车前秒数);
+    D(startTime,开始时间);
+    D(endTime,结束时间);
+    D(RecTime,记录时间);
+    D(RecType,记录类型);
+    D(Unknown,未知);
+    D(Login,登录);
+    D(Logout,退出);
+    D(PowerOn,上电);
+    D(PowerOff,掉电);
+
 }
 
 LPCTSTR CDataCollectionDlg::Tanslate(CString &str)

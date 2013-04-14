@@ -52,6 +52,9 @@ string& VTDRUniqCode::Dump(string& buf)
 {
 	stringstream stream;
 	stream << VTDRRecord::Dump(buf) << endl;
+	stream << "CCC-Code:" << strManufacture.c_str() << endl;
+	stream << "AuthrizedType:" << strAuthType.c_str() << endl;
+	stream << "ProductDate:" << nYear << "-" << nMonth << "-" << nDay << endl;
 	stream << "SN:" << nSerialNumber << endl;
 	return buf = stream.str();
 }

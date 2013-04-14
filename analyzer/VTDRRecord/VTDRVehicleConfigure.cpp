@@ -59,7 +59,7 @@ string& VTDRVehicleConfigure::Dump(string& buf)
 {
 	stringstream stream;
 	stream << VTDRRecord::Dump(buf) << " Time:" << ctime(&tTime);
-	stream << "State:";
+	stream << "StateByte:";
 	stream << hex << uppercase << (int)(cState&0x000000FF) << endl;
 	for (int i = 0; i < 8; i++)
 	{

@@ -47,7 +47,7 @@ string& VTDRSpeedRecord::Write(string& buf)
 string& VTDRSpeedRecord::Dump(string& buf)
 {
 	stringstream stream;
-	stream << VTDRRecord::Dump(buf) << " Time:" << Time2String(tStart) << endl;
+	stream << VTDRRecord::Dump(buf) << " StartTime:" << Time2String(tStart) << endl;
 	stream << "SEC\tSPEED\tSTATE:" << endl;
 	for (int i = 0; i < 60; i++)
 	{

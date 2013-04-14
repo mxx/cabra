@@ -44,8 +44,9 @@ string& VTDRDriverIDRecord::Write(string& buf)
 string& VTDRDriverIDRecord::Dump(string& buf)
 {
 	stringstream stream;
-	stream << VTDRRecord::Dump(buf) << " Time:" << Time2String(tStart) << endl;
-	stream << "LICIENCE:" << strLicenseNumber.c_str();
-	stream << ",Type:" << decodeType[mapType(cType)] << "(" << (int)cType << ")" << endl;
+	stream << VTDRRecord::Dump(buf) << endl;
+	stream <<"RecTime:" << Time2String(tStart) << endl;
+	stream << "DriverLicense:" << strLicenseNumber.c_str();
+	stream << ",RecType:" << decodeType[mapType(cType)] << "(" << (int)cType << ")" << endl;
 	return buf = stream.str();
 }

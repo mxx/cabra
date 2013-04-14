@@ -13,7 +13,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 // CDataCollectionDlg dialog
-
+class VTDRRecord;
 class CDataCollectionDlg : public CDialog
 {
 // Construction
@@ -50,6 +50,7 @@ public:
 	static map<CString,LPCTSTR> dict;
 // Implementation
 protected:
+	void sendCmd(VTDRRecord* ptrRec);
 
 	CString strSending;
 	CString strReceive;

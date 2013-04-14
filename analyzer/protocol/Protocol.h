@@ -12,10 +12,12 @@
 class Protocol
 {
 public:
+	
 	Protocol();
 	virtual ~Protocol();
 	VTDRRecord* Parse(Packet& packet);
 	Packet Command(CmdWord cmd,time_t tStart, time_t tEnd, int size);
+    Packet Command(VTDRRecord* ptrRec);
 protected:
 
 

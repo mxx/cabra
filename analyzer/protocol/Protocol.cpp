@@ -117,3 +117,22 @@ Packet Protocol::Command(CmdWord cmd, time_t tStart, time_t tEnd, int size)
 
 	return packet;
 }
+
+Packet Protocol::Command(VTDRRecord *ptrRec)
+{
+	Packet packet;
+    int n = ptrRec->GetDataCode();
+    CmdWord cmd;
+    switch(n)
+    {
+    case VTDRRecord::VehicleInfo:
+        cmd = SET_Vehicle_Info;
+        break;
+    default:
+        cmd = CMD_OVER;
+    }
+    string strData;
+    ptrRec->Write(strData);
+	packet.SetCmdPacket(cmd,strData);
+	return packet;
+}

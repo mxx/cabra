@@ -12,6 +12,7 @@
 #include "protocol/Packet.h"
 #include "protocol/Protocol.h"
 #include "USBDataFilev2012.h"
+#include "DlgSetVInfo.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -384,6 +385,18 @@ bool CDataCollectionDlg::getDateSetting(void)
     return false;
 }
 
+void CDataCollectionDlg::sendCmd(VTDRRecord* ptrRec)
+{
+    Protocol pro;
+	Packet packet;
+    packet = pro.Command(ptrRec);
+	m_strStatus.LoadString(IDS_SENDING);
+	UpdateData(FALSE);
+	m_port.Write(packet.GetData().data(), packet.GetData().size());
+    Sleep(500);
+	m_strStatus = "";
+	UpdateData(FALSE);
+}
 
 void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int size)
 {
@@ -569,8 +582,15 @@ void CDataCollectionDlg::OnButtonSetpara()
 
 void CDataCollectionDlg::OnButtonSetvinfo() 
 {
-	// TODO: Add your control notification handler code here
-	
+	CDlgSetVInfo dlg;
+    if (dlg.DoModal()==IDOK)
+    {
+        VTDRVehicleInfo info;
+        info.strPlateClass = (LPCTSTR)dlg.m_strPClass;
+        info.strPlateNumber = (LPCTSTR)dlg.m_strPNo;
+        info.strTypeCode = (LPCTSTR)dlg.m_strVID;
+        sendCmd(&info);      
+    }
 }
 
 void CDataCollectionDlg::OnButtonSpd() 
@@ -677,3 +697,4 @@ LPCTSTR CDataCollectionDlg::Tanslate(CString &str)
         str.Replace(it->first,it->second);
     return str;
 }
+

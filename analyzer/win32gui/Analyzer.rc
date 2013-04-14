@@ -163,6 +163,24 @@ BEGIN
     GROUPBOX        "串口选择",IDC_STATIC,62,58,162,47
 END
 
+IDD_DIALOG_SETVINFO DIALOGEX 0, 0, 225, 118
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "车辆信息"
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "确定(&O)",IDOK,40,87,50,14
+    PUSHBUTTON      "取消(&C)",IDCANCEL,125,86,50,14
+    LTEXT           "车辆识别代号",IDC_STATIC,30,19,49,8
+    EDITTEXT        IDC_EDIT_VID,84,17,115,12,ES_AUTOHSCROLL | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    LTEXT           "机动车号牌号码",IDC_STATIC,22,41,57,8
+    EDITTEXT        IDC_EDIT_PNO,84,39,115,12,ES_AUTOHSCROLL | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    LTEXT           "机动车号牌分类",IDC_STATIC,22,63,57,8
+    EDITTEXT        IDC_EDIT_PCLASS,84,61,40,12,ES_AUTOHSCROLL | NOT 
+                    WS_BORDER,WS_EX_STATICEDGE
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -254,6 +272,25 @@ END
 //
 
 IDB_BITMAP1             BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_DIALOG_SETVINFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 218
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 111
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

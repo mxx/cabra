@@ -109,6 +109,10 @@ SOURCE=.\DataCollectionDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DlgSetVInfo.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\EnumSerial.cpp
 # End Source File
 # Begin Source File
@@ -246,6 +250,10 @@ SOURCE=.\DataCollectionDlg.h
 # Begin Source File
 
 SOURCE=..\VTDRRecord\define_gbk.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DlgSetVInfo.h
 # End Source File
 # Begin Source File
 

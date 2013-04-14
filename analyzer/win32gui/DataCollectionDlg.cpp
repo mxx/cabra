@@ -54,10 +54,12 @@ UINT CommThreadProc(LPVOID pParam)
                 ptrUI->Prompt((LPCSTR)strDump);
             }
 			strCache.append(buf, n);
-			if (packet.Extract(strCache).size())
+            packet.Extract(strCache);
+            CmdWord cmd = packet.GetCmd();
+			if (cmd != CMD_OVER)
 			{
-				CmdWord cmd = packet.GetCmd();
-				if (cmd == GET_ERROR || cmd == SET_ERROR)
+				
+				if (cmd == GET_ERROR || cmd == SET_ERROR || packet.GetContent().empty())
 				{
 					ptrUI->SendMessage(WM_UPDATE_DATA, NULL, cmd);
 					continue;
@@ -75,7 +77,7 @@ UINT CommThreadProc(LPVOID pParam)
 		else
 		{
 			Sleep(5);
-			ptrUI->SendMessage(WM_UPDATE_DATA, NULL, NULL);
+			ptrUI->SendMessage(WM_UPDATE_DATA, NULL, CMD_OVER);
 		}
 	} while (!ptrUI->m_bStop);
 
@@ -331,7 +333,14 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 			m_strStatus.LoadString(IDS_GETERROR);
 		else if (cmd == SET_ERROR)
 			m_strStatus.LoadString(IDS_SETERROR);
-		else
+		else if (cmd != CMD_OVER)
+        {
+            m_strStatus.LoadString(IDS_RECEIVE);
+            CString str;
+            str.Format("ÃüÁî%XÓ¦´ð\r\n",cmd & 0x0000FF);
+            Prompt((LPCTSTR)str);
+        }
+        else
 			m_strStatus.LoadString(IDS_WAITING);
 	}
 	UpdateData(FALSE);

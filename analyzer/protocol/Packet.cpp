@@ -20,8 +20,7 @@
 Packet::Packet() :
 		posFrameStart(string::npos)
 {
-
-
+    cmd = CMD_OVER;
 }
 
 Packet::~Packet()
@@ -85,9 +84,6 @@ const string&  Packet::Extract(string& buf)
 				cmd = (CmdWord)ptrPacket->cCmdWord;
 				nDataSize = data_size;
 				data = buf.substr(posFrameStart+head_size,data_size);
-                // Set the error report packet content and command word
-                if (data.size()==0)
-                    data += (unsigned char)cmd;
 				buf.erase(0,posFrameStart + data_size + sizeof(*ptrPacket) +1);
 				break;
 			}

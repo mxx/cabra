@@ -5,7 +5,9 @@
 #include "protocol/Packet.h"
 #include <time.h>
 #include <map>
+#include <list>
 
+using namespace std;
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -23,7 +25,7 @@ public:
 	void Prompt(LPCSTR szTxt);
 	void ClosePort();
 	CDataCollectionDlg(CWnd* pParent = NULL);   // standard constructor
-
+    list<VTDRRecord*> m_Records;
 // Dialog Data
 	//{{AFX_DATA(CDataCollectionDlg)
 	enum { IDD = IDD_DIALOG_DATA_COLLECTION };

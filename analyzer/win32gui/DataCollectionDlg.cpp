@@ -31,6 +31,7 @@ UINT CommThreadProc(LPVOID pParam)
 	Packet packet;
 	Protocol pro;
 	string strCache;
+   
 	do
 	{
 		char buf[2048] =
@@ -65,10 +66,10 @@ UINT CommThreadProc(LPVOID pParam)
 					continue;
 				}
 
-				VTDRRecord* ptrRecord = pro.Parse(packet);
-				if (ptrRecord)
+				int n  = pro.Parse(packet, ptrUI->m_Records);
+				if (n)
 				{
-					ptrUI->SendMessage(WM_UPDATE_DATA, (WPARAM) ptrRecord,
+					ptrUI->SendMessage(WM_UPDATE_DATA, (WPARAM) n,
 							NULL);
 				}
 
@@ -304,26 +305,31 @@ void CDataCollectionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 
 LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 {
-	VTDRRecord* ptrRec = (VTDRRecord*) wParam;
+	int n = (int) wParam;
 
-	if (ptrRec)
+	if (n)
 	{
-		string strDump;
-		string strTitle;
-        strTitle = USBDataFilev2012::DataBlockName[ptrRec->GetDataCode()];
-		strTitle += "\r\n";
-		ptrRec->Dump(strDump);
-        strDump += "\r\n";
-        strTitle += strDump;
-        Prompt(strTitle.c_str());
-        
-		m_strStatus.LoadString(IDS_RECEIVE);
-        if (ptrRec->GetDataCode() == VTDRRecord::Version)
+        while(m_Records.size())
         {
-            VTDRVersion* p = (VTDRVersion*)ptrRec;
-            m_strVersion.Format("%d.%d",p->year,p->modify);
-        }
-		delete ptrRec;
+            VTDRRecord* ptrRec = m_Records.front();
+            m_Records.pop_front();
+            string strDump;
+            string strTitle;
+            strTitle = USBDataFilev2012::DataBlockName[ptrRec->GetDataCode()];
+            strTitle += "\r\n";
+            ptrRec->Dump(strDump);
+            strDump += "\r\n";
+            strTitle += strDump;
+            Prompt(strTitle.c_str());
+            
+            m_strStatus.LoadString(IDS_RECEIVE);
+            if (ptrRec->GetDataCode() == VTDRRecord::Version)
+            {
+                VTDRVersion* p = (VTDRVersion*)ptrRec;
+                m_strVersion.Format("%d.%d",p->year,p->modify);
+            }
+            delete ptrRec;
+        };
 	}
 	else
 	{
@@ -485,8 +491,11 @@ void CDataCollectionDlg::OnButtonDriver()
 
 void CDataCollectionDlg::OnButtonDri() 
 {
-	
-	sendCmd(GET_Driver_Record,0,0,0);
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Driver_Record,tStart,tEnd,nNum);	
+    }	
+
 }
 
 void CDataCollectionDlg::OnButtonRtc() 
@@ -496,12 +505,18 @@ void CDataCollectionDlg::OnButtonRtc()
 
 void CDataCollectionDlg::OnButtonOtd() 
 {
-	sendCmd(GET_OverDrive_Record,0,0,0);	
+    if (getDateSetting())
+    {
+	    sendCmd(GET_OverDrive_Record,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonAcdr() 
 {
-	sendCmd(GET_Suspious_Record,0,0,0);	
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Suspious_Record,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonChkclk() 
@@ -559,7 +574,10 @@ void CDataCollectionDlg::OnButtonOdermeter()
 
 void CDataCollectionDlg::OnButtonPara() 
 {
-	sendCmd(GET_Param_Record,0,0,0);
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Param_Record,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonPlus() 
@@ -569,12 +587,18 @@ void CDataCollectionDlg::OnButtonPlus()
 
 void CDataCollectionDlg::OnButtonPos() 
 {
-	sendCmd(GET_Postion_Record,0,0,0);	
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Postion_Record,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonPwr() 
 {
-	sendCmd(GET_Power_Record,0,0,0);
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Power_Record,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonSetconf() 
@@ -585,8 +609,7 @@ void CDataCollectionDlg::OnButtonSetconf()
 
 void CDataCollectionDlg::OnButtonSetpara() 
 {
-	// TODO: Add your control notification handler code here
-	
+
 }
 
 void CDataCollectionDlg::OnButtonSetvinfo() 
@@ -617,7 +640,10 @@ void CDataCollectionDlg::OnButtonStatconf()
 
 void CDataCollectionDlg::OnButtonStlog() 
 {
-	sendCmd(GET_Speed_State_Log,0,0,0);
+    if (getDateSetting())
+    {
+	    sendCmd(GET_Speed_State_Log,tStart,tEnd,nNum);	
+    }
 }
 
 void CDataCollectionDlg::OnButtonUniqno() 

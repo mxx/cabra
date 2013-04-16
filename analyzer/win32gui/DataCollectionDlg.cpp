@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Analyzer.h"
 #include "VTDRVersion.h"
+#include "VTDRRealTime.h"
 #include "define_gbk.h"
 #include "DataCollectionDlg.h"
 #include "SerialPort.h"
@@ -13,6 +14,7 @@
 #include "protocol/Protocol.h"
 #include "USBDataFilev2012.h"
 #include "DlgSetVInfo.h"
+#include "DlgSetInstDate.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -400,11 +402,11 @@ bool CDataCollectionDlg::getDateSetting(void)
     return false;
 }
 
-void CDataCollectionDlg::sendCmd(VTDRRecord* ptrRec)
+void CDataCollectionDlg::sendCmd(CmdWord cmd,VTDRRecord* ptrRec)
 {
     Protocol pro;
 	Packet packet;
-    packet = pro.Command(ptrRec);
+    packet = pro.Command(cmd,ptrRec);
 	m_strStatus.LoadString(IDS_SENDING);
 	UpdateData(FALSE);
 	m_port.Write(packet.GetData().data(), packet.GetData().size());
@@ -539,8 +541,14 @@ void CDataCollectionDlg::OnButtonCjkodr()
 
 void CDataCollectionDlg::OnButtonClock() 
 {
-	// TODO: Add your control notification handler code here
-	
+	CDlgSetInstDate dlg;
+    dlg.m_tInstDate = CTime::GetCurrentTime();
+    if (dlg.DoModal()==IDOK)
+    {
+        VTDRRealTime realTime;
+        realTime.tTime = dlg.m_tInstDate.GetTime();
+        sendCmd(SET_Clock,&realTime);
+    }
 }
 
 void CDataCollectionDlg::OnButtonEntcheck() 
@@ -563,8 +571,14 @@ void CDataCollectionDlg::OnButtonInitodr()
 
 void CDataCollectionDlg::OnButtonInstdate() 
 {
-	// TODO: Add your control notification handler code here
-	
+	CDlgSetInstDate dlg;
+    dlg.m_tInstDate = CTime::GetCurrentTime();
+    if (dlg.DoModal()==IDOK)
+    {
+        VTDRRealTime realTime;
+        realTime.tTime = dlg.m_tInstDate.GetTime();
+        sendCmd(SET_Install_Date,&realTime);
+    }
 }
 
 void CDataCollectionDlg::OnButtonOdermeter() 
@@ -621,7 +635,7 @@ void CDataCollectionDlg::OnButtonSetvinfo()
         info.strPlateClass = (LPCTSTR)dlg.m_strPClass;
         info.strPlateNumber = (LPCTSTR)dlg.m_strPNo;
         info.strTypeCode = (LPCTSTR)dlg.m_strVID;
-        sendCmd(&info);      
+        sendCmd(SET_Vehicle_Info,&info);      
     }
 }
 

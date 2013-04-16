@@ -52,7 +52,7 @@ public:
 	static map<CString,LPCTSTR> dict;
 // Implementation
 protected:
-	void sendCmd(VTDRRecord* ptrRec);
+	void sendCmd(CmdWord cmd,VTDRRecord* ptrRec);
 
 	CString strSending;
 	CString strReceive;

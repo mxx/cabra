@@ -23,6 +23,7 @@
 #define IDD_DIALOG_LIST                 138
 #define IDD_DIALOG_SENDPARA             138
 #define IDD_DIALOG_SETVINFO             141
+#define IDD_DIALOG_INSTDATE             142
 #define IDC_BUTTON_DATA_COLLECTION      1000
 #define IDC_BUTTON_FILE_SETTING         1009
 #define IDC_BUTTON_SPECTRUM             1010
@@ -68,6 +69,7 @@
 #define IDC_GRAPH                       1094
 #define IDC_DATETIMEPICKER1             1096
 #define IDC_DATETIMEPICKER_START        1096
+#define IDC_DATETIMEPICKER_INSTDATE     1096
 #define IDC_DATETIMEPICKER_END          1097
 #define IDC_EDIT_REC                    1099
 #define IDC_SPIN2                       1100
@@ -77,15 +79,16 @@
 #define IDC_EDIT_VID                    1104
 #define IDC_EDIT_PNO                    1105
 #define IDC_EDIT_PCLASS                 1106
+#define IDC_DATETIMEPICKER_INSTTIME     1107
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        142
+#define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1107
+#define _APS_NEXT_CONTROL_VALUE         1108
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

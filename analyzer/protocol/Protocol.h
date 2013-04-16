@@ -19,7 +19,7 @@ public:
 	virtual ~Protocol();
 	int Parse(Packet& packet, list<VTDRRecord*>& recs);
 	Packet Command(CmdWord cmd,time_t tStart, time_t tEnd, int size);
-    Packet Command(VTDRRecord* ptrRec);
+    Packet Command(CmdWord cmd,VTDRRecord* ptrRec);
 protected:
 
 

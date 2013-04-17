@@ -77,14 +77,16 @@ void SeleteDate::OnCancelMode()
 
 void SeleteDate::OnOK() 
 {
-    UpdateData();
+    CDialog::OnOK();
     CTime t;
-    m_ctlStart.GetTime(t);
-    m_timeStart=CTime(t.GetYear(),t.GetMonth(),t.GetDay(),
+    if (GDT_VALID == m_ctlStart.GetTime(t))
+	{
+		m_timeStart=CTime(t.GetYear(),t.GetMonth(),t.GetDay(),
         m_timeStart.GetHour(),m_timeStart.GetMinute(),m_timeStart.GetSecond());
-
+	}
     m_ctlEnd.GetTime(t);
     m_timeEnd=CTime(t.GetYear(),t.GetMonth(),t.GetDay(),
         m_timeEnd.GetHour(),m_timeEnd.GetMinute(),m_timeEnd.GetSecond());
-	CDialog::OnOK();
+
+	
 }

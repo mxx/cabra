@@ -15,7 +15,8 @@
 #include "USBDataFilev2012.h"
 #include "DlgSetVInfo.h"
 #include "DlgSetInstDate.h"
-
+#include "DlgSetOnPara.h"
+#include "DlgSetStateName.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -317,8 +318,9 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
             m_Records.pop_front();
             string strDump;
             string strTitle;
-            strTitle = USBDataFilev2012::DataBlockName[ptrRec->GetDataCode()];
-            strTitle += "\r\n";
+            strTitle = _T("【");
+            strTitle += USBDataFilev2012::DataBlockName[ptrRec->GetDataCode()];
+            strTitle += _T("】\r\n");
             ptrRec->Dump(strDump);
             strDump += "\r\n";
             strTitle += strDump;
@@ -565,8 +567,16 @@ void CDataCollectionDlg::OnButtonExitchk()
 
 void CDataCollectionDlg::OnButtonInitodr() 
 {
-	// TODO: Add your control notification handler code here
-	
+	CDlgSetOnPara dlg;
+    dlg.m_strTitle.LoadString(IDS_ODERMETERSTART);
+    if (dlg.DoModal()==IDOK)
+    {
+        VTDROderMeter recd;
+        recd.startMeter = dlg.m_nPara;
+        recd.tInstall = time(NULL);
+        recd.tNow = time(NULL);
+        sendCmd(SET_Odometer,&recd);
+    }
 }
 
 void CDataCollectionDlg::OnButtonInstdate() 
@@ -617,13 +627,33 @@ void CDataCollectionDlg::OnButtonPwr()
 
 void CDataCollectionDlg::OnButtonSetconf() 
 {
-	// TODO: Add your control notification handler code here
-	
+	CDlgSetStateName dlg;
+    if (dlg.DoModal()==IDOK)
+    {
+        VTDRVehicleConfigure conf;
+        conf.strNameOf[0] = (LPCTSTR)dlg.m_strName1;
+        conf.strNameOf[1] = (LPCTSTR)dlg.m_strName2;
+        conf.strNameOf[2] = (LPCTSTR)dlg.m_strName3;
+        conf.strNameOf[3] = (LPCTSTR)dlg.m_strName4;
+        conf.strNameOf[4] = (LPCTSTR)dlg.m_strName5;
+        conf.strNameOf[5] = (LPCTSTR)dlg.m_strName6;
+        conf.strNameOf[6] = (LPCTSTR)dlg.m_strName7;
+        conf.strNameOf[7] = (LPCTSTR)dlg.m_strName8;
+        sendCmd(SET_Param_Config,&conf);
+    }
 }
 
 void CDataCollectionDlg::OnButtonSetpara() 
 {
-
+    CDlgSetOnPara dlg;
+    dlg.m_strTitle.LoadString(IDS_PULSPARA);
+    if (dlg.DoModal()==IDOK)
+    {
+        VTDRPulseModulus recd;
+        recd.sModulus = dlg.m_nPara;
+        recd.tTime = time(NULL);
+        sendCmd(SET_Pulse_Param,&recd);
+    }
 }
 
 void CDataCollectionDlg::OnButtonSetvinfo() 
@@ -736,6 +766,7 @@ void CDataCollectionDlg::InitDict()
     D(Logout,退出);
     D(PowerOn,上电);
     D(PowerOff,掉电);
+    dict["\n"]=_T("\r\n");
 
 }
 

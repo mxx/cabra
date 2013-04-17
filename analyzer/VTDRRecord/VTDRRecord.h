@@ -99,8 +99,8 @@ public:
 			char *destbuf, size_t destlen);
 	static int gb2312toutf8(const char *sourcebuf, size_t sourcelen,
 			char *destbuf, size_t destlen);
-	string UTF8ToGB2312(const string& str) const;
-	string GB2312ToUTF8(const string& str) const;
+	static string UTF8ToGB2312(const string& str);
+	static string GB2312ToUTF8(const string& str);
 
 	static float TenThoundthMinuteToMinute(int n)
 	{

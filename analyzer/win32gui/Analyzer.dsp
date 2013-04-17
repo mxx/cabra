@@ -113,6 +113,14 @@ SOURCE=.\DlgSetInstDate.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DlgSetOnPara.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\DlgSetStateName.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DlgSetVInfo.cpp
 # End Source File
 # Begin Source File
@@ -258,6 +266,14 @@ SOURCE=..\VTDRRecord\define_gbk.h
 # Begin Source File
 
 SOURCE=.\DlgSetInstDate.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DlgSetOnPara.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DlgSetStateName.h
 # End Source File
 # Begin Source File
 

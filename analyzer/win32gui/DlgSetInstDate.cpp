@@ -19,8 +19,8 @@ CDlgSetInstDate::CDlgSetInstDate(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgSetInstDate::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CDlgSetInstDate)
-	m_tInstDate = 0;
-	m_tInstTime = 0;
+	m_tInstDate = time(NULL);
+	m_tInstTime = time(NULL);
 	//}}AFX_DATA_INIT
 }
 
@@ -45,8 +45,8 @@ END_MESSAGE_MAP()
 
 void CDlgSetInstDate::OnOK() 
 {
-	
+	CDialog::OnOK();
     m_tInstDate = CTime(m_tInstDate.GetYear(),m_tInstDate.GetMonth(),m_tInstDate.GetDay(),
                 m_tInstTime.GetHour(),m_tInstTime.GetMinute(),m_tInstTime.GetSecond());
-	CDialog::OnOK();
+
 }

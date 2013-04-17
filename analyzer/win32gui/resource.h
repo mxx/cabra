@@ -11,6 +11,8 @@
 #define IDS_SETERROR                    7
 #define IDS_GETERROR                    8
 #define IDS_GRAPH_TITLE                 9
+#define IDS_PULSPARA                    10
+#define IDS_ODERMETERSTART              11
 #define IDD_MAIN_DIALOG                 102
 #define IDD_PROPPAGE_SET                106
 #define IDR_MAINFRAME                   128
@@ -24,6 +26,8 @@
 #define IDD_DIALOG_SENDPARA             138
 #define IDD_DIALOG_SETVINFO             141
 #define IDD_DIALOG_INSTDATE             142
+#define IDD_DIALOG_ONEPARA              143
+#define IDD_DIALOG_STCONFIG             144
 #define IDC_BUTTON_DATA_COLLECTION      1000
 #define IDC_BUTTON_FILE_SETTING         1009
 #define IDC_BUTTON_SPECTRUM             1010
@@ -80,15 +84,25 @@
 #define IDC_EDIT_PNO                    1105
 #define IDC_EDIT_PCLASS                 1106
 #define IDC_DATETIMEPICKER_INSTTIME     1107
+#define IDC_EDIT_PARA                   1108
+#define IDC_STATIC_PARANAME             1109
+#define IDC_EDIT1                       1110
+#define IDC_EDIT2                       1111
+#define IDC_EDIT3                       1112
+#define IDC_EDIT4                       1113
+#define IDC_EDIT5                       1114
+#define IDC_EDIT6                       1115
+#define IDC_EDIT7                       1116
+#define IDC_EDIT8                       1117
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1108
+#define _APS_NEXT_CONTROL_VALUE         1111
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

@@ -121,6 +121,10 @@ int VTDRRecord::utf8togb2312(const char *sourcebuf, size_t sourcelen,
 	if ((size_t) -1 == iconv(cd, source, &sourcelen, dest, &destlen))
 		rt = -1;
 	iconv_close(cd);
+#else
+	string strUTF(sourcebuf,sourcelen);
+	UTF8ToGB2312(strUTF);
+	strncpy(destbuf,strUTF.c_str(),destlen);
 #endif
 	return rt;
 
@@ -142,12 +146,17 @@ int VTDRRecord::gb2312toutf8(const char *sourcebuf, size_t sourcelen,
 	if ((size_t) -1 == iconv(cd, source, &sourcelen, dest, &destlen))
 		rt = -1;
 	iconv_close(cd);
+#else
+	string strGB(sourcebuf,sourcelen);
+	GB2312ToUTF8(strGB);
+	strncpy(destbuf,strGB.c_str(),destlen);
+
 #endif
 	return rt;
 
 }
 
-string VTDRRecord::UTF8ToGB2312(const string& str) const
+string VTDRRecord::UTF8ToGB2312(const string& str) 
 {
 #ifndef _WIN32
 	char* ptrBuf = new char[str.size() * 2];
@@ -174,7 +183,7 @@ string VTDRRecord::UTF8ToGB2312(const string& str) const
     return strR;
 }
 
-string VTDRRecord::GB2312ToUTF8(const string& str) const
+string VTDRRecord::GB2312ToUTF8(const string& str) 
 {
 #ifndef _WIN32
 	char* ptrBuf = new char[str.size() * 2];

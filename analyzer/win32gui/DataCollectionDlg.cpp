@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <afxmt.h>
 #include "Analyzer.h"
 #include "VTDRVersion.h"
 #include "VTDRRealTime.h"
@@ -24,9 +25,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define D(x,y)  dict[#x] = _T( #y )
-
+CMutex g_Mutex(FALSE,NULL);
 using namespace std;
 map<CString,LPCTSTR> CDataCollectionDlg::dict;
+
+
 
 UINT CommThreadProc(LPVOID pParam)
 {
@@ -40,6 +43,7 @@ UINT CommThreadProc(LPVOID pParam)
 		char buf[2048] =
 		{ 0 };
 		int n = 0;
+
 		n = ptrUI->m_port.Read(buf, 2048);
 
 		if (n || strCache.size())
@@ -103,6 +107,7 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
 	//}}AFX_DATA_INIT
 	pWorking = NULL;
 	m_bStop = false;
+    m_bCheckMode = false;
     tStart = 0;
     tEnd = 0;
     nNum = 0;
@@ -180,8 +185,9 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
 	ON_BN_CLICKED(IDC_BUTTON_STLOG, OnButtonStlog)
 	ON_BN_CLICKED(IDC_BUTTON_UNIQNO, OnButtonUniqno)
 	ON_BN_CLICKED(IDC_BUTTON_VINFO, OnButtonVinfo)
-    ON_WM_COPYDATA()
 	ON_BN_CLICKED(IDC_CHECK_DEBUG, OnCheckDebug)
+    ON_WM_COPYDATA()
+	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
     ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
     END_MESSAGE_MAP()
@@ -309,7 +315,7 @@ void CDataCollectionDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
 {
 	int n = (int) wParam;
-
+    
 	if (n)
 	{
         while(m_Records.size())
@@ -411,7 +417,9 @@ void CDataCollectionDlg::sendCmd(CmdWord cmd,VTDRRecord* ptrRec)
     packet = pro.Command(cmd,ptrRec);
 	m_strStatus.LoadString(IDS_SENDING);
 	UpdateData(FALSE);
+    g_Mutex.Lock();
 	m_port.Write(packet.GetData().data(), packet.GetData().size());
+    g_Mutex.Unlock();
     Sleep(500);
 	m_strStatus = "";
 	UpdateData(FALSE);
@@ -423,7 +431,9 @@ void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int si
 	Packet packet = pro.Command(cmd, tStart, tEnd, size);
 	m_strStatus.LoadString(IDS_SENDING);
 	UpdateData(FALSE);
+    g_Mutex.Lock();
 	m_port.Write(packet.GetData().data(), packet.GetData().size());
+    g_Mutex.Unlock();
     Sleep(500);
 	m_strStatus = "";
 	UpdateData(FALSE);
@@ -456,7 +466,13 @@ void CDataCollectionDlg::showCHKbuttons(int cmd)
     {
         CWnd* pWnd = GetDlgItem(IDC_BUTTON_ENTCHECK+i);
         if (pWnd)
+        {
             pWnd->ShowWindow(cmd);
+            if (i)
+                pWnd->EnableWindow(FALSE);
+            else
+                pWnd->SetFocus();
+        }
     }
 }
 
@@ -465,11 +481,13 @@ void CDataCollectionDlg::OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult)
 	switch (m_tabComm.GetCurFocus())
     {
     case 0:
+        m_bCheckMode = false;
 	    showGETbuttons(SW_SHOW);
 	    showSETbuttons(SW_HIDE);
 	    showCHKbuttons(SW_HIDE);
         break;
     case 1:
+        m_bCheckMode = false;
     	showSETbuttons(SW_SHOW);
         showCHKbuttons(SW_HIDE);
         showGETbuttons(SW_HIDE);
@@ -525,20 +543,17 @@ void CDataCollectionDlg::OnButtonAcdr()
 
 void CDataCollectionDlg::OnButtonChkclk() 
 {
-	// TODO: Add your control notification handler code here
-	
+	sendCmd(CHECK_Output_RTC_Pulse,0,0,0);
 }
 
 void CDataCollectionDlg::OnButtonChkpara() 
 {
-	// TODO: Add your control notification handler code here
-	
+	sendCmd(CHECK_Output_Speed_Pulse,0,0,0);
 }
 
 void CDataCollectionDlg::OnButtonCjkodr() 
 {
-	// TODO: Add your control notification handler code here
-	
+	sendCmd(CHECK_Input_Speed_Pulse,0,0,0);	
 }
 
 void CDataCollectionDlg::OnButtonClock() 
@@ -555,14 +570,19 @@ void CDataCollectionDlg::OnButtonClock()
 
 void CDataCollectionDlg::OnButtonEntcheck() 
 {
-	// TODO: Add your control notification handler code here
-	
+    
+	sendCmd(CHECK_Enter,0,0,0);
+    m_bCheckMode = true;
+    enableCHKButton(TRUE);
+    SetTimer(1,2000,NULL);
 }
 
 void CDataCollectionDlg::OnButtonExitchk() 
 {
-	// TODO: Add your control notification handler code here
-	
+    m_bCheckMode = false;
+	sendCmd(CHECK_Leave,0,0,0);
+    KillTimer(1);
+    enableCHKButton(FALSE);
 }
 
 void CDataCollectionDlg::OnButtonInitodr() 
@@ -778,3 +798,35 @@ LPCTSTR CDataCollectionDlg::Tanslate(CString &str)
     return str;
 }
 
+
+void CDataCollectionDlg::CheckModeHeartbeat()
+{
+    if (!m_bCheckMode)
+    {
+        KillTimer(1);
+        return;
+    }
+    sendCmd(CHECK_Enter,0,0,0);
+}
+
+void CDataCollectionDlg::enableCHKButton(BOOL enable)
+{
+    for(int i=1;i < 5 ;i++)
+    {
+        CWnd* pWnd = GetDlgItem(IDC_BUTTON_ENTCHECK+i);
+        if (pWnd)
+        {
+            pWnd->EnableWindow(enable);
+        }
+    }
+    if (!enable)
+        GetDlgItem(IDC_BUTTON_ENTCHECK)->SetFocus();
+}
+
+void CDataCollectionDlg::OnTimer(UINT nIDEvent) 
+{
+    if (m_bCheckMode)
+        CheckModeHeartbeat();
+
+	CDialog::OnTimer(nIDEvent);
+}

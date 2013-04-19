@@ -20,6 +20,7 @@ class CDataCollectionDlg : public CDialog
 {
 // Construction
 public:
+	void CheckModeHeartbeat(void);
 	static LPCTSTR Tanslate(CString& str);
 	static void InitDict(void);
 	void Prompt(LPCSTR szTxt);
@@ -41,6 +42,7 @@ public:
 	CSerialPort m_port;
 	CString m_strDev;
 	bool m_bStop;
+    bool m_bCheckMode;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CDataCollectionDlg)
@@ -52,6 +54,7 @@ public:
 	static map<CString,LPCTSTR> dict;
 // Implementation
 protected:
+	void enableCHKButton(BOOL enable);
 	void sendCmd(CmdWord cmd,VTDRRecord* ptrRec);
 
 	CString strSending;
@@ -59,6 +62,7 @@ protected:
 	CWinThread *pWorking;
     time_t tStart;
     time_t tEnd;
+    time_t tLastBeat;
     int nNum;
 	void groupButtonSet(int first,int number);
     void showGETbuttons(int cmd);
@@ -105,6 +109,7 @@ protected:
 	afx_msg void OnButtonUniqno();
 	afx_msg void OnButtonVinfo();
 	afx_msg void OnCheckDebug();
+	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()

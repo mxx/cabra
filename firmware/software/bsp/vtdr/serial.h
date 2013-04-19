@@ -49,6 +49,7 @@ struct stm32_serial_int_rx
 {
 	rt_uint8_t  rx_buffer[UART_RX_BUFFER_SIZE];
 	rt_uint32_t read_index, save_index;
+	rt_uint8_t getcmd;
 };
 
 struct stm32_serial_device

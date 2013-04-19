@@ -60,6 +60,9 @@
 /* Using Device System */
 #define RT_USING_DEVICE
 #define RT_USING_UART2
+#define RT_USING_UART3
+#define RT_USING_UART4
+#define RT_USING_UART5
 
 /* SECTION: Console options */
 /* the buffer size of console*/

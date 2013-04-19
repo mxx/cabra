@@ -3,6 +3,37 @@
  *
  *  Created on: Jan 27, 2013
  *      Author: mxx
+ *
+ *  FLASH文件系统
+ *  将FLASH地址空间，分为256个数据块，分别分配给不同的文件使用
+ *  FLASH空间的大小通过FLASH_SIZE宏定义
+ *  每个文件使用一个4bit标识，最多可处理16个文件
+ *
+ *  每个数据块头部，包含一个FlashBlockHead结构，定义此块属于那个文件，以及
+ *  第一个时间标签的开始位置，和文件下一块的编号、块的擦写次数
+ *
+ *  flashFileBlockLimite
+ *  定义各个文件的分配最大的数据块数
+ *
+ *  block_map是内存中记录文件分配表，类似FAT表
+ *  系统启动后，需调用flashfile_system_init，从FLASH中回复数据
+ *
+ *  FlashFile类型的数组变量flashFile，
+ *  记录每个文件相关参数的数据结构。
+ *  使用文件系统前需调用flashfile_set_param设置文件的各项参数。
+ *  文件内容是带时间标签的定长记录
+ *  需要设置的参数：
+ *  int record_size		记录的长度
+ *  int time_unit		每条记录的代表多少秒
+ *  int time_interval	时间标签的间隔时间，以秒为单位
+ *
+ *  寫文件調用 flashfile_append_record函數
+ *  參數爲：文件標識，時間標籤，數據指針
+ *  返回值：大於0，表示寫的字節數，小於0，表示出錯
+ *
+ *  讀文件調用 flashfile_get_record函數
+ *  參數爲：文件標識，時間標籤，存儲回傳數據的指針
+ *  返回值：0，表示沒有此數據，大於0，表示寫的字節數，小於0，表示出錯
  */
 #include "flashfile.h"
 #include "flash_dev.h"

@@ -97,7 +97,7 @@ void rtthread_startup(void)
 	rt_system_scheduler_init();
 
 	/* init dataflash driver */
-	rt_hw_dataflash_init();
+	//rt_hw_dataflash_init();
 	rt_hw_rtc_init();
 
 	/* init all device */
@@ -126,7 +126,7 @@ void rtthread_startup(void)
 
 int main(void)
 {
-	rt_uint32_t UNUSED level;
+	rt_uint32_t  level;
 
 	/* disable interrupt first */
 	level = rt_hw_interrupt_disable();

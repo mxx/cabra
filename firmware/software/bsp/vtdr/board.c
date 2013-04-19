@@ -21,6 +21,7 @@
 #include "misc.h"
 #include "board.h"
 #include "gpio_drv.h"
+#include "menu.h"
 
 /**
  * @addtogroup STM32
@@ -123,11 +124,11 @@ void rt_hw_usb_init()
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_Pin   = USB_PWR_ON ;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
     GPIO_InitStructure.GPIO_Pin   = USB_OC ;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 #if 0
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPD;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -165,6 +166,7 @@ void rt_hw_board_init()
 	rt_hw_gpio_init();
 	I2C_LowLevel_Init(I2C1);
 	rt_console_set_device(CONSOLE_DEVICE);
+	 //DisplayProductVersion();
 }
 
 /*@}*/

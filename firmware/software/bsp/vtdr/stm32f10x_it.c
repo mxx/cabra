@@ -28,7 +28,7 @@
 
 #include <usb_core.h>
 #include <usbh_core.h>
-
+#include<stm32f10x_dma.h>
 /** @addtogroup Template_Project
   * @{
   */
@@ -324,7 +324,7 @@ void EXTI4_IRQHandler(void)
   */
 void EXTI15_10_IRQHandler(void)
 {
-	EXTI_ClearITPendingBit(EXTI_Line11);
+	//EXTI_ClearITPendingBit(EXTI_Line11);
 	rt_kprintf("fired\n");
 }
 void TIM2_IRQHandler(void)

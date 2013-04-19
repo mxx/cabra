@@ -20,12 +20,22 @@
 #ifndef FONT_MATRIX
 #define  FONT_MATRIX unsigned char
 #endif
-
-
+#define HAN_ZI 12
+#define NUM  6
+#define ZIMU 7
+typedef enum
+{
+	line1 = 3,
+	line2 = 1,
+	line3 = 7,
+	line4 = 5,
+	lineall = 8
+}LINE_CMD;
 void rt_hw_lcd_init(void);
 void rt_hw_lcd_on(void);
 void rt_hw_lcd_off(void);
-void lcd_write_matrix(rt_uint8_t row,rt_uint8_t column,FONT_MATRIX *pt);
+void lcd_write_matrix(rt_uint8_t row,rt_uint8_t column,FONT_MATRIX *pt,rt_uint8_t num);
 void lcd_Reset(void);
+void lcd_clear(LINE_CMD value);
 
 #endif

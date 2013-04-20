@@ -15,8 +15,11 @@
 
 #include <rtthread.h>
 #include <stm32f10x.h>
+#include <stm32f10x_rcc.h>
+#include <stm32f10x_bkp.h>
 #include "rtc.h"
-
+#include "application.h"
+CLOCK curTime;
 static struct rt_device rtc;
 static rt_err_t rt_rtc_open(rt_device_t dev, rt_uint16_t oflag)
 {
@@ -211,22 +214,26 @@ void set_date(rt_uint32_t year, rt_uint32_t month, rt_uint32_t day)
 }
 FINSH_FUNCTION_EXPORT(set_date, set date. e.g: set_date(2010,2,28))
 
-void set_time(rt_uint32_t hour, rt_uint32_t minute, rt_uint32_t second)
+void SetCurrentDateTime(CLOCK *clock)
 {
     time_t now;
     struct tm* ti;
     rt_device_t device;
 
     ti = RT_NULL;
+
     /* get current time */
     time(&now);
 
     ti = localtime(&now);
     if (ti != RT_NULL)
     {
-        ti->tm_hour = hour;
-        ti->tm_min 	= minute;
-        ti->tm_sec 	= second;
+		ti->tm_year =   BCD2Char(clock->year) +100;
+		ti->tm_mon 	= BCD2Char(clock->month )- 1; /* ti->tm_mon 	= month; 0~11 */
+		ti->tm_mday = BCD2Char(clock->day);
+		ti->tm_hour = BCD2Char(clock->hour);
+		ti->tm_min 	= BCD2Char(clock->minute);
+		ti->tm_sec 	= BCD2Char(clock->second);
     }
 
     now = mktime(ti);
@@ -236,7 +243,7 @@ void set_time(rt_uint32_t hour, rt_uint32_t minute, rt_uint32_t second)
         rt_rtc_control(device, RT_DEVICE_CTRL_RTC_SET_TIME, &now);
     }
 }
-FINSH_FUNCTION_EXPORT(set_time, set time. e.g: set_time(23,59,59))
+//FINSH_FUNCTION_EXPORT(SetCurrentDateTime, set time. e.g: SetCurrentDateTime(23,59,59))
 
 void list_date(void)
 {
@@ -246,4 +253,30 @@ void list_date(void)
     rt_kprintf("%s\n", ctime(&now));
 }
 FINSH_FUNCTION_EXPORT(list_date, show date and time.)
+
+void GetCurrentDateTime(CLOCK *clock)
+{
+	  time_t now;
+	  struct tm* ti;
+	    rt_device_t device;
+
+	    ti = RT_NULL;
+	    /* get current time */
+	    time(&now);
+
+	    ti = localtime(&now);
+	    if (ti != RT_NULL)
+	    {
+	    	clock->day = Char2BCD((unsigned char)ti->tm_mday);
+	    	clock->month = Char2BCD((unsigned char)ti->tm_mon+1);
+	    	clock->year = Char2BCD((unsigned char)ti->tm_year-100);
+	        clock->hour = Char2BCD((unsigned char)ti->tm_hour);
+	        clock->minute = Char2BCD((unsigned char)ti->tm_min);
+	        clock->second = Char2BCD((unsigned char)ti->tm_sec);
+
+	    }
+
+
+}
+
 #endif

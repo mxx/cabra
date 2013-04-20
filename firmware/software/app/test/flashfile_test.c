@@ -59,6 +59,7 @@ void flashfile_dump(void)
 	}
 }
 
+// 驱动接口函数，删除指定的块
 int flash_erase_block(const int block)
 {
 	int abs_offset = block * BLOCK_SIZE ;
@@ -104,6 +105,7 @@ int flash_read_raw(int fp, const int offset, char* ptrData, int size)
 	}
 	return 0;
 }
+
 
 int flash_write(const int block, const int offset, const char* ptrData,
 		const int size)

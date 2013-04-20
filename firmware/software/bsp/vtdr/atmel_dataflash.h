@@ -28,7 +28,7 @@
 
 /* Dummy byte */
 #define DUMMY   0xFF
-
+//#define DATAFLASH_BASE 0x00000000
 /* Start Data tokens  */
 /* Tokens (necessary because at nop/idle (and CS active) only 0xff is on the data/command line) */
 #define DATAFLASH_START_DATA_SINGLE_BLOCK_READ 0xFE  /* Data token start byte, Start Single Block Read */
@@ -144,33 +144,33 @@ sDATAFLASH_CID;
 /* Exported functions ------------------------------------------------------- */
 
 /*----- High layer function -----*/
-u8 DATAFLASH_Init(void);
+u8 DATAFLASH_Init(SPI_TypeDef* SPIx);
 
-u8 DATAFLASH_GetDeviceID(sDATAFLASH_CID* DATAFLASH_cid);
-u8 DATAFLASH_GetStatusREG( void );
-void DATAFLASH_ChangProtectStatus(u8 pBuffer);
+u8 DATAFLASH_GetDeviceID(SPI_TypeDef* SPIx,sDATAFLASH_CID* DATAFLASH_cid);
+u8 DATAFLASH_GetStatusREG( SPI_TypeDef* SPIx );
+void DATAFLASH_ChangProtectStatus(SPI_TypeDef* SPIx,u8 pBuffer);
 
 /*----- Medium layer function -----*/
 /*----- High layer function -----*/
-void SPI_FLASH_Init(void);
-void SPI_FLASH_Sector4kErase(u32 SectorAddr);
-void SPI_FLASH_SectorErase(u32 SectorAddr);
-void SPI_FLASH_BulkErase(void);
-void SPI_FLASH_PageWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite);
-void SPI_FLASH_BufferWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite);
-void SPI_FLASH_BufferRead(u8* pBuffer, u32 ReadAddr, u16 NumByteToRead);
-void SPI_FLASH_StartReadSequence(u32 ReadAddr);
+void SPI_FLASH_Init(SPI_TypeDef* SPIx);
+void SPI_FLASH_Sector4kErase(SPI_TypeDef* SPIx,u32 SectorAddr);
+void SPI_FLASH_SectorErase(SPI_TypeDef* SPIx,u32 SectorAddr);
+void SPI_FLASH_BulkErase(SPI_TypeDef* SPIx);
+void SPI_FLASH_PageWrite(SPI_TypeDef* SPIx,u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite);
+void SPI_FLASH_BufferWrite(SPI_TypeDef* SPIx,u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite);
+void SPI_FLASH_BufferRead(SPI_TypeDef* SPIx,u8* pBuffer, u32 ReadAddr, u16 NumByteToRead);
+void SPI_FLASH_StartReadSequence(SPI_TypeDef* SPIx,u32 ReadAddr);
 
 /*----- Low layer function -----*/
-u8 SPI_FLASH_ReadByte(void);
-u8 SPI_FLASH_SendByte(u8 byte);
-u16 SPI_FLASH_SendHalfWord(u16 HalfWord);
-void SPI_FLASH_WriteEnable(void);
-void SPI_FLASH_WaitForWriteEnd(void);
+u8 SPI_FLASH_ReadByte(SPI_TypeDef* SPIx);
+u8 SPI_FLASH_SendByte(SPI_TypeDef* SPIx,u8 byte);
+u16 SPI_FLASH_SendHalfWord(SPI_TypeDef* SPIx,u16 HalfWord);
+void SPI_FLASH_WriteEnable(SPI_TypeDef* SPIx);
+void SPI_FLASH_WaitForWriteEnd(SPI_TypeDef* SPIx);
 
 /*----- Low layer function -----*/
-void DATAFLASH_WriteByte(u8 byte);
-u16 DATAFLASH_ReadByte(void);
+void DATAFLASH_WriteByte(SPI_TypeDef* SPIx,u8 byte);
+u16 DATAFLASH_ReadByte(SPI_TypeDef* SPIx);
 
 #endif /* __DATAFLASH_H */
 

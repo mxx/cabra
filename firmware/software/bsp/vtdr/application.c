@@ -21,6 +21,8 @@
 #include <board.h>
 #include <rtthread.h>
 
+#include<stm32f10x_gpio.h>
+
 #ifdef RT_USING_DFS
 /* dfs init */
 #include <dfs_init.h>
@@ -46,7 +48,8 @@
 #include "led.h"
 #include "lcd.h"
 #include "i2c_drv.h"
-#include "font_lib.h"
+#include "menu.h"
+//#include "font_lib.h"
 #include "atmel_dataflash.h"
 #include<rtdef.h>
 #include<rtconfig.h>
@@ -92,7 +95,7 @@ static void led_thread_entry(void* parameter)
        // testreadbuff=I2C_Master_BufferWrite(I2C1,OwnAddress1,0,1,&testwritebuff);
         //SPI_FLASH_Sector4kErase(0x00);
 #if 0
-        SPI_FLASH_BulkErase();
+        SPI_FLASH_BulkErase(SPI2);
         for (jonh = 0;jonh<0x100000;jonh=jonh+512)
         {
 			for (i = 0;i<512;i++ )
@@ -106,8 +109,8 @@ static void led_thread_entry(void* parameter)
 					testwritebuff[i] = i-256;
 				}
 			}
-			SPI_FLASH_BufferWrite(&testwritebuff,jonh,512);
-	        SPI_FLASH_BufferRead(&testreadbuff,jonh,512);
+			SPI_FLASH_BufferWrite(SPI2,&testwritebuff,jonh,512);
+	        SPI_FLASH_BufferRead(SPI2,&testreadbuff,jonh,512);
 	        if (strcmp(testwritebuff,testreadbuff)== 0)
 	        {
 	               	rt_hw_led_off(0);
@@ -120,8 +123,24 @@ static void led_thread_entry(void* parameter)
         rt_hw_led_on(0);
         jonhbak = jonh;
 #endif
-        //I2C_Master_BufferRead(I2C1,OwnAddress1,0,1,&testreadbuff);
+        if(GPIO_ReadInputDataBit(GPIOD,GPIO_Pin_14) == 0)
+        {
+        	MenutKeyHandler();
+        }
+        else if(GPIO_ReadInputDataBit( GPIOD, GPIO_Pin_15) == 0 )
+		{
+        	SelectKeyHandler(1);
+		}
+        else if(GPIO_ReadInputDataBit( GPIOC, GPIO_Pin_6) == 0 )
+        {
+        	SelectKeyHandler(0);
+        }
+        else if(GPIO_ReadInputDataBit( GPIOC, GPIO_Pin_7) == 0 )
+		{
+        	OKKeyHandler();
+		}
 
+      //  DisplayNormalUI();
 
 
     }

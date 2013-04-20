@@ -18,9 +18,36 @@
 #include "serial.h"
 #include <stm32f10x_dma.h>
 #include <stm32f10x_usart.h>
+extern struct rt_device uart2_device;
+typedef enum UART2_STATUS
+{
+	Get_sync_head,
+	Start_head_end,
+	Get_the_Command,
+	Get_the_lenth_high,
+	Get_the_lenth_low,
+	Get_the_reserve,
+	Get_the_data,
+	Get_the_checksum
+
+}Status_uart2;
+Status_uart2 Uart2PackStatus= Get_sync_head;
 
 static void rt_serial_enable_dma(DMA_Channel_TypeDef* dma_channel,
 	rt_uint32_t address, rt_uint32_t size);
+
+#if 0
+static rt_err_t  rt_serial_rx(rt_device_t device ,unsigned char lenth)
+{
+	struct stm32_serial_device* uart = (struct stm32_serial_device*) device->user_data;
+	switch (uart->int_rx->rx_buffer[uart->int_rx->read_index])
+	{
+		case  0xaa
+	}
+
+
+}
+#endif
 
 /**
  * @addtogroup STM32
@@ -40,6 +67,7 @@ static rt_err_t rt_serial_init (rt_device_t dev)
 				sizeof(uart->int_rx->rx_buffer));
 			uart->int_rx->read_index = 0;
 			uart->int_rx->save_index = 0;
+			uart->int_rx->getcmd = 0;
 		}
 
 		if (dev->flag & RT_DEVICE_FLAG_DMA_TX)
@@ -311,6 +339,8 @@ rt_err_t rt_hw_serial_register(rt_device_t device, const char* name, rt_uint32_t
 void rt_hw_serial_isr(rt_device_t device)
 {
 	struct stm32_serial_device* uart = (struct stm32_serial_device*) device->user_data;
+    static unsigned char checksum;
+    static uint16_t lenth;
 
 	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
 	{
@@ -326,6 +356,7 @@ void rt_hw_serial_isr(rt_device_t device)
 			level = rt_hw_interrupt_disable();
 
 			/* save character */
+#if 0
 			uart->int_rx->rx_buffer[uart->int_rx->save_index] = uart->uart_device->DR & 0xff;
 			uart->int_rx->save_index ++;
 			if (uart->int_rx->save_index >= UART_RX_BUFFER_SIZE)
@@ -337,6 +368,90 @@ void rt_hw_serial_isr(rt_device_t device)
 				uart->int_rx->read_index ++;
 				if (uart->int_rx->read_index >= UART_RX_BUFFER_SIZE)
 					uart->int_rx->read_index = 0;
+			}
+#endif
+			if((&uart2_device )== device)
+			{
+				uart->int_rx->rx_buffer[uart->int_rx->save_index] = uart->uart_device->DR & 0xff;
+				checksum = checksum^(uart->int_rx->rx_buffer[uart->int_rx->save_index]);
+				switch (Uart2PackStatus )
+				{
+					case Get_sync_head:
+						if ((uart->int_rx->rx_buffer[uart->int_rx->save_index])== 0xaa)
+						{
+							checksum = uart->int_rx->rx_buffer[uart->int_rx->save_index];
+							Uart2PackStatus = Start_head_end;
+						}
+						else
+						{
+							uart->int_rx->getcmd = 0x7f;
+						}
+						break;
+					case Start_head_end:
+						if((uart->int_rx->rx_buffer[uart->int_rx->save_index])== 0x75)
+						{
+							Uart2PackStatus = Get_the_Command;
+						}
+						else
+						{
+							uart->int_rx->getcmd = 0x7f;
+							Uart2PackStatus = Get_sync_head;
+						}
+						break;
+					case Get_the_Command:
+						if((uart->int_rx->rx_buffer[uart->int_rx->save_index]) <0x15)
+							Uart2PackStatus = Get_the_lenth_high;
+						else
+						{
+							uart->int_rx->getcmd = 0x7f;
+							Uart2PackStatus = Get_sync_head;
+						}
+
+						break;
+					case Get_the_lenth_high:
+						lenth = uart->int_rx->rx_buffer[uart->int_rx->save_index];
+						Uart2PackStatus = Get_the_lenth_high;
+						break;
+					case Get_the_lenth_low:
+						lenth = ((lenth<<8)&0xff00)+(uart->int_rx->rx_buffer[uart->int_rx->save_index]);
+						Uart2PackStatus = Get_the_reserve;
+						break;
+					case Get_the_reserve:
+						Uart2PackStatus = Get_the_data;
+						break;
+					case Get_the_data:
+						if(lenth )
+							lenth--;
+						else
+							Uart2PackStatus = Get_the_checksum;
+
+						break;
+					case Get_the_checksum:
+						if(checksum == uart->int_rx->rx_buffer[uart->int_rx->save_index])
+						{
+							uart->int_rx->getcmd ++;
+						}
+						else
+						{
+							uart->int_rx->getcmd = 0x7f;
+						}
+						Uart2PackStatus = Get_sync_head;
+						break;
+					default:
+						break;
+				}
+
+				uart->int_rx->save_index ++;
+				if (uart->int_rx->save_index >= UART_RX_BUFFER_SIZE)
+					uart->int_rx->save_index = 0;
+
+				/* if the next position is read index, discard this 'read char' */
+				if (uart->int_rx->save_index == uart->int_rx->read_index)
+				{
+					uart->int_rx->read_index ++;
+					if (uart->int_rx->read_index >= UART_RX_BUFFER_SIZE)
+						uart->int_rx->read_index = 0;
+				}
 			}
 
 			/* enable interrupt */

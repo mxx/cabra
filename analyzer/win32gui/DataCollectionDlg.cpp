@@ -186,8 +186,9 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
 	ON_BN_CLICKED(IDC_BUTTON_UNIQNO, OnButtonUniqno)
 	ON_BN_CLICKED(IDC_BUTTON_VINFO, OnButtonVinfo)
 	ON_BN_CLICKED(IDC_CHECK_DEBUG, OnCheckDebug)
-    ON_WM_COPYDATA()
 	ON_WM_TIMER()
+    ON_WM_COPYDATA()
+	ON_BN_CLICKED(IDC_BUTTON_UFILE, OnButtonUfile)
 	//}}AFX_MSG_MAP
     ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
     END_MESSAGE_MAP()
@@ -829,4 +830,36 @@ void CDataCollectionDlg::OnTimer(UINT nIDEvent)
         CheckModeHeartbeat();
 
 	CDialog::OnTimer(nIDEvent);
+}
+
+void CDataCollectionDlg::OnButtonUfile() 
+{
+    const char szFilter[] = _T("记录仪数据(*.VDR)|D*.VDR|All Files (*.*)|*.*||");
+
+    CFileDialog dlg(TRUE,".VDR",NULL,OFN_ALLOWMULTISELECT,szFilter,this);
+    if (dlg.DoModal()==IDOK)
+    {
+        POSITION pos = dlg.GetStartPosition();
+        while(pos)
+        {
+            CString str = dlg.GetNextPathName(pos);
+            USBDataFilev2012 usbfile;
+            if (!usbfile.ParseFileName((LPCTSTR)str))
+            {
+                CString strP;
+                strP.Format("文件名%s不合规范,取消读取？",(LPCTSTR)str);
+                if (AfxMessageBox((LPCTSTR)strP,MB_YESNO,NULL)==IDYES)
+                    continue;
+            }
+
+            try
+            {
+                usbfile.ReadFromFile((LPCTSTR)str);
+            }
+            catch(USBDataFileException& e)
+            {
+                AfxMessageBox(e.strType.c_str());
+            }
+        };
+    }	
 }

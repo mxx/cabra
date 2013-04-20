@@ -110,6 +110,7 @@ protected:
 	afx_msg void OnButtonVinfo();
 	afx_msg void OnCheckDebug();
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnButtonUfile();
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()

@@ -88,6 +88,7 @@
 #define IDC_STATIC_PARANAME             1109
 #define IDC_EDIT1                       1110
 #define IDC_EDIT2                       1111
+#define IDC_BUTTON_UFILE                1111
 #define IDC_EDIT3                       1112
 #define IDC_EDIT4                       1113
 #define IDC_EDIT5                       1114
@@ -102,7 +103,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1111
+#define _APS_NEXT_CONTROL_VALUE         1112
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

@@ -843,18 +843,44 @@ void CDataCollectionDlg::OnButtonUfile()
         while(pos)
         {
             CString str = dlg.GetNextPathName(pos);
+            
+            char drive[_MAX_DRIVE];
+            char dir[_MAX_DIR];
+            char fname[_MAX_FNAME];
+            char ext[_MAX_EXT];
+            
+            _splitpath( (LPCTSTR)str, drive, dir, fname, ext );
+            CString strFileName;
+            strFileName.Format("%s.%s",fname,ext);
             USBDataFilev2012 usbfile;
-            if (!usbfile.ParseFileName((LPCTSTR)str))
+            if (!usbfile.ParseFileName((LPCTSTR)strFileName))
             {
                 CString strP;
                 strP.Format("文件名%s不合规范,取消读取？",(LPCTSTR)str);
                 if (AfxMessageBox((LPCTSTR)strP,MB_YESNO,NULL)==IDYES)
                     continue;
             }
-
+            
             try
             {
                 usbfile.ReadFromFile((LPCTSTR)str);
+                string strDump;
+                for(int i =0 ;i < 21;i++)
+                {
+                    USBDataFilev2012::DataSet& data = usbfile.GetDataList(i);
+                    if (&data)
+                    {
+                        list<VTDRRecord*>::iterator it;
+                        for(it=data.begin();it!=data.end();it++)
+                        {
+                            string str;
+                            (*it)->Dump(str);
+                            strDump+=str;
+                            
+                        }
+                        Prompt(strDump.c_str());
+                    }
+                }
             }
             catch(USBDataFileException& e)
             {

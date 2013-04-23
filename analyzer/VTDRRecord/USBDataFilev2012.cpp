@@ -332,6 +332,15 @@ size_t USBDataFilev2012::readBlock(const string& str, int index)
 	return nLength + sizeof(USBDataBlock);
 }
 
+USBDataFilev2012::DataSet& USBDataFilev2012::GetDataList(int idx)
+{
+	if (Datas.count(idx))
+	{
+		return Datas[idx];
+	}
+	return *(DataSet*)NULL;
+}
+
 VTDRRecord* USBDataFilev2012::generateRecord(VTDRRecord::DataCode code)
 {
 	VTDRRecord* ptrRecord = NULL;

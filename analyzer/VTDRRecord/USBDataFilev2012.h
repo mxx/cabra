@@ -52,11 +52,14 @@ public:
 	USBDataFilev2012();
 	virtual ~USBDataFilev2012();
 
+	typedef list<VTDRRecord*> DataSet;
+
 	bool ParseFileName(const char* szFileName);
 	VTDRRecord* PushData(VTDRRecord* ptrRecord);
 	void WriteToFile(const char* szFolder);
 	void ReadFromFile(const char* szFileName);
 	string& GenerateFileName();
+	DataSet& GetDataList(int idx);
 	static void initMap();
 	static map<int, const char*> DataBlockName;
 
@@ -64,6 +67,14 @@ protected:
 	string strPlateCode;
 	time_t tRecordTime;
 	string strFileName;
+
+#ifdef _WIN32
+#pragma pack(1)
+#define PACK
+#else
+#define PACK  __attribute__ ((packed))
+#endif
+
 	typedef struct _USBDataBlock
 	{
 		unsigned char cDataCode;
@@ -71,8 +82,12 @@ protected:
 		unsigned int nDataLength;
 	} PACK USBDataBlock;
 
+#ifdef _WIN32
+#pragma pack()
+#endif
+
 	unsigned short nDataBlockNumber;
-	typedef list<VTDRRecord*> DataSet;
+
 	map<int, DataSet> Datas;
 
 	char checkSum(const string & str) const;

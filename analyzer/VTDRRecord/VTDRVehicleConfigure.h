@@ -30,4 +30,35 @@ protected:
 	}PACK Config;
 };
 
+class VTDRVehicleConfigureSetup: public VTDRVehicleConfigure
+{
+public:
+	VTDRVehicleConfigureSetup();
+	virtual ~VTDRVehicleConfigureSetup();
+
+protected:
+	typedef struct _ConfigSetup
+	{
+		unsigned char NameOfD[8][10];
+	}PACK ConfigSetup;
+public:
+
+	string& Write(string& buf)
+	{
+		ConfigSetup conf =
+		{ 0 };
+		for (int i = 0; i < 8; i++)
+		{
+			if (strNameOf[i].empty())
+				continue;
+			utf8togb2312(strNameOf[i].c_str(), strNameOf[i].size(), (char*)conf.NameOfD[i], 10);
+		}
+
+		buf.append((const char*) &conf, sizeof(conf));
+		return buf;
+	};
+
+
+};
+
 #endif /* VTDRVEHICLECONFIGURE_H_ */

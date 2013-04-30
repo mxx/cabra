@@ -592,7 +592,7 @@ void CDataCollectionDlg::OnButtonInitodr()
     if (dlg.DoModal()==IDOK)
     {
         VTDROderMeterInit recd;
-        recd.startMeter = dlg.m_nPara;
+        recd.startMeter = (double)dlg.m_nPara/10.0;
         sendCmd(SET_Odometer,&recd);
     }
 }
@@ -648,7 +648,7 @@ void CDataCollectionDlg::OnButtonSetconf()
 	CDlgSetStateName dlg;
     if (dlg.DoModal()==IDOK)
     {
-        VTDRVehicleConfigure conf;
+        VTDRVehicleConfigureSetup conf;
         conf.strNameOf[0] = (LPCTSTR)dlg.m_strName1;
         conf.strNameOf[1] = (LPCTSTR)dlg.m_strName2;
         conf.strNameOf[2] = (LPCTSTR)dlg.m_strName3;

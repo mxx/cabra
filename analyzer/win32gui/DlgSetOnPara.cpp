@@ -30,7 +30,7 @@ void CDlgSetOnPara::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDlgSetOnPara)
 	DDX_Text(pDX, IDC_EDIT_PARA, m_nPara);
-	DDV_MinMaxUInt(pDX, m_nPara, 0, 4294967295);
+	DDV_MinMaxUInt(pDX, m_nPara, 0, 99999999);
 	DDX_Text(pDX, IDC_STATIC_PARANAME, m_strTitle);
 	//}}AFX_DATA_MAP
 }

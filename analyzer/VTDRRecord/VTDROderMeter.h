@@ -22,8 +22,8 @@ public:
 	string& Dump(string& buf);
 	time_t tNow;
 	time_t tInstall;
-	float startMeter;
-	float sumMeter;
+	double startMeter;
+	double sumMeter;
 	int sumMeterRaw;
 protected:
 	typedef struct _OderMeter
@@ -50,7 +50,7 @@ public:
     string& Write(string& buf)	
     {
         unsigned char data[4]={0};
-        int v = (int)startMeter*10.0;
+        int v = (int)(startMeter*10.0);
         for (int i = 0; i < sizeof(data); i++)
         {
             data[sizeof(data) - i - 1] = INT2BCDchar( v % 100);

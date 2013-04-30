@@ -33,8 +33,8 @@ protected:
 class VTDRVehicleConfigureSetup: public VTDRVehicleConfigure
 {
 public:
-	VTDRVehicleConfigureSetup();
-	virtual ~VTDRVehicleConfigureSetup();
+    VTDRVehicleConfigureSetup() {};
+    virtual ~VTDRVehicleConfigureSetup(){};
 
 protected:
 	typedef struct _ConfigSetup

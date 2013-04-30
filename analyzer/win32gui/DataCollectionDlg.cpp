@@ -23,7 +23,7 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
+extern CString g_strUser;
 #define D(x,y)  dict[#x] = _T( #y )
 CMutex g_Mutex(FALSE,NULL);
 using namespace std;
@@ -483,7 +483,10 @@ void CDataCollectionDlg::showSETbuttons(int cmd)
     {
         CWnd* pWnd = GetDlgItem(IDC_BUTTON_SETVINFO+i);
         if (pWnd)
+        {
             pWnd->ShowWindow(cmd);
+            pWnd->EnableWindow(g_strUser == "admin");
+        }
     }
 
 }
@@ -516,8 +519,10 @@ void CDataCollectionDlg::OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult)
         m_tableData.ShowWindow(SW_HIDE);
         break;
     case 1:
+
+        showSETbuttons(SW_SHOW);
         m_bCheckMode = false;
-    	showSETbuttons(SW_SHOW);
+    	
         showCHKbuttons(SW_HIDE);
         showGETbuttons(SW_HIDE);
         m_tableData.ShowWindow(SW_HIDE);

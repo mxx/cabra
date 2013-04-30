@@ -21,6 +21,7 @@ class CDataCollectionDlg : public CDialog
 {
 // Construction
 public:
+	void UpdateBaseInfo(VTDRRecord* ptrRec);
 	CTableData m_tableData;
 	void CheckModeHeartbeat(void);
 	static LPCTSTR Tanslate(CString& str);

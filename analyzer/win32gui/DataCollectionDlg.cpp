@@ -347,21 +347,8 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
             Prompt(strTitle.c_str());
             
             m_strStatus.LoadString(IDS_RECEIVE);
-            switch(ptrRec->GetDataCode())
-            {
-            case VTDRRecord::Version:
-                {
-                VTDRVersion* p = (VTDRVersion*)ptrRec;
-                m_strVersion.Format("%d.%d",p->year,p->modify);
-                }
-                break;
-            case VTDRRecord::VehicleInfo:
-                {
-                VTDRVehicleInfo* p = (VTDRVehicleInfo*)ptrRec;
-                m_strPlateNo = p->strPlateNumber.c_str();
-                }
-                break;
-            };
+            UpdateBaseInfo(ptrRec);
+
             delete ptrRec;
         };
 	}
@@ -474,7 +461,10 @@ void CDataCollectionDlg::showGETbuttons(int cmd)
     }
     pWnd = GetDlgItem(IDC_CHECK_SAVECOM);
     if (pWnd)
-            pWnd->ShowWindow(cmd);   
+            pWnd->ShowWindow(cmd); 
+    pWnd = GetDlgItem(IDC_BUTTON_UFILE);
+    if (pWnd)
+            pWnd->ShowWindow(cmd); 
 }
 
 void CDataCollectionDlg::showSETbuttons(int cmd)
@@ -900,7 +890,7 @@ void CDataCollectionDlg::OnButtonUfile()
                 if (AfxMessageBox((LPCTSTR)strP,MB_YESNO,NULL)==IDYES)
                     continue;
             }
-            
+
             try
             {
                 usbfile.ReadFromFile((LPCTSTR)str);
@@ -911,6 +901,7 @@ void CDataCollectionDlg::OnButtonUfile()
                     if (&data)
                     {
                         list<VTDRRecord*>::iterator it = data.begin();
+                        UpdateBaseInfo((*it));
                         string str;
                         str = usbfile.DataBlockName[(*it)->GetDataCode()];
                         CString strN;
@@ -920,6 +911,7 @@ void CDataCollectionDlg::OnButtonUfile()
                         
                     }
                 }
+                UpdateData(FALSE);
                 Prompt(strDump.c_str());
             }
             catch(USBDataFileException& e)
@@ -933,4 +925,37 @@ void CDataCollectionDlg::OnButtonUfile()
 void CDataCollectionDlg::OnCheckSavecom() 
 {
 	UpdateData();	
+}
+
+void CDataCollectionDlg::UpdateBaseInfo(VTDRRecord *ptrRec)
+{
+    if (!ptrRec) return;
+    
+    switch(ptrRec->GetDataCode())
+    {
+    case VTDRRecord::Version:
+        {
+            VTDRVersion* p = (VTDRVersion*)ptrRec;
+            m_strVersion.Format("%d.%d",p->year,p->modify);
+        }
+        break;
+    case VTDRRecord::VehicleInfo:
+        {
+            VTDRVehicleInfo* p = (VTDRVehicleInfo*)ptrRec;
+            m_strPlateNo = p->strPlateNumber.c_str();
+        }
+        break;
+    case VTDRRecord::UniqCode:
+        {
+            VTDRUniqCode* p = (VTDRUniqCode*)ptrRec;
+            m_strUniqNo.Format("%s-%s-%02d%02d%02d-%d",p->strManufacture.c_str(),
+                p->strManufacture.c_str(),
+                p->nYear,
+                p->nMonth,
+                p->nDay,
+                p->nSerialNumber);
+        }
+        break;
+    };
+    
 }

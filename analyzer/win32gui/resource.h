@@ -13,6 +13,7 @@
 #define IDS_GRAPH_TITLE                 9
 #define IDS_PULSPARA                    10
 #define IDS_ODERMETERSTART              11
+#define IDS_DATA                        12
 #define IDD_MAIN_DIALOG                 102
 #define IDD_PROPPAGE_SET                106
 #define IDR_MAINFRAME                   128
@@ -28,6 +29,8 @@
 #define IDD_DIALOG_INSTDATE             142
 #define IDD_DIALOG_ONEPARA              143
 #define IDD_DIALOG_STCONFIG             144
+#define IDD_DIALOG_DATATABLE            145
+#define IDD_DIALOG_PASSWD               146
 #define IDC_BUTTON_DATA_COLLECTION      1000
 #define IDC_BUTTON_FILE_SETTING         1009
 #define IDC_BUTTON_SPECTRUM             1010
@@ -39,6 +42,7 @@
 #define IDC_STATIC_VERSION              1045
 #define IDC_BUTTON_COMCONF              1055
 #define IDC_STATIC_TIME                 1058
+#define IDC_STATIC_PLATENO              1058
 #define IDC_STATIC_STATUS               1059
 #define IDC_STATIC_UNIQNO               1060
 #define IDC_BUTTON_PRINT                1063
@@ -91,9 +95,13 @@
 #define IDC_BUTTON_UFILE                1111
 #define IDC_EDIT3                       1112
 #define IDC_EDIT4                       1113
+#define IDC_STATIC_PROMPT               1113
 #define IDC_EDIT5                       1114
+#define IDC_CHECK_SAVECOM               1114
 #define IDC_EDIT6                       1115
+#define IDC_EDIT_PASSWD                 1115
 #define IDC_EDIT7                       1116
+#define IDC_EDIT_USR                    1116
 #define IDC_EDIT8                       1117
 #define IDC_EDIT_SAMPLE                 1500
 
@@ -101,9 +109,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        145
+#define _APS_NEXT_RESOURCE_VALUE        147
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1112
+#define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

@@ -137,6 +137,10 @@ SOURCE=.\FileSettingDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Login.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\MainDlg.cpp
 # End Source File
 # Begin Source File
@@ -170,6 +174,10 @@ SOURCE=..\sqlite3\sqlite3.c
 # Begin Source File
 
 SOURCE=.\stdafx.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TableData.cpp
 # End Source File
 # Begin Source File
 
@@ -293,6 +301,10 @@ SOURCE=.\FileSettingDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Login.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\MainDlg.h
 # End Source File
 # Begin Source File
@@ -334,6 +346,10 @@ SOURCE=..\sqlite3\sqlite3ext.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TableData.h
 # End Source File
 # Begin Source File
 

@@ -6,6 +6,7 @@
 #include <time.h>
 #include <map>
 #include <list>
+#include "TableData.h"	// Added by ClassView
 
 using namespace std;
 #if _MSC_VER > 1000
@@ -20,6 +21,7 @@ class CDataCollectionDlg : public CDialog
 {
 // Construction
 public:
+	CTableData m_tableData;
 	void CheckModeHeartbeat(void);
 	static LPCTSTR Tanslate(CString& str);
 	static void InitDict(void);
@@ -32,11 +34,12 @@ public:
 	enum { IDD = IDD_DIALOG_DATA_COLLECTION };
 	CEdit	m_ctlPrompt;
 	CTabCtrl	m_tabComm;
-	CString	m_strTime;
 	CString	m_strUniqNo;
 	CString	m_strVersion;
 	CString	m_strStatus;
 	BOOL	m_bDebug;
+	BOOL	m_bSaveComData;
+	CString	m_strPlateNo;
 	//}}AFX_DATA
     DCB m_dcb;
 	CSerialPort m_port;
@@ -111,6 +114,7 @@ protected:
 	afx_msg void OnCheckDebug();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnButtonUfile();
+	afx_msg void OnCheckSavecom();
 	//}}AFX_MSG
 	afx_msg LRESULT OnUpdateData(WPARAM wParam, LPARAM lParam); 
 	DECLARE_MESSAGE_MAP()

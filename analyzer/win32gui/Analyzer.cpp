@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "Analyzer.h"
 #include "MainDlg.h"
-
+#include "Login.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -35,6 +35,7 @@ CAnalyzerApp::CAnalyzerApp()
 // The one and only CLSCApp object
 
 CAnalyzerApp theApp;
+CString g_strUser;
 
 /////////////////////////////////////////////////////////////////////////////
 // CLSCApp initialization
@@ -54,6 +55,19 @@ BOOL CAnalyzerApp::InitInstance()
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 	SetRegistryKey("Wayon");
+
+    {
+        CLogin dlgLogin;
+        
+        if (dlgLogin.DoModal() == IDCANCEL)
+            return FALSE;
+        
+        //    if (dlgLogin.m_strPasswd != "000000")
+        //        return FALSE;
+        
+        g_strUser = dlgLogin.m_strUsr;
+    }
+
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();

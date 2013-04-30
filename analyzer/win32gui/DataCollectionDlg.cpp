@@ -98,11 +98,12 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
 		CDialog(CDataCollectionDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CDataCollectionDlg)
-	m_strTime = _T("");
 	m_strUniqNo = _T("");
 	m_strVersion = _T("");
 	m_strStatus = _T("");
 	m_bDebug = FALSE;
+	m_bSaveComData = FALSE;
+	m_strPlateNo = _T("");
 	//}}AFX_DATA_INIT
 	pWorking = NULL;
 	m_bStop = false;
@@ -120,11 +121,12 @@ void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CDataCollectionDlg)
 	DDX_Control(pDX, IDC_EDIT_PROMPT, m_ctlPrompt);
 	DDX_Control(pDX, IDC_TAB_COMM, m_tabComm);
-	DDX_Text(pDX, IDC_STATIC_TIME, m_strTime);
 	DDX_Text(pDX, IDC_STATIC_UNIQNO, m_strUniqNo);
 	DDX_Text(pDX, IDC_STATIC_VERSION, m_strVersion);
 	DDX_Text(pDX, IDC_STATIC_STATUS, m_strStatus);
 	DDX_Check(pDX, IDC_CHECK_DEBUG, m_bDebug);
+	DDX_Check(pDX, IDC_CHECK_SAVECOM, m_bSaveComData);
+	DDX_Text(pDX, IDC_STATIC_PLATENO, m_strPlateNo);
 	//}}AFX_DATA_MAP
 }
 
@@ -186,8 +188,9 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
 	ON_BN_CLICKED(IDC_BUTTON_VINFO, OnButtonVinfo)
 	ON_BN_CLICKED(IDC_CHECK_DEBUG, OnCheckDebug)
 	ON_WM_TIMER()
-    ON_WM_COPYDATA()
 	ON_BN_CLICKED(IDC_BUTTON_UFILE, OnButtonUfile)
+    ON_WM_COPYDATA()
+	ON_BN_CLICKED(IDC_CHECK_SAVECOM, OnCheckSavecom)
 	//}}AFX_MSG_MAP
     ON_MESSAGE(WM_UPDATE_DATA,OnUpdateData)
     END_MESSAGE_MAP()
@@ -210,11 +213,22 @@ BOOL CDataCollectionDlg::OnInitDialog()
     str.LoadString(IDS_CHECKTAB);
     m_tabComm.InsertItem(2, (LPCTSTR)str);
 
+    str.LoadString(IDS_DATA);
+    m_tabComm.InsertItem(3,(LPCTSTR)str);
+
 	strSending.LoadString(IDS_SENDING);
 	strReceive.LoadString(IDS_RECEIVE);
 
 	groupButtonSet(IDC_BUTTON_SETVINFO,6);
 	groupButtonSet(IDC_BUTTON_ENTCHECK,5);
+
+    CRect rect;
+    CWnd* pWnd = GetDlgItem(IDC_STATIC_PROMPT);
+    if (pWnd)
+        pWnd->GetWindowRect(&rect);
+    ScreenToClient(&rect);
+    m_tableData.Create(WS_CHILD|WS_BORDER|LVS_REPORT,rect, this, 1);
+
     return TRUE;  // return TRUE unless you set the focus to a control
 	
 }
@@ -333,11 +347,21 @@ LRESULT CDataCollectionDlg::OnUpdateData(WPARAM wParam, LPARAM lParam)
             Prompt(strTitle.c_str());
             
             m_strStatus.LoadString(IDS_RECEIVE);
-            if (ptrRec->GetDataCode() == VTDRRecord::Version)
+            switch(ptrRec->GetDataCode())
             {
+            case VTDRRecord::Version:
+                {
                 VTDRVersion* p = (VTDRVersion*)ptrRec;
                 m_strVersion.Format("%d.%d",p->year,p->modify);
-            }
+                }
+                break;
+            case VTDRRecord::VehicleInfo:
+                {
+                VTDRVehicleInfo* p = (VTDRVehicleInfo*)ptrRec;
+                m_strPlateNo = p->strPlateNumber.c_str();
+                }
+                break;
+            };
             delete ptrRec;
         };
 	}
@@ -441,12 +465,16 @@ void CDataCollectionDlg::sendCmd(CmdWord cmd, time_t tStart, time_t tEnd, int si
 
 void CDataCollectionDlg::showGETbuttons(int cmd)
 {
+    CWnd* pWnd;
     for(int i=0;i < 16 ;i++)
     {
-        CWnd* pWnd = GetDlgItem(IDC_BUTTON_VERSION+i);
+        pWnd = GetDlgItem(IDC_BUTTON_VERSION+i);
         if (pWnd)
             pWnd->ShowWindow(cmd);   
     }
+    pWnd = GetDlgItem(IDC_CHECK_SAVECOM);
+    if (pWnd)
+            pWnd->ShowWindow(cmd);   
 }
 
 void CDataCollectionDlg::showSETbuttons(int cmd)
@@ -485,18 +513,28 @@ void CDataCollectionDlg::OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult)
 	    showGETbuttons(SW_SHOW);
 	    showSETbuttons(SW_HIDE);
 	    showCHKbuttons(SW_HIDE);
+        m_tableData.ShowWindow(SW_HIDE);
         break;
     case 1:
         m_bCheckMode = false;
     	showSETbuttons(SW_SHOW);
         showCHKbuttons(SW_HIDE);
         showGETbuttons(SW_HIDE);
+        m_tableData.ShowWindow(SW_HIDE);
         break;
     case 2:
         showGETbuttons(SW_HIDE);
         showSETbuttons(SW_HIDE);
         showCHKbuttons(SW_SHOW);
+        m_tableData.ShowWindow(SW_HIDE);
         break;
+    case 3:
+        showGETbuttons(SW_HIDE);
+        showSETbuttons(SW_HIDE);
+        showCHKbuttons(SW_HIDE);
+        m_tableData.ShowWindow(SW_SHOW);
+        break;
+
     }
 	*pResult = 0;
 }
@@ -885,4 +923,9 @@ void CDataCollectionDlg::OnButtonUfile()
             }
         };
     }	
+}
+
+void CDataCollectionDlg::OnCheckSavecom() 
+{
+	UpdateData();	
 }

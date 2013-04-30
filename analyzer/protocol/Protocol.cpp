@@ -76,7 +76,7 @@ int Protocol::Parse(Packet& packet, list<VTDRRecord*>& recs)
             ptrRec = new VTDRSpeedRecord;
             break;
         case GET_Postion_Record:
-            ptrRec = new VTDRDriverInfo;
+            ptrRec = new VTDRPositionRecord;
             break;
         case GET_Suspious_Record:
             ptrRec = new VTDRDetailRecord;

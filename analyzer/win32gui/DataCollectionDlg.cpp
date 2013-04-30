@@ -30,7 +30,6 @@ using namespace std;
 map<CString,LPCTSTR> CDataCollectionDlg::dict;
 
 
-
 UINT CommThreadProc(LPVOID pParam)
 {
 	CDataCollectionDlg* ptrUI = (CDataCollectionDlg*) pParam;
@@ -43,7 +42,7 @@ UINT CommThreadProc(LPVOID pParam)
 		char buf[2048] =
 		{ 0 };
 		int n = 0;
-
+        
 		n = ptrUI->m_port.Read(buf, 2048);
 
 		if (n || strCache.size())
@@ -592,10 +591,8 @@ void CDataCollectionDlg::OnButtonInitodr()
     dlg.m_strTitle.LoadString(IDS_ODERMETERSTART);
     if (dlg.DoModal()==IDOK)
     {
-        VTDROderMeter recd;
+        VTDROderMeterInit recd;
         recd.startMeter = dlg.m_nPara;
-        recd.tInstall = time(NULL);
-        recd.tNow = time(NULL);
         sendCmd(SET_Odometer,&recd);
     }
 }
@@ -870,17 +867,17 @@ void CDataCollectionDlg::OnButtonUfile()
                     USBDataFilev2012::DataSet& data = usbfile.GetDataList(i);
                     if (&data)
                     {
-                        list<VTDRRecord*>::iterator it;
-                        for(it=data.begin();it!=data.end();it++)
-                        {
-                            string str;
-                            (*it)->Dump(str);
-                            strDump+=str;
-                            
-                        }
-                        Prompt(strDump.c_str());
+                        list<VTDRRecord*>::iterator it = data.begin();
+                        string str;
+                        str = usbfile.DataBlockName[(*it)->GetDataCode()];
+                        CString strN;
+                        strN.Format("%dÌõ¼ÇÂ¼\r\n",data.size());
+                        str += (LPCTSTR)strN;
+                        strDump += str;
+                        
                     }
                 }
+                Prompt(strDump.c_str());
             }
             catch(USBDataFileException& e)
             {

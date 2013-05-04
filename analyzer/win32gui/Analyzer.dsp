@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../VTDRRecord" /I "../" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "./" /I "../VTDRRecord" /I "../" /I "../sqlite3/" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -106,6 +106,14 @@ SOURCE=.\Config.cpp
 # Begin Source File
 
 SOURCE=.\DataCollectionDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\DataStore\DataStore.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\DataStore\DataStore.h
 # End Source File
 # Begin Source File
 
@@ -182,6 +190,10 @@ SOURCE=.\TableData.cpp
 # Begin Source File
 
 SOURCE=..\VTDRRecord\USBDataFilev2012.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\USBFileLoading.cpp
 # End Source File
 # Begin Source File
 
@@ -357,6 +369,10 @@ SOURCE=..\VTDRRecord\USBDataFilev2012.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\USBFileLoading.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\VTDRRecord\VTDRDetailRecord.h
 # End Source File
 # Begin Source File
@@ -438,6 +454,10 @@ SOURCE=.\res\Analyzer.rc2
 # Begin Source File
 
 SOURCE=.\res\bitmap1.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\cursor1.cur
 # End Source File
 # Begin Source File
 

@@ -18,6 +18,7 @@
 #include "DlgSetInstDate.h"
 #include "DlgSetOnPara.h"
 #include "DlgSetStateName.h"
+#include "USBFileLoading.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -869,56 +870,17 @@ void CDataCollectionDlg::OnButtonUfile()
     CFileDialog dlg(TRUE,".VDR",NULL,OFN_ALLOWMULTISELECT,szFilter,this);
     if (dlg.DoModal()==IDOK)
     {
+        CUSBFileLoading* pDlg = new CUSBFileLoading(this);
+        CUSBFileLoading& dlgLoad = *pDlg;
+        dlgLoad.m_pSelf = pDlg;
         POSITION pos = dlg.GetStartPosition();
         while(pos)
         {
             CString str = dlg.GetNextPathName(pos);
-            
-            char drive[_MAX_DRIVE];
-            char dir[_MAX_DIR];
-            char fname[_MAX_FNAME];
-            char ext[_MAX_EXT];
-            
-            _splitpath( (LPCTSTR)str, drive, dir, fname, ext );
-            CString strFileName;
-            strFileName.Format("%s.%s",fname,ext);
-            USBDataFilev2012 usbfile;
-            if (!usbfile.ParseFileName((LPCTSTR)strFileName))
-            {
-                CString strP;
-                strP.Format("文件名%s不合规范,取消读取？",(LPCTSTR)str);
-                if (AfxMessageBox((LPCTSTR)strP,MB_YESNO,NULL)==IDYES)
-                    continue;
-            }
-
-            try
-            {
-                usbfile.ReadFromFile((LPCTSTR)str);
-                string strDump;
-                for(int i =0 ;i < 21;i++)
-                {
-                    USBDataFilev2012::DataSet& data = usbfile.GetDataList(i);
-                    if (&data)
-                    {
-                        list<VTDRRecord*>::iterator it = data.begin();
-                        UpdateBaseInfo((*it));
-                        string str;
-                        str = usbfile.DataBlockName[(*it)->GetDataCode()];
-                        CString strN;
-                        strN.Format("%d条记录\r\n",data.size());
-                        str += (LPCTSTR)strN;
-                        strDump += str;
-                        
-                    }
-                }
-                UpdateData(FALSE);
-                Prompt(strDump.c_str());
-            }
-            catch(USBDataFileException& e)
-            {
-                AfxMessageBox(e.strType.c_str());
-            }
+            dlgLoad.m_listFiles.push_back(str);  
         };
+        dlgLoad.Create(dlgLoad.IDD,this);
+        dlgLoad.ShowWindow(SW_SHOW);
     }	
 }
 

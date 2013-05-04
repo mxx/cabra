@@ -31,6 +31,8 @@
 #define IDD_DIALOG_STCONFIG             144
 #define IDD_DIALOG_DATATABLE            145
 #define IDD_DIALOG_PASSWD               146
+#define IDD_DIALOG_USBFLOAD             147
+#define IDC_CURSOR1                     148
 #define IDC_BUTTON_DATA_COLLECTION      1000
 #define IDC_BUTTON_FILE_SETTING         1009
 #define IDC_BUTTON_SPECTRUM             1010
@@ -103,15 +105,16 @@
 #define IDC_EDIT7                       1116
 #define IDC_EDIT_USR                    1116
 #define IDC_EDIT8                       1117
+#define IDC_STATIC_PROGESS              1117
 #define IDC_EDIT_SAMPLE                 1500
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        147
+#define _APS_NEXT_RESOURCE_VALUE        149
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1117
+#define _APS_NEXT_CONTROL_VALUE         1118
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

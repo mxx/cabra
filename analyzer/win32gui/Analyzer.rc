@@ -259,6 +259,16 @@ BEGIN
     EDITTEXT        IDC_EDIT_USR,88,24,73,13,ES_AUTOHSCROLL
 END
 
+IDD_DIALOG_USBFLOAD DIALOGEX 0, 0, 317, 105
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,104,84,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,160,84,50,14
+    LTEXT           "Static",IDC_STATIC_PROGESS,17,30,285,32,0,
+                    WS_EX_STATICEDGE
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -406,9 +416,24 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 87
     END
+
+    IDD_DIALOG_USBFLOAD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 98
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_CURSOR1             CURSOR  DISCARDABLE     "res\\cursor1.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

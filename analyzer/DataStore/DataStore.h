@@ -11,7 +11,7 @@
 #include "sqlite3.h"
 #include <exception>
 #include <string>
-
+#include "VTDRSpeedRecord.h"
 using namespace std;
 
 class DataStoreException: public exception
@@ -31,7 +31,7 @@ public:
 		strErr = szErr;
 	}
 	;
-	const char* what(void)
+	virtual const char* what(void)
 	{
 		return strErr.c_str();
 	}
@@ -46,6 +46,7 @@ public:
 	DataStore();
 	virtual ~DataStore();
 	void Open(void);
+	void SaveSpeedRecord(const char* szPlateNo, VTDRSpeedRecord& rec);
 protected:
 	void initDataStore(void);
 	sqlite3* db;

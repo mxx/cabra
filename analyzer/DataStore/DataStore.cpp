@@ -41,12 +41,54 @@ void DataStore::Open(void)
 	initDataStore();
 }
 
+void DataStore::SaveSpeedRecord(const char* szPlateNo, VTDRSpeedRecord& rec)
+{
+	const char* szSQL =
+			"insert into main.speed_record (vid, time_tag, speed,state, update_time) values ";
+	char* szErrMsg;
+	sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &szErrMsg);
+	if (szErrMsg)
+	{
+		DataStoreException ex(szErrMsg);
+		sqlite3_free(szErrMsg);
+		throw ex;
+	}
+	char buf[128];
+
+	for (int i = 0; i < 60; i++)
+	{
+		string strSQL;
+		strSQL = szSQL;
+		strSQL += "(\"";
+		strSQL += szPlateNo;
+		strSQL += "\",";
+		sprintf(buf, "%u,%u,%u,%u);", rec.tStart + i, rec.Speed[i],
+				rec.State[i], time(NULL));
+		strSQL += buf;
+		sqlite3_exec(db, strSQL.c_str(), NULL, NULL, &szErrMsg);
+		if (szErrMsg)
+		{
+			break;
+		}
+	}
+
+	if (szErrMsg)
+	{
+		DataStoreException ex(szErrMsg);
+		sqlite3_free(szErrMsg);
+		sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
+		throw ex;
+	}
+	else
+		sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, NULL);
+
+}
+
 void DataStore::initDataStore(void)
 {
 	char* err_msg = NULL;
 	const char* create_sql[] =
-	{
-			CREATE_DRIVER,          //for driver name to license
+	{ CREATE_DRIVER,          //for driver name to license
 			CREATE_DRIVE_RECORD,    //driving state
 			CREATE_ODERMETER,       //
 			CREATE_OVERDRIVE,		//
@@ -56,8 +98,8 @@ void DataStore::initDataStore(void)
 			CREATE_SPEED_RECORD,	//
 			CREATE_ABNORMAL_SPEED,	//
 			CREATE_VINFO			//
-	};
-	for (int i = 0; i < sizeof(create_sql)/sizeof(const char*); i++)
+			};
+	for (int i = 0; i < sizeof(create_sql) / sizeof(const char*); i++)
 	{
 		if (SQLITE_OK != sqlite3_exec(db, create_sql[i], 0, 0, &err_msg))
 		{

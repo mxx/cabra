@@ -176,10 +176,16 @@ bool USBDataFilev2012::ParseFileName(const char* szFileName)
 		char ext[3];
 	} FileName, *pFileName;
 	tRecordTime = 0;
+#ifdef _WIN32
+    if (szFileName)
+        strncpy((char*)&FileName,szFileName,sizeof(FileName));
+#else
 	if (!szFileName
 			|| VTDRRecord::utf8togb2312(szFileName, strlen(szFileName),
 					(char*) &FileName, sizeof(FileName)))
-		return false;
+        return false;
+#endif
+		
 
 	pFileName = &FileName;
 

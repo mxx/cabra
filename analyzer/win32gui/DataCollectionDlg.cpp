@@ -114,6 +114,7 @@ CDataCollectionDlg::CDataCollectionDlg(CWnd* pParent /*=NULL*/) :
     nNum = 0;
     InitDict();
     USBDataFilev2012::initMap();
+   
 }
 
 void CDataCollectionDlg::DoDataExchange(CDataExchange* pDX)
@@ -157,7 +158,6 @@ void CDataCollectionDlg::groupButtonSet(int first,int number)
     ON_BN_CLICKED(IDC_BUTTON_SPECTRUM, OnButtonSpectrum)
     ON_WM_CTLCOLOR()
     ON_WM_SHOWWINDOW()
-    ON_WM_CLOSE()
     ON_WM_DESTROY()
     ON_BN_CLICKED(IDC_BUTTON_VERSION, OnButtonVersion)
     ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_COMM, OnSelchangeTabComm)
@@ -230,6 +230,8 @@ BOOL CDataCollectionDlg::OnInitDialog()
     ScreenToClient(&rect);
     m_tableData.Create(WS_CHILD|WS_BORDER|LVS_REPORT,rect, this, 1);
 
+    m_USBProcess.Create(m_USBProcess.IDD,this);
+    m_USBProcess.ShowWindow(SW_HIDE);
     return TRUE;  // return TRUE unless you set the focus to a control
 	
 }
@@ -388,11 +390,6 @@ void CDataCollectionDlg::ClosePort()
 	}
 }
 
-void CDataCollectionDlg::OnClose()
-{
-    
-	CDialog::OnClose();
-}
 
 void CDataCollectionDlg::OnDestroy()
 {
@@ -870,17 +867,16 @@ void CDataCollectionDlg::OnButtonUfile()
     CFileDialog dlg(TRUE,".VDR",NULL,OFN_ALLOWMULTISELECT,szFilter,this);
     if (dlg.DoModal()==IDOK)
     {
-        CUSBFileLoading* pDlg = new CUSBFileLoading(this);
-        CUSBFileLoading& dlgLoad = *pDlg;
-        dlgLoad.m_pSelf = pDlg;
+        m_USBProcess.m_listFiles.clear();
         POSITION pos = dlg.GetStartPosition();
         while(pos)
         {
             CString str = dlg.GetNextPathName(pos);
-            dlgLoad.m_listFiles.push_back(str);  
+            m_USBProcess.m_listFiles.push_back(str);  
         };
-        dlgLoad.Create(dlgLoad.IDD,this);
-        dlgLoad.ShowWindow(SW_SHOW);
+        m_USBProcess.ShowWindow(SW_SHOW);
+        m_USBProcess.DoLoad();
+
     }	
 }
 

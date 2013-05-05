@@ -32,7 +32,8 @@ DataStore::~DataStore()
 
 void DataStore::Open(void)
 {
-	int rt = sqlite3_open("datastore.db", &db);
+    string dbFile = m_strDBPath + "datastore.db";
+	int rt = sqlite3_open(dbFile.c_str(), &db);
 	if (rt)
 	{
 		DataStoreException ex(sqlite3_errmsg(db));

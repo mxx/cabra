@@ -123,7 +123,7 @@ int VTDRRecord::utf8togb2312(const char *sourcebuf, size_t sourcelen,
 	iconv_close(cd);
 #else
 	string strUTF(sourcebuf,sourcelen);
-	UTF8ToGB2312(strUTF);
+	strUTF = UTF8ToGB2312(strUTF);
 	strncpy(destbuf,strUTF.c_str(),destlen);
 #endif
 	return rt;
@@ -148,7 +148,7 @@ int VTDRRecord::gb2312toutf8(const char *sourcebuf, size_t sourcelen,
 	iconv_close(cd);
 #else
 	string strGB(sourcebuf,sourcelen);
-	GB2312ToUTF8(strGB);
+	strGB = GB2312ToUTF8(strGB);
 	strncpy(destbuf,strGB.c_str(),destlen);
 
 #endif

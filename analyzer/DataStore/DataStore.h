@@ -47,6 +47,8 @@ public:
 	virtual ~DataStore();
 	void Open(void);
 	void SaveSpeedRecord(const char* szPlateNo, VTDRSpeedRecord& rec);
+
+    string m_strDBPath;
 protected:
 	void initDataStore(void);
 	sqlite3* db;

@@ -7,7 +7,7 @@
 #include <map>
 #include <list>
 #include "TableData.h"	// Added by ClassView
-
+#include "USBFileLoading.h"
 using namespace std;
 #if _MSC_VER > 1000
 #pragma once
@@ -21,6 +21,7 @@ class CDataCollectionDlg : public CDialog
 {
 // Construction
 public:
+	CUSBFileLoading m_USBProcess;
 	void UpdateBaseInfo(VTDRRecord* ptrRec);
 	CTableData m_tableData;
 	void CheckModeHeartbeat(void);
@@ -82,7 +83,6 @@ protected:
 	afx_msg void OnButtonSpectrum();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg void OnClose();
 	afx_msg void OnDestroy();
 	afx_msg void OnButtonVersion();
 	afx_msg void OnSelchangeTabComm(NMHDR* pNMHDR, LRESULT* pResult);

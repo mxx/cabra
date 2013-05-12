@@ -18,6 +18,8 @@
 
 #include "stm32f10x.h"
 #include "stm32f10x_fsmc.h"
+#include <stm32f10x_gpio.h>
+#include <stm32f10x_rcc.h>
 #include "misc.h"
 #include "board.h"
 #include "gpio_drv.h"
@@ -164,6 +166,7 @@ void rt_hw_board_init()
 	rt_hw_buzz_init();
 	rt_hw_usb_init();
 	rt_hw_gpio_init();
+	rt_hw_tim3_init();
 	I2C_LowLevel_Init(I2C1);
 	rt_console_set_device(CONSOLE_DEVICE);
 	 //DisplayProductVersion();

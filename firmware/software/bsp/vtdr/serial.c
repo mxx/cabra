@@ -19,6 +19,7 @@
 #include <stm32f10x_dma.h>
 #include <stm32f10x_usart.h>
 extern struct rt_device uart2_device;
+extern struct rt_device uart3_device;
 typedef enum UART2_STATUS
 {
 	Get_sync_head,
@@ -32,6 +33,23 @@ typedef enum UART2_STATUS
 
 }Status_uart2;
 Status_uart2 Uart2PackStatus= Get_sync_head;
+typedef enum UART3_STATUS
+{
+	FIELD_NONE,
+	FIELD_ONE,
+	FIELD_TWO,
+	FIELD_THREE,
+	FIELD_FOUR,
+	FIELD_FIVE,
+	FIELD_SIX,
+	FIELD_SEVEN,
+	FIELD_EIGHT,
+	FIELD_NIGHT,
+	FIELD_TEN,
+	FIELD_ELEVENT
+}Status_uart3;
+Status_uart3 SectionID;
+
 
 static void rt_serial_enable_dma(DMA_Channel_TypeDef* dma_channel,
 	rt_uint32_t address, rt_uint32_t size);
@@ -341,6 +359,9 @@ void rt_hw_serial_isr(rt_device_t device)
 	struct stm32_serial_device* uart = (struct stm32_serial_device*) device->user_data;
     static unsigned char checksum;
     static uint16_t lenth;
+    unsigned char gprmcbuf[5];
+    static unsigned char isgprmc;
+    static unsigned char gprmccnt;
 
 	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
 	{
@@ -356,20 +377,7 @@ void rt_hw_serial_isr(rt_device_t device)
 			level = rt_hw_interrupt_disable();
 
 			/* save character */
-#if 0
-			uart->int_rx->rx_buffer[uart->int_rx->save_index] = uart->uart_device->DR & 0xff;
-			uart->int_rx->save_index ++;
-			if (uart->int_rx->save_index >= UART_RX_BUFFER_SIZE)
-				uart->int_rx->save_index = 0;
 
-			/* if the next position is read index, discard this 'read char' */
-			if (uart->int_rx->save_index == uart->int_rx->read_index)
-			{
-				uart->int_rx->read_index ++;
-				if (uart->int_rx->read_index >= UART_RX_BUFFER_SIZE)
-					uart->int_rx->read_index = 0;
-			}
-#endif
 			if((&uart2_device )== device)
 			{
 				uart->int_rx->rx_buffer[uart->int_rx->save_index] = uart->uart_device->DR & 0xff;
@@ -399,7 +407,11 @@ void rt_hw_serial_isr(rt_device_t device)
 						}
 						break;
 					case Get_the_Command:
-						if((uart->int_rx->rx_buffer[uart->int_rx->save_index]) <0x15)
+						if(((uart->int_rx->rx_buffer[uart->int_rx->save_index]) <0x15)
+							||((uart->int_rx->rx_buffer[uart->int_rx->save_index])>0x81
+							 &&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0x85 )
+							||((uart->int_rx->rx_buffer[uart->int_rx->save_index])>0x81
+							&&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0x85 ))
 							Uart2PackStatus = Get_the_lenth_high;
 						else
 						{
@@ -453,7 +465,54 @@ void rt_hw_serial_isr(rt_device_t device)
 						uart->int_rx->read_index = 0;
 				}
 			}
+		    if((&uart3_device)== device)
+		    {
+		    	 if((uart->uart_device->DR & 0xff) == '$')
+		    	 {
 
+		    	       SectionID=0;
+		    	       isgprmc = 0;
+		    	       gprmccnt =0;
+		    	 }
+		    	 if((uart->uart_device->DR & 0xff)==',')
+		    	 {
+		    	           SectionID++;
+		    	 }
+
+		    	 else
+		    	 {
+
+					   switch(SectionID)
+					   {
+					   	   	 case FIELD_NONE:
+					   	   		 if (gprmccnt !=5)
+					   	   		 {
+									gprmcbuf[gprmccnt] = uart->uart_device->DR & 0xff;
+									gprmccnt++;
+					   	   		 }
+					   	   		 if((gprmccnt == 5)&& strcmp(gprmcbuf,"GPRMC",5))
+					   	   		 {
+					   	   			 isgprmc =1;
+					   	   		 }
+
+					   	   		   break;
+							 case FIELD_ONE://提取时间
+								  break;
+							 case FIELD_TWO: //判断数据是否可信(当GPS天线能接收到有3颗GPS卫星时为A，可信)
+								 break;
+							 case FIELD_THREE://提取出纬度
+
+								  break;
+							 case FIELD_FOUR://提取出经度
+								  break;
+							 case FIELD_NIGHT://提取出日期
+
+								  break;
+								  default:
+								  break;
+						}
+				 }
+		   }
 			/* enable interrupt */
 			rt_hw_interrupt_enable(level);
 		}

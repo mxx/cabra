@@ -140,7 +140,7 @@ static void led_thread_entry(void* parameter)
         	OKKeyHandler();
 		}
 
-      //  DisplayNormalUI();
+       DisplayNormalUI();
 
 
     }

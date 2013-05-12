@@ -29,6 +29,7 @@
 #include <usb_core.h>
 #include <usbh_core.h>
 #include<stm32f10x_dma.h>
+#include<stm32f10x_exti.h>
 /** @addtogroup Template_Project
   * @{
   */
@@ -221,6 +222,28 @@ void USART3_IRQHandler(void)
     rt_interrupt_leave();
 #endif
 }
+/*******************************************************************************
+* Function Name  : EXTI0_IRQHandler
+* Description    : This function handles External interrupt Line 0 request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void EXTI0_IRQHandler(void)
+{
+    extern void Getthepluse(void);
+
+    /* enter interrupt */
+    rt_interrupt_enter();
+
+    Getthepluse();
+
+    /* Clear the Key Button EXTI line pending bit */
+    EXTI_ClearITPendingBit(EXTI_Line0);
+
+    /* leave interrupt */
+    rt_interrupt_leave();
+}
 
 #if defined(RT_USING_DFS) && STM32_USE_SDIO
 /*******************************************************************************
@@ -334,6 +357,18 @@ void TIM2_IRQHandler(void)
 	rt_interrupt_enter();
 
 	USB_OTG_BSP_TimerIRQ();
+
+	/* leave interrupt */
+    rt_interrupt_leave();
+
+}
+void TIM3_IRQHandler(void)
+{
+	extern void Time3_irg_handler(void);
+	/* enter interrupt */
+	rt_interrupt_enter();
+
+	Time3_irg_handler();
 
 	/* leave interrupt */
     rt_interrupt_leave();

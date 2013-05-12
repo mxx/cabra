@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//software/bsp/stm32f10x/ssd1289.c=GBK
+encoding//software/bsp/vtdr/DataManager.c=UTF-8
 encoding//software/bsp/vtdr/readme.txt=GBK
 encoding//software/examples/gui/demo_view_buffer_animation.c=GBK
 encoding//software/examples/rtgui_win/demo_gui_animation.c=GBK

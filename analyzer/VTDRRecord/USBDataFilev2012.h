@@ -62,7 +62,7 @@ public:
 	DataSet& GetDataList(int idx);
 	static void initMap();
 	static map<int, const char*> DataBlockName;
-
+	string m_strDecodeText;
 protected:
 	string strPlateCode;
 	time_t tRecordTime;

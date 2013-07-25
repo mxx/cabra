@@ -17,7 +17,6 @@
 #include "define_gbk.h"
 #endif
 
-
 map<int, const char*> USBDataFilev2012::DataBlockName;
 
 USBDataFilev2012::USBDataFilev2012() :
@@ -177,15 +176,14 @@ bool USBDataFilev2012::ParseFileName(const char* szFileName)
 	} FileName, *pFileName;
 	tRecordTime = 0;
 #ifdef _WIN32
-    if (szFileName)
-        strncpy((char*)&FileName,szFileName,sizeof(FileName));
+	if (szFileName)
+	strncpy((char*)&FileName,szFileName,sizeof(FileName));
 #else
 	if (!szFileName
 			|| VTDRRecord::utf8togb2312(szFileName, strlen(szFileName),
 					(char*) &FileName, sizeof(FileName)))
-        return false;
+		return false;
 #endif
-		
 
 	pFileName = &FileName;
 
@@ -263,6 +261,7 @@ char USBDataFilev2012::checkSum(const string& str) const
 
 void USBDataFilev2012::parseFile(const string& str)
 {
+	m_strDecodeText = "";
 	if (checkSum(str))
 		throw USBDataFileException("checksum error");
 	TRACE("Checksum OK");
@@ -273,7 +272,7 @@ void USBDataFilev2012::parseFile(const string& str)
 	while (index < (str.size() - 1))
 	{
 		index += readBlock(str, index);
-	}; TRACE("total read %d blocks",nDataBlockNumber);
+	};TRACE("total read %d blocks",nDataBlockNumber);
 	if (nDataBlockNumber != nFileBlock)
 	{
 		ERROR("Declared Block number:%d, actual read %d blocks",nFileBlock,nDataBlockNumber);
@@ -332,6 +331,7 @@ size_t USBDataFilev2012::readBlock(const string& str, int index)
 		string buf;
 		ptrRecord->Dump(buf);
 		TRACE("\n%s",buf.c_str());
+		m_strDecodeText.append(buf);
 		PushData(ptrRecord);
 	};
 
@@ -344,7 +344,7 @@ USBDataFilev2012::DataSet& USBDataFilev2012::GetDataList(int idx)
 	{
 		return Datas[idx];
 	}
-	return *(DataSet*)NULL;
+	return *(DataSet*) NULL;
 }
 
 VTDRRecord* USBDataFilev2012::generateRecord(VTDRRecord::DataCode code)

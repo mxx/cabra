@@ -73,9 +73,16 @@ void CUSBFileLoading::loadData(CString &strFilePath)
     
     try
     {
-        usbfile.ReadFromFile((LPCTSTR)strFilePath);
         string strDump;
         string strPlat;
+        usbfile.ReadFromFile((LPCTSTR)strFilePath);
+  
+        strDump = VTDRRecord::UTF8ToGB2312(usbfile.m_strDecodeText);
+        CString strTmp = strDump.c_str();
+        strTmp.Replace("\n","\r\n");
+        m_strMsg = strTmp;
+        UpdateData(FALSE);
+
         for(int i =0 ;i < 21;i++)
         {
             USBDataFilev2012::DataSet& data = usbfile.GetDataList(i);
@@ -96,12 +103,11 @@ void CUSBFileLoading::loadData(CString &strFilePath)
                 if (i==VTDRRecord::SpeedRecord)
                     m_ds.SaveSpeedRecord(strPlat.c_str(),*(VTDRSpeedRecord*)(*it));
             }
-            m_strMsg = strDump.c_str();
-            
-            UpdateData(FALSE);
+           // m_strMsg += strDump.c_str();
+            //UpdateData(FALSE);
             
         }
-        
+
     }
     catch(USBDataFileException& e)
     {

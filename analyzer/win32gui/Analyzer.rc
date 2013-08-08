@@ -437,7 +437,7 @@ END
 // Cursor
 //
 
-IDC_CURSOR1             CURSOR  DISCARDABLE     "res\\cursor1.cur"
+//IDC_CURSOR1             CURSOR  DISCARDABLE     "res\\cursor1.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

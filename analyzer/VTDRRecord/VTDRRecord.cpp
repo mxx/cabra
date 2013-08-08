@@ -67,7 +67,12 @@ time_t VTDRRecord::ToSystime(VTDRTime& t)
 	tmVal.tm_hour = BCD2INT(t.bcdHour);
 	tmVal.tm_min = BCD2INT(t.bcdMinute);
 	tmVal.tm_sec = BCD2INT(t.bcdSecond);
-	return mktime(&tmVal);
+	time_t n = mktime(&tmVal);
+	if (n == -1)
+	{
+		m_strError = "time format error";
+	}
+	return n;
 }
 
 VTDRTime& VTDRRecord::ToBCDTime(time_t t, VTDRTime& tmBCD)

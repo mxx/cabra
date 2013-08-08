@@ -88,11 +88,12 @@ public:
 		return buf;
 	}
 	;
+	string m_strError;
 	static string BCD2ASCII(string& strBCD);
 	static unsigned int BCD2INT(const char* bcd, int size);
 	static unsigned int BCD2INT(unsigned char bcd);
 	static char INT2BCDchar(int n);
-	static time_t ToSystime(VTDRTime& t);
+	time_t ToSystime(VTDRTime& t);
 	static VTDRTime& ToBCDTime(time_t t, VTDRTime& tm);
 	static string Time2String(time_t t);
 	static int utf8togb2312(const char *sourcebuf, size_t sourcelen,
@@ -175,6 +176,14 @@ protected:
 	}
 	;
 	DataCode cDataCode;
+	char* ctime(const time_t* tp)
+	{
+		char* p = ::ctime(tp);
+		if (!p)
+			return "\r\n";
+		else
+			return p;
+	};
 };
 
 #endif /* VTDRRECORD_H_ */

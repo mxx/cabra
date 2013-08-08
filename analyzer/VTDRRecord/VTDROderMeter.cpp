@@ -62,7 +62,11 @@ string& VTDROderMeter::Dump(string& buf)
 	stringstream stream;
 	stream << VTDRRecord::Dump(buf) << " Time:" << ctime(&tNow);
 	stream << " InstallTime:" << ctime(&tInstall);
-	stream << " StartMeter:" << startMeter;
+	stream << " StartMeter:" ;
+	stream.setf(ios::fixed);
+	stream.precision(1);
+	stream.width(9);
+	stream << startMeter;
 	stream << " AccumulateMeter:" << sumMeter << "(" ;
 	stream.setf(stream.hex,stream.basefield);
 	stream	<< sumMeterRaw << ")";

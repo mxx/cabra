@@ -14,7 +14,7 @@
 #define GPS                 0
 
 
-#define OpenDoorDeal    	1
+#define OpenDoorDeal    	0
 #define RTC8025             1     //ʱ��оƬѡ�񿪹�
 #define GetSpeedStatusBy232 0     //ͨ��ں�������ͨѶ��ȡ�ٶȺ�ȫ��״̬����
 //#define WATCH_DOG_EN    	1     // ���Ź�����
@@ -101,8 +101,8 @@ typedef struct
 } RoadSection;
 typedef struct
 {
-	unsigned char AutoCode[17];
-	unsigned char AutoVincode[12];
+	unsigned char AutoVincode[17];
+	unsigned char AutoCode[12];
 	unsigned char AutoSort[12];
 
 }AutoInfo;
@@ -116,7 +116,6 @@ typedef struct
 	unsigned char d5[10];
 	unsigned char d6[10];
 	unsigned char d7[10];
-	unsigned char d8[10];
 }StatusSingal;
 typedef struct
 {
@@ -129,35 +128,35 @@ typedef struct
 typedef struct
 {
 
-	unsigned short mark;//*�����֡���2
-	unsigned char  sn[22];//��Ʒ���кš���22(24)
+	unsigned long  DriverDistace;
+	unsigned long  StarDistance;
+	unsigned long  LimitSpeed;
+	unsigned short mark;//
+	unsigned char  sn[22];//
 	unsigned char standeryear;
 	unsigned char modifyNb;
-	AutoInfo AutoInfodata;
 	unsigned char signalstatus;
 	StatusSingal singalname;
 	ProductType  typedata;
-	unsigned char  DriverLisenseCode[18];//��ʻ֤���롪��20(108)
-	unsigned char  AlarmSound;//��������ѡ��0x00-����0xFF-������1(114)
+	unsigned char  AlarmSound;
 	CLOCK   time;
 	CLOCK   InstallTime;
-	unsigned long  DriverDistace;
-	unsigned long  StarDistance;
 	unsigned char  PulseNumber;
 	unsigned short  PulseCoff;
-
+	unsigned char  DriverLisenseCode[18];
 	unsigned char SectionNumber;
 	RoadSection section[20];
 
-	unsigned char  reserved1[92];//Ϊ�˱�֤��վ������·�߷ֶ����ôӵ�ַ0x200��ʼд
+	unsigned char  reserved1[92];//
 	unsigned char SectionNumber1;
+	AutoInfo AutoInfodata;
 	RoadSection section1[20];
 } StructPara;
 
 typedef struct
 {
-	unsigned long  DriverCode;//��ʻԱ���롪��4(88)
-	unsigned char  DriverLisenseCode[18];//��ʻ֤���롪��20(108)
+	unsigned long  DriverCode;
+	unsigned char  DriverLisenseCode[18];
 } DRIVER;
 
 typedef struct
@@ -166,13 +165,16 @@ typedef struct
 	unsigned long  BaseAddr;
 	unsigned long  EndAddr;//�����ַ
 	unsigned long  CurPoint;//��ǰָ���ַ,ָ����һ����ݿɴ�ŵ�λ��
-	unsigned long  BakPoint;
+	//unsigned long  BakPoint;
+	unsigned long  finshflag;
 	
 } StructPT;
 
 typedef struct
 {
 
+	unsigned long	 TotalDistance;
+	unsigned long	 DriverCode;
 	unsigned short  Available;//=0��ʾû��ʹ�ô������>0��ʾ�������Ч
 	StructPT DoubtPointData;// 疑点数据
 	StructPT LocationData;
@@ -182,12 +184,23 @@ typedef struct
 	StructPT BaseData;//行驶速度记录
 	StructPT DriverReRecord;
 	StructPT journalRecord;
-
-	unsigned long	 TotalDistance;
 	CLOCK	 LastUploadTime;
-	unsigned long	 DriverCode;//��ʻԱ����
-	unsigned char   DriverLisenseCode[20];//��ʻ֤����
+	unsigned char   DriverLisenseCode[18];//��ʻ֤����
 } PartitionTable;
+typedef struct
+{
+	unsigned char Time200msflag:1;
+	unsigned char Time1sflag:1;
+	unsigned char Ver1sflag:1;
+	unsigned char Time1minflag:1;
+}Timeflag;
+typedef struct
+{
+	unsigned char Time1msCnt;
+	unsigned char Time200msCnt:3;
+	unsigned char Time1sCnt:6;
+	unsigned char Time5minCnt:7;
+}TimeCnt;
 
 /* ���������Ч�ָ�λ���� */
 #define DOUBTPOINTDATA  	0
@@ -238,28 +251,28 @@ typedef struct
 #define PartitionTable_BASE (DATAFLASH_BASE+0x00001000)
 
 #define BASEDATA_BASE DATAFLASH_BASE+0x02000 //48h data 126byte/block
-#define BASEDATA_END  DATAFLASH_BASE+0x164fff
+#define BASEDATA_END  DATAFLASH_BASE+0x5afff
 
-#define DPD_BASE      DATAFLASH_BASE+0x165000 //100条
-#define DPD_END       DATAFLASH_BASE+0x17bfff
+#define DPD_BASE      DATAFLASH_BASE+0x5b000 //100条
+#define DPD_END       DATAFLASH_BASE+0x60fff
 
-#define OVERDRV_BASE  DATAFLASH_BASE+0x17c000 //100条
-#define OVERDRV_END   DATAFLASH_BASE+0x180fff
+#define OVERDRV_BASE  DATAFLASH_BASE+0x61000 //100条
+#define OVERDRV_END   DATAFLASH_BASE+0x62fff
 
-#define LOCATION_BASE DATAFLASH_BASE+0x181000//360个小时
-#define LOCATION_END  DATAFLASH_BASE+0x26bfff
+#define LOCATION_BASE DATAFLASH_BASE+0x63000//360个小时
+#define LOCATION_END  DATAFLASH_BASE+0x9dfff
 
-#define DRVRG_BASE    DATAFLASH_BASE+0x26c000//200条
-#define DRVRG_END     DATAFLASH_BASE+0x270fff
+#define DRVRG_BASE    DATAFLASH_BASE+0x9e000//200条
+#define DRVRG_END     DATAFLASH_BASE+0x9ffff
 
-#define POWER_BASE    DATAFLASH_BASE+0x271000//100条
-#define POWER_END     DATAFLASH_BASE+0x271fff
+#define POWER_BASE    DATAFLASH_BASE+0xa0000//100条
+#define POWER_END     DATAFLASH_BASE+0xa0fff
 
-#define PARA_BASE     DATAFLASH_BASE+0x272000//100条
-#define PARA_END      DATAFLASH_BASE+0x272fff
+#define PARA_BASE     DATAFLASH_BASE+0xa1000//100条
+#define PARA_END      DATAFLASH_BASE+0xa1fff
 
-#define JN_BASE       DATAFLASH_BASE+0x273000//10条
-#define JN_END    	  DATAFLASH_BASE+0x274fff
+#define JN_BASE       DATAFLASH_BASE+0xa2000//10条
+#define JN_END    	  DATAFLASH_BASE+0xa2fff
 
 //2004.07.23
 #define DOWNLOADTIME_BASE DATAFLASH_BASE+0x00400
@@ -278,8 +291,8 @@ typedef struct{
 	unsigned char status;//ÿ0.2��8λ״̬
 }DoubtData;
 typedef struct{
-	unsigned char longtitude[4];
-	unsigned char latitude[4];
+	unsigned char longtitude[4];//经度
+	unsigned char latitude[4];//纬度
 	unsigned char altitude[2];
 }SizeData;
 typedef struct{
@@ -293,6 +306,11 @@ typedef struct{
 	unsigned char speed[60];
 	unsigned char status[60];
 }BaseDataBlock;
+typedef struct{
+	CLOCK lclk;
+	SizeData Lsizedata[60];
+    unsigned char speed1min[60];
+}LocationBlock;
 typedef struct{
 	unsigned char  DriverLisenseCode[18];
 	CLOCK startdrivertime;
@@ -346,6 +364,40 @@ typedef struct{
 	DRIVER driver;
 }AnAlarmData;
 
+typedef struct{
+	unsigned char datacode;
+	unsigned char blockname[18];
+	unsigned long blocklenth;
+}UsbBlock;
+typedef struct{
+    unsigned short blocknum;
+	UsbBlock UsbBlock0;
+	unsigned char standeryear;
+	unsigned char modifynum;
+	UsbBlock UsbBlock1;
+	unsigned char drivercode[18];
+	UsbBlock UsbBlock2;
+	CLOCK usbtime;
+	UsbBlock UsbBlock3;
+	CLOCK drivertime;
+	CLOCK installtime;
+	unsigned long startdistance;
+	unsigned long totaldistance;
+	UsbBlock UsbBlock4;
+	UsbBlock UsbBlock5;
+	UsbBlock UsbBlock6;
+	UsbBlock UsbBlock7;
+	UsbBlock UsbBlock8;
+	UsbBlock UsbBlock9;
+	UsbBlock UsbBlock10;
+	UsbBlock UsbBlock11;
+	UsbBlock UsbBlock12;
+	UsbBlock UsbBlock13;
+	UsbBlock UsbBlock14;
+	UsbBlock UsbBlock15;
+    unsigned char checksum;
+}UsbBlockData;
+
 /*����״̬�ֽ���ÿλ�ĺ���*/
 #define DOOR	   8
 #define AIRPRESS   7
@@ -376,6 +428,12 @@ typedef struct{
 //
 #define POWER_ON   0x01
 #define POWER_OFF  0x02
+
+//Alarmstatus
+#define ALARM_OVER_TIME 0x01
+#define ALARM_NOT_RE    0x02
+#define ALARM_OVER_SPEED 0x04
+#define ALARM_SPEED_ABOR  0x08
 
 #define SpeedPowerOff    0
 enum

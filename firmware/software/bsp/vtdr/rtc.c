@@ -183,8 +183,8 @@ time_t time(time_t* t)
     return time;
 }
 
-#ifdef RT_USING_FINSH
-#include <finsh.h>
+//#ifdef RT_USING_FINSH
+//#include <finsh.h>
 
 void set_date(rt_uint32_t year, rt_uint32_t month, rt_uint32_t day)
 {
@@ -212,7 +212,7 @@ void set_date(rt_uint32_t year, rt_uint32_t month, rt_uint32_t day)
         rt_rtc_control(device, RT_DEVICE_CTRL_RTC_SET_TIME, &now);
     }
 }
-FINSH_FUNCTION_EXPORT(set_date, set date. e.g: set_date(2010,2,28))
+//FINSH_FUNCTION_EXPORT(set_date, set date. e.g: set_date(2010,2,28))
 
 void SetCurrentDateTime(CLOCK *clock)
 {
@@ -252,7 +252,7 @@ void list_date(void)
     time(&now);
     rt_kprintf("%s\n", ctime(&now));
 }
-FINSH_FUNCTION_EXPORT(list_date, show date and time.)
+//FINSH_FUNCTION_EXPORT(list_date, show date and time.)
 
 void GetCurrentDateTime(CLOCK *clock)
 {
@@ -268,8 +268,8 @@ void GetCurrentDateTime(CLOCK *clock)
 	    if (ti != RT_NULL)
 	    {
 	    	clock->day = Char2BCD((unsigned char)ti->tm_mday);
-	    	clock->month = Char2BCD((unsigned char)ti->tm_mon+1);
-	    	clock->year = Char2BCD((unsigned char)ti->tm_year-100);
+	    	clock->month = Char2BCD((unsigned char)(ti->tm_mon+1));
+	    	clock->year = Char2BCD((unsigned char)(ti->tm_year-100));
 	        clock->hour = Char2BCD((unsigned char)ti->tm_hour);
 	        clock->minute = Char2BCD((unsigned char)ti->tm_min);
 	        clock->second = Char2BCD((unsigned char)ti->tm_sec);
@@ -279,4 +279,4 @@ void GetCurrentDateTime(CLOCK *clock)
 
 }
 
-#endif
+//#endif

@@ -56,7 +56,7 @@
 #define HOST_OVRCURR_IRQn                  EXTI1_IRQn
 
 #define HOST_POWERSW_PORT_RCC             RCC_APB2Periph_GPIOC
-#define HOST_POWERSW_PORT                 GPIOC
+#define HOST_POWERSW_PORT                 GPIOA
 #define HOST_POWERSW_VBUS                 GPIO_Pin_9
 
 #define HOST_SOF_OUTPUT_RCC                RCC_APB2Periph_GPIOA
@@ -117,9 +117,9 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 {
 
      GPIO_InitTypeDef GPIO_InitStructure;
-
-     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS , ENABLE);
      RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
+     RCC_AHBPeriphClockCmd( RCC_AHBPeriph_OTG_FS , ENABLE);
+
 #if 0
      /* Configure SOF VBUS ID DM DP Pins */
      GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8  |
@@ -220,7 +220,7 @@ void USB_OTG_BSP_ConfigVBUS(USB_OTG_CORE_HANDLE *pdev)
 
 	/* By Default, DISABLE is needed on output of the Power Switch */
 	//GPIO_SetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);
-	GPIO_ResetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);//modify by leiyq 20130301
+	//GPIO_ResetBits(HOST_POWERSW_PORT, HOST_POWERSW_VBUS);//modify by leiyq 20130301
 
 	USB_OTG_BSP_mDelay(200); /* Delay is need for stabilising the Vbus Low
 	 in Reset Condition, when Vbus=1 and Reset-button is pressed by user */

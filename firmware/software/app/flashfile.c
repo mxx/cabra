@@ -34,6 +34,7 @@
  *  讀文件調用 flashfile_get_record函數
  *  參數爲：文件標識，時間標籤，存儲回傳數據的指針
  *  返回值：0，表示沒有此數據，大於0，表示寫的字節數，小於0，表示出錯
+ *
  */
 #include "flashfile.h"
 #include "flash_dev.h"

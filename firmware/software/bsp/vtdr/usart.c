@@ -35,6 +35,7 @@
  * USART3 Rx --> DMA Channel 3
  */
 
+
 #ifdef RT_USING_UART1
 struct stm32_serial_int_rx uart1_int_rx;
 struct stm32_serial_device uart1 =
@@ -89,9 +90,9 @@ struct rt_device uart3_device;
 #define RCC_APBPeriph_UART2	RCC_APB1Periph_USART2
 #else /* for STM32F10X_HD */
 /* USART2_REMAP = 0 */
-#define UART2_GPIO_TX		GPIO_Pin_2
-#define UART2_GPIO_RX		GPIO_Pin_3
-#define UART2_GPIO			GPIOA
+#define UART2_GPIO_TX		GPIO_Pin_5
+#define UART2_GPIO_RX		GPIO_Pin_6
+#define UART2_GPIO			GPIOD
 #define RCC_APBPeriph_UART2	RCC_APB1Periph_USART2
 #define UART2_TX_DMA		DMA1_Channel7
 #define UART2_RX_DMA		DMA1_Channel6
@@ -124,7 +125,9 @@ static void RCC_Configuration(void)
     GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE);
 #else
     /* Enable AFIO and GPIOA clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA, ENABLE);
+   // RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOD, ENABLE);
 #endif
 
 	/* Enable USART2 clock */
@@ -137,7 +140,7 @@ static void RCC_Configuration(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
 	/* DMA clock enable */
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 #endif
 }
 
@@ -213,10 +216,10 @@ static void NVIC_Configuration(void)
 	NVIC_Init(&NVIC_InitStructure);
 
 	/* Enable the DMA1 Channel2 Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+//	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
+//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitStructure);
 #endif
 }
 
@@ -261,7 +264,7 @@ void rt_hw_usart_init()
 
 	NVIC_Configuration();
 
-	DMA_Configuration();
+//	DMA_Configuration();
 
 	/* uart init */
 #ifdef RT_USING_UART1
@@ -289,9 +292,9 @@ void rt_hw_usart_init()
 
 #ifdef RT_USING_UART2
 	USART_InitStructure.USART_BaudRate = 115200; 
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_WordLength = USART_WordLength_9b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_Parity = USART_Parity_Odd;
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_ClockInitStructure.USART_Clock = USART_Clock_Disable;
@@ -311,7 +314,7 @@ void rt_hw_usart_init()
 #endif
 
 #ifdef RT_USING_UART3
-	USART_InitStructure.USART_BaudRate = 115200;
+	USART_InitStructure.USART_BaudRate = 10000;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -324,15 +327,20 @@ void rt_hw_usart_init()
 	USART_Init(USART3, &USART_InitStructure);
 	USART_ClockInit(USART3, &USART_ClockInitStructure);
 
-	uart3_dma_tx.dma_channel= UART3_TX_DMA;
+	//uart3_dma_tx.dma_channel= UART3_TX_DMA;
 
 	/* register uart3 */
+#if 0
 	rt_hw_serial_register(&uart3_device, "uart3",
 		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_DMA_TX,
 		&uart3);
+#endif
+	rt_hw_serial_register(&uart3_device, "uart3",
+		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
+		&uart3);
 
 	/* Enable USART3 DMA Tx request */
-	USART_DMACmd(USART3, USART_DMAReq_Tx , ENABLE);
+	//USART_DMACmd(USART3, USART_DMAReq_Tx , ENABLE);
 
 	/* enable interrupt */
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);

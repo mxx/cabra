@@ -186,8 +186,7 @@ Status I2C_Master_BufferRead(I2C_TypeDef* I2Cx,
 
      return SUCCESS;
    }
-   else
-     if(NumByteToRead == 0x02)
+   else if(NumByteToRead == 0x02)
      {
 
        loop = 0;
@@ -757,6 +756,7 @@ void I2C_LowLevel_Init(I2C_TypeDef* I2Cx)
 
     /* GPIOB clock enable */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
     if (I2Cx == I2C1)
     {
         /* I2C1 clock enable */
@@ -769,6 +769,12 @@ void I2C_LowLevel_Init(I2C_TypeDef* I2Cx)
 
         GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
         GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+		GPIO_Init(GPIOD, &GPIO_InitStructure);//IC卡电源开关
+
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+		/* I2C1 SDA and SCL configuration */
 
         /* Enable I2C1 reset state */
         RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);

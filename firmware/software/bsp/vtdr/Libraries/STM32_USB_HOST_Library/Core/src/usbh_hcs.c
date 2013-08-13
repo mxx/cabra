@@ -229,10 +229,10 @@ static uint16_t USBH_GetFreeChannel (USB_OTG_CORE_HANDLE *pdev)
   
   for (idx = 0 ; idx < HC_MAX ; idx++)
   {
-	if ((pdev->host.channel[idx] & HC_USED) == 0)
-	{
-	   return idx;
-	} 
+	  if ((pdev->host.channel[idx] & HC_USED) == 0)
+	  {
+		  return idx;
+	  }
   }
   return HC_ERROR;
 }

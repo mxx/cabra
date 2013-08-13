@@ -18,6 +18,8 @@
 #include "serial.h"
 #include <stm32f10x_dma.h>
 #include <stm32f10x_usart.h>
+uint8_t uart3flag;
+uint8_t uartcount = 0;
 extern struct rt_device uart2_device;
 extern struct rt_device uart3_device;
 typedef enum UART2_STATUS
@@ -352,6 +354,10 @@ rt_err_t rt_hw_serial_register(rt_device_t device, const char* name, rt_uint32_t
 	/* register a character device */
 	return rt_device_register(device, name, RT_DEVICE_FLAG_RDWR | flag);
 }
+void leidebug()
+{
+	return;
+}
 
 /* ISR for serial interrupt */
 void rt_hw_serial_isr(rt_device_t device)
@@ -359,9 +365,9 @@ void rt_hw_serial_isr(rt_device_t device)
 	struct stm32_serial_device* uart = (struct stm32_serial_device*) device->user_data;
     static unsigned char checksum;
     static uint16_t lenth;
-    unsigned char gprmcbuf[5];
+    static unsigned char gprmcbuf[400];
     static unsigned char isgprmc;
-    static unsigned char gprmccnt;
+    static unsigned short gprmccnt = 0;
 
 	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
 	{
@@ -380,6 +386,7 @@ void rt_hw_serial_isr(rt_device_t device)
 
 			if((&uart2_device )== device)
 			{
+				uartcount++;
 				uart->int_rx->rx_buffer[uart->int_rx->save_index] = uart->uart_device->DR & 0xff;
 				checksum = checksum^(uart->int_rx->rx_buffer[uart->int_rx->save_index]);
 				switch (Uart2PackStatus )
@@ -407,11 +414,13 @@ void rt_hw_serial_isr(rt_device_t device)
 						}
 						break;
 					case Get_the_Command:
-						if(((uart->int_rx->rx_buffer[uart->int_rx->save_index]) <0x15)
+						if(((uart->int_rx->rx_buffer[uart->int_rx->save_index]) <0x16)
 							||((uart->int_rx->rx_buffer[uart->int_rx->save_index])>0x81
 							 &&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0x85 )
 							||((uart->int_rx->rx_buffer[uart->int_rx->save_index])>0x81
-							&&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0x85 ))
+							&&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0x85 )
+							||((uart->int_rx->rx_buffer[uart->int_rx->save_index])>0xc1
+							&&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0xc5 ))
 							Uart2PackStatus = Get_the_lenth_high;
 						else
 						{
@@ -422,24 +431,29 @@ void rt_hw_serial_isr(rt_device_t device)
 						break;
 					case Get_the_lenth_high:
 						lenth = uart->int_rx->rx_buffer[uart->int_rx->save_index];
-						Uart2PackStatus = Get_the_lenth_high;
+						Uart2PackStatus = Get_the_lenth_low;
 						break;
 					case Get_the_lenth_low:
 						lenth = ((lenth<<8)&0xff00)+(uart->int_rx->rx_buffer[uart->int_rx->save_index]);
 						Uart2PackStatus = Get_the_reserve;
 						break;
 					case Get_the_reserve:
-						Uart2PackStatus = Get_the_data;
+						if (lenth != 0)
+						{
+							Uart2PackStatus = Get_the_data;
+						}
+						else
+							Uart2PackStatus = Get_the_checksum;
 						break;
 					case Get_the_data:
 						if(lenth )
 							lenth--;
-						else
+						if(lenth == 0)
 							Uart2PackStatus = Get_the_checksum;
 
 						break;
 					case Get_the_checksum:
-						if(checksum == uart->int_rx->rx_buffer[uart->int_rx->save_index])
+						if(checksum == 0)
 						{
 							uart->int_rx->getcmd ++;
 						}
@@ -464,48 +478,115 @@ void rt_hw_serial_isr(rt_device_t device)
 					if (uart->int_rx->read_index >= UART_RX_BUFFER_SIZE)
 						uart->int_rx->read_index = 0;
 				}
+
 			}
 		    if((&uart3_device)== device)
 		    {
-		    	 if((uart->uart_device->DR & 0xff) == '$')
-		    	 {
+		    	if((uart->uart_device->DR & 0xff) == '$')
+		    	{
 
 		    	       SectionID=0;
 		    	       isgprmc = 0;
 		    	       gprmccnt =0;
+		    	       uart3flag =1;
 		    	 }
-		    	 if((uart->uart_device->DR & 0xff)==',')
+		    	 else if((uart->uart_device->DR & 0xff)==',')
 		    	 {
 		    	           SectionID++;
+		    	           gprmccnt = 0;
+		    	           uart3flag =2;
 		    	 }
 
 		    	 else
 		    	 {
-
+		    		   if(gprmccnt == 400)
+		    		   {
+		    			   gprmccnt = 0;
+		    		   }
+					   gprmcbuf[gprmccnt] = uart->uart_device->DR & 0xff;
+					   gprmccnt++;
 					   switch(SectionID)
 					   {
-					   	   	 case FIELD_NONE:
-					   	   		 if (gprmccnt !=5)
+					         case FIELD_NONE:
+					   	   		 if(gprmccnt == 5)
 					   	   		 {
-									gprmcbuf[gprmccnt] = uart->uart_device->DR & 0xff;
-									gprmccnt++;
-					   	   		 }
-					   	   		 if((gprmccnt == 5)&& strcmp(gprmcbuf,"GPRMC",5))
-					   	   		 {
-					   	   			 isgprmc =1;
+					   	   			 uart3flag =2;
+					   	   			gprmccnt =0 ;
+									if ( (gprmcbuf[0] == 'G')
+										&&(gprmcbuf[1] == 'P')&&(gprmcbuf[2] =='G')
+										&&(gprmcbuf[3] =='G')&&(gprmcbuf[4] == 'A'))
+									 {
+										 isgprmc =1;//位置信息
+
+									 }
+									if ( (gprmcbuf[0] == 'G')
+										&&(gprmcbuf[1] == 'P')&&(gprmcbuf[2] =='V')
+										&&(gprmcbuf[3] == 'T')&&(gprmcbuf[4] == 'G'))
+									 {
+										 isgprmc =2;//速度信息
+										 uart3flag =2;
+									 }
 					   	   		 }
 
 					   	   		   break;
 							 case FIELD_ONE://提取时间
+								 uart3flag =1;
+								 if(isgprmc == 1)
+								 {
+										 if(gprmccnt == 10 )
+										 {
+											 //get the time
+											 GetTheGPSTime(gprmcbuf);
+										 }
+								 }
 								  break;
-							 case FIELD_TWO: //判断数据是否可信(当GPS天线能接收到有3颗GPS卫星时为A，可信)
+							 case FIELD_TWO: //判断数据是否可信(当GPS天线能接收到有3颗GPS卫星时为A，可信
+								 if(isgprmc == 1)
+								 {
+									 if(gprmccnt == 9 )
+									 {
+										 //get the time
+										 GetGPSLocation1(gprmcbuf);
+									 }
+									 GetGPSLocation1(gprmcbuf);
+								 }
 								 break;
 							 case FIELD_THREE://提取出纬度
-
 								  break;
-							 case FIELD_FOUR://提取出经度
+							 case FIELD_FOUR://提取出速度
+								 if(isgprmc == 1)
+								 {
+									 if(gprmccnt == 10 )
+									 {
+										 //get the time
+										 GetGPSLocation2(gprmcbuf);
+									 }
+								 }
+								 if(isgprmc == 2)
+								 {
+									 //get the speed
+								 }
 								  break;
-							 case FIELD_NIGHT://提取出日期
+							 case FIELD_FIVE://提取出经度
+							 	  break;
+							 case FIELD_SEVEN:
+								if(isgprmc == 1)
+								{
+									 if(gprmccnt == 2 )
+									 {
+										 //get the singal
+									 }
+								}
+								break;
+							 case FIELD_NIGHT://提取高度
+								 if(isgprmc == 1)
+								 {
+									 if(gprmccnt == 7 )
+									 {
+										 //get the time
+										 GetGPSLocation3(gprmcbuf);
+									 }
+								 }
 
 								  break;
 								  default:
@@ -513,6 +594,7 @@ void rt_hw_serial_isr(rt_device_t device)
 						}
 				 }
 		   }
+
 			/* enable interrupt */
 			rt_hw_interrupt_enable(level);
 		}

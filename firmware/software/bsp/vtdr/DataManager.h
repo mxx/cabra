@@ -62,6 +62,7 @@ typedef struct
 	unsigned char Over20min:1;
 	unsigned char locationchagestatus:1;
 }Datastatus;
+
 extern void SelfCheck();
 extern void OverSpeedHandler();
 extern void DoubtPointHandler();

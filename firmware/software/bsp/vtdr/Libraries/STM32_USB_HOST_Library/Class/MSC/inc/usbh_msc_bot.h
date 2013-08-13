@@ -131,6 +131,7 @@ typedef union _USBH_CSW_Block
 #define USBH_MSC_DECODE_CSW               6
 #define USBH_MSC_BOT_ERROR_IN             7
 #define USBH_MSC_BOT_ERROR_OUT            8
+#define USBH_MSC_BOT_RESET_CBW              9 //add by leiyq
 
 
 #define USBH_MSC_BOT_CBW_SIGNATURE        0x43425355
@@ -164,7 +165,7 @@ typedef union _USBH_CSW_Block
 #define USB_REQ_BOT_RESET                0xFF
 #define USB_REQ_GET_MAX_LUN              0xFE
 
-#define MAX_BULK_STALL_COUNT_LIMIT       0x04   /* If STALL is seen on Bulk 
+#define MAX_BULK_STALL_COUNT_LIMIT       0x04   /* If STALL is seen on Bulk
                                          Endpoint continously, this means 
                                          that device and Host has phase error
                                          Hence a Reset is needed */

@@ -33,11 +33,15 @@
 #include "usbh_def.h"
 #include "usb_hcd_int.h"
 
+
 #include <rtthread.h>
+#include<stm32f10x_gpio.h>
 /** @addtogroup USBH_LIB
 * @{
 */
 
+extern USBH_Status USBH_MSC_BOTReset(USB_OTG_CORE_HANDLE *pdev,
+                              USBH_HOST *phost);
 /** @addtogroup USBH_CLASS
 * @{
 */
@@ -50,7 +54,6 @@
 * @brief    This file includes the mass storage related functions
 * @{
 */ 
-
 
 /** @defgroup USBH_MSC_BOT_Private_TypesDefinitions
 * @{
@@ -94,6 +97,7 @@ __ALIGN_BEGIN HostCSWPkt_TypeDef USBH_MSC_CSWData __ALIGN_END ;
 
 
 static uint32_t BOTStallErrorCount;   /* Keeps count of STALL Error Cases*/
+static uint32_t BOTNakErrorCount;    /* Keeps count of STALL Error Cases*/
 
 /**
 * @}
@@ -150,12 +154,25 @@ void USBH_MSC_Init(USB_OTG_CORE_HANDLE *pdev )
 * @retval None
 * 
 */
+void USB_delay(unsigned char num)
+{
+	unsigned char i,j;
+	if(num == 0)
+	{
+		return;
+	}
+	for(j=0;j<num;j++)
+	{
+		for(i=0;i<3;i++);
+	}
+}
 void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
 {
   uint8_t xferDirection, index;
-  static uint32_t remainingDataLength,remainingDataLengthBak;
+  static uint32_t remainingDataLength,remmaingDataLengthbak,nakflag;
   static uint8_t *datapointer , *datapointer_prev;
   static uint8_t error_direction;
+  static uint8_t nakcout;
   USBH_Status status;
   
   URB_STATE URB_Status = URB_IDLE;
@@ -166,7 +183,7 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
     switch (USBH_MSC_BOTXferParam.BOTState)
     {
     case USBH_MSC_SEND_CBW:
-       rt_kprintf("\nUSBH_MSC_SEND_CBW\n");
+       //rt_kprintf("\nUSBH_MSC_SEND_CBW\n");
       /* send CBW */    
       USBH_BulkSendData (pdev,
                          &USBH_MSC_CBWData.CBWArray[0], 
@@ -179,11 +196,12 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       break;
       
     case USBH_MSC_SENT_CBW:
-        rt_kprintf("\n USBH_MSC_SENT_CBW\n");
+      //  rt_kprintf("\n USBH_MSC_SENT_CBW\n");
       URB_Status = HCD_GetURB_State(pdev , MSC_Machine.hc_num_out);
       if(URB_Status == URB_DONE)
       { 
         BOTStallErrorCount = 0;
+        BOTNakErrorCount =0;
         USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_SENT_CBW; 
         
         /* If the CBW Pkt is sent successful, then change the state */
@@ -216,35 +234,34 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       }   
       else if(URB_Status == URB_NOTREADY)
       {
-        USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOTXferParam.BOTStateBkp;
+    	  USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOTXferParam.BOTStateBkp;
       }     
       else if(URB_Status == URB_STALL)
       {
         error_direction = USBH_MSC_DIR_OUT;
         USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOT_ERROR_OUT;
       }
-      else if(URB_Status == URB_ERROR)//add by leiyq 20130305
+      else if(URB_Status == URB_ERROR)
       {
     	  USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOTXferParam.BOTStateBkp;
       }
       break;
       
     case USBH_MSC_BOT_DATAIN_STATE:
-    	rt_kprintf("\n USBH_MSC_BOT_DATAIN_STATE\n");
       URB_Status =   HCD_GetURB_State(pdev , MSC_Machine.hc_num_in);
       /* BOT DATA IN stage */
       if((URB_Status == URB_DONE) ||(USBH_MSC_BOTXferParam.BOTStateBkp != USBH_MSC_BOT_DATAIN_STATE))
       {
         BOTStallErrorCount = 0;
-        USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_BOT_DATAIN_STATE;    
-        
+        BOTNakErrorCount =0;
+        USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_BOT_DATAIN_STATE;
         if(remainingDataLength > MSC_Machine.MSBulkInEpSize)
         {
           USBH_BulkReceiveData (pdev,
 	                        datapointer, 
 			        MSC_Machine.MSBulkInEpSize , 
 			        MSC_Machine.hc_num_in);
-          
+          datapointer_prev = datapointer;
           remainingDataLength -= MSC_Machine.MSBulkInEpSize;
           datapointer = datapointer + MSC_Machine.MSBulkInEpSize;
         }
@@ -255,21 +272,21 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         }
         else
         {       
-          USBH_BulkReceiveData (pdev,
+        	USBH_BulkReceiveData (pdev,
 	                        datapointer, 
 			        remainingDataLength , 
 			        MSC_Machine.hc_num_in);
-          
-          remainingDataLengthBak = remainingDataLength;//add by leiyq 20130305
+        	remmaingDataLengthbak = remainingDataLength;
           remainingDataLength = 0; /* Reset this value and keep in same state */
         }
       }
+
       else if(URB_Status == URB_STALL)
       {
         /* This is Data Stage STALL Condition */
         
-        error_direction = USBH_MSC_DIR_IN;
-        USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOT_ERROR_IN;
+         error_direction = USBH_MSC_DIR_IN;
+         USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOT_ERROR_IN;
         
         /* Refer to USB Mass-Storage Class : BOT (www.usb.org) 
         6.7.2 Host expects to receive data from the device
@@ -281,34 +298,45 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         USBH_MSC_BOTXferParam.BOTStateBkp is used to switch to the Original 
         state after the ClearFeature Command is issued.
         */
-        USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
-        
+       // USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
+       // USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_BOT_DATAIN_STATE;
       }
-      else if(URB_Status == URB_ERROR)//add by leiyq 20130305
+      else if(URB_Status == URB_NOTREADY)
+      {
+    	 if(remainingDataLength == 0)
+    	  {
+    		  /* If value was 0, and successful transfer, then change the state */
+    		           USBH_MSC_BOTXferParam.BOTState = USBH_MSC_RECEIVE_CSW_STATE;
+    	  }
+
+      }
+      else if((URB_Status == URB_ERROR))//add by leiyq 20130305
 	  {
-		  if (remainingDataLength == 0)
-		  {
-			  USBH_BulkReceiveData (pdev,
-									  datapointer,
-									  remainingDataLengthBak ,
-									  MSC_Machine.hc_num_in);
-		  }
-		  else
-		  {
-			  USBH_BulkReceiveData (pdev,
-									   datapointer_prev,
-									   MSC_Machine.MSBulkInEpSize  ,
-									   MSC_Machine.hc_num_in);
-		  }
+    	  /* re-activate the channel  */
+			if(datapointer != datapointer_prev)
+			{
+				USBH_BulkReceiveData (pdev,
+								 (datapointer - MSC_Machine.MSBulkInEpSize),
+								 MSC_Machine.MSBulkInEpSize ,
+								 MSC_Machine.hc_num_in);
+			}
+			else
+			{
+				USBH_BulkReceiveData (pdev,
+								 datapointer,
+								 remmaingDataLengthbak  ,
+								 MSC_Machine.hc_num_in);
+			}
+
 	  }
       break;   
       
       
     case USBH_MSC_BOT_DATAOUT_STATE:
-    	rt_kprintf("\n USBH_MSC_BOT_DATAOUT_STATE\n");
+    	//rt_kprintf("\n USBH_MSC_BOT_DATAOUT_STATE\n");
       /* BOT DATA OUT stage */
-      URB_Status = HCD_GetURB_State(pdev , MSC_Machine.hc_num_out);       
-      if(URB_Status == URB_DONE)
+      URB_Status = HCD_GetURB_State(pdev , MSC_Machine.hc_num_out);
+      if((URB_Status == URB_DONE)||(USBH_MSC_BOTXferParam.BOTStateBkp != USBH_MSC_BOT_DATAOUT_STATE))
       {
         BOTStallErrorCount = 0;
         USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_BOT_DATAOUT_STATE;    
@@ -335,12 +363,12 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
 			     remainingDataLength , 
 			     MSC_Machine.hc_num_out);
           
-          remainingDataLengthBak = remainingDataLength;//add by leiyq 20130305
+      	remmaingDataLengthbak = remainingDataLength;
           remainingDataLength = 0; /* Reset this value and keep in same state */   
         }      
       }
       
-      else if(URB_Status == URB_NOTREADY)
+      else if((URB_Status == URB_NOTREADY)||(URB_Status == URB_ERROR))//modify by leiyq
       {
         if(datapointer != datapointer_prev)
         {
@@ -353,7 +381,7 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         {
           USBH_BulkSendData (pdev,
                              datapointer,
-                             MSC_Machine.MSBulkOutEpSize , 
+                             remmaingDataLengthbak ,
                              MSC_Machine.hc_num_out);
         }
       }
@@ -376,30 +404,13 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         state after the ClearFeature Command is issued.
         */
         
-        USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
-        
-      }
-      else if(URB_Status == URB_ERROR)//add by leiyq 20130305
-      {
-    	  if (remainingDataLength == 0)
-    	  {
-    		  USBH_BulkSendData (pdev,
-    				  	  	  	  	  datapointer,
-    			  	  	  	  	  	  remainingDataLengthBak ,
-    	                              MSC_Machine.hc_num_out);
-    	  }
-    	  else
-    	  {
-    		  USBH_BulkSendData (pdev,
-    		    			  	  	   datapointer_prev,
-    		    			  	  	   MSC_Machine.MSBulkOutEpSize  ,
-    		    	                   MSC_Machine.hc_num_out);
-    	  }
+       // USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
+        USBH_MSC_BOTXferParam.BOTStateBkp =  USBH_MSC_BOT_DATAOUT_STATE;
       }
       break;
       
     case USBH_MSC_RECEIVE_CSW_STATE:
-    	rt_kprintf("\n USBH_MSC_RECEIVE_CSW_STATE\n");
+    //	rt_kprintf("\n USBH_MSC_RECEIVE_CSW_STATE\n");
       /* BOT CSW stage */     
         /* NOTE: We cannot reset the BOTStallErrorCount here as it may come from 
         the clearFeature from previous command */
@@ -417,34 +428,45 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
         USBH_MSC_CSWData.CSWArray[0] = 0;
         USBH_BulkReceiveData (pdev,
                               USBH_MSC_BOTXferParam.pRxTxBuff, 
-                              USBH_MSC_CSW_MAX_LENGTH , 
+                              USBH_MSC_CSW_LENGTH ,
                               MSC_Machine.hc_num_in);
         USBH_MSC_BOTXferParam.BOTState = USBH_MSC_DECODE_CSW;    
 
       break;
       
     case USBH_MSC_DECODE_CSW:
-    	rt_kprintf("\nUSBH_MSC_DECODE_CSW\n");
+    	//rt_kprintf("\nUSBH_MSC_DECODE_CSW\n");
       URB_Status = HCD_GetURB_State(pdev , MSC_Machine.hc_num_in);
       /* Decode CSW */
       if(URB_Status == URB_DONE)
       {
-        BOTStallErrorCount = 0;
-        USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
-        
-        USBH_MSC_BOTXferParam.MSCState = USBH_MSC_BOTXferParam.MSCStateCurrent ;
-        
-        USBH_MSC_BOTXferParam.BOTXferStatus = USBH_MSC_DecodeCSW(pdev , phost);
+
+			BOTStallErrorCount = 0;
+			USBH_MSC_BOTXferParam.BOTStateBkp = USBH_MSC_RECEIVE_CSW_STATE;
+
+			USBH_MSC_BOTXferParam.MSCState = USBH_MSC_BOTXferParam.MSCStateCurrent ;
+			USBH_MSC_BOTXferParam.BOTXferStatus = USBH_MSC_DecodeCSW(pdev , phost);
       }
       else if(URB_Status == URB_STALL)     
       {
-        error_direction = USBH_MSC_DIR_IN;
-        USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOT_ERROR_IN;
+          error_direction = USBH_MSC_DIR_IN;
+         USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOT_ERROR_IN;
       }
+      else if(URB_Status == URB_NOTREADY)//addby leiyq 20130625
+      {
+    	  //error_direction = USBH_MSC_DIR_IN;
+    	   //USBH_MSC_BOTXferParam.BOTState  = USBH_MSC_BOT_ERROR_IN;
+
+      }
+      else if(URB_Status == URB_ERROR)//addby leiyq 20130625
+	  {
+		  USBH_MSC_BOTXferParam.BOTState =  USBH_MSC_BOTXferParam.BOTStateBkp;
+
+	  }
       break;
       
     case USBH_MSC_BOT_ERROR_IN: 
-    	rt_kprintf("\nUSBH_MSC_BOT_ERROR_IN\n");
+    //	rt_kprintf("\nUSBH_MSC_BOT_ERROR_IN\n");
       status = USBH_MSC_BOT_Abort(pdev, phost, USBH_MSC_DIR_IN);
       if (status == USBH_OK)
       {
@@ -463,7 +485,11 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       else if (status == USBH_UNRECOVERED_ERROR)
       {
         /* This means that there is a STALL Error limit, Do Reset Recovery */
-        USBH_MSC_BOTXferParam.BOTXferStatus = USBH_MSC_PHASE_ERROR;
+        //  USBH_MSC_BOTXferParam.BOTXferStatus = USBH_MSC_PHASE_ERROR;
+       // USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOTXferParam.BOTStateBkp;
+    	//  USBH_MSC_BOTXferParam.MSCState = USBH_MSC_BOTXferParam.MSCStateCurrent;
+    	  //USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOT_RESET_CBW;
+    	  USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOTXferParam.BOTStateBkp;
       }
       break;
       
@@ -471,16 +497,29 @@ void USBH_MSC_HandleBOTXfer (USB_OTG_CORE_HANDLE *pdev ,USBH_HOST *phost)
       status = USBH_MSC_BOT_Abort(pdev, phost, USBH_MSC_DIR_OUT);
       if ( status == USBH_OK)
       { /* Switch Back to the Original State */
-        USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOTXferParam.BOTStateBkp;        
+        USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOTXferParam.BOTStateBkp;
       }
       else if (status == USBH_UNRECOVERED_ERROR)
       {
         /* This means that there is a STALL Error limit, Do Reset Recovery */
-        USBH_MSC_BOTXferParam.BOTXferStatus = USBH_MSC_PHASE_ERROR;
+       // USBH_MSC_BOTXferParam.BOTXferStatus = USBH_MSC_PHASE_ERROR;
+        //USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOTXferParam.BOTStateBkp;
+
+        //USBH_MSC_BOTXferParam.CmdStateMachine = CMD_SEND_STATE;//add by leiyq
+        //USBH_MSC_BOTReset(pdev, phost);
+    	 // USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOT_RESET_CBW;
+    	  USBH_MSC_BOTXferParam.BOTState = USBH_MSC_BOTXferParam.BOTStateBkp;
       }
       break;
-      
-    default:      
+    case USBH_MSC_BOT_RESET_CBW:
+    	status = USBH_MSC_BOTReset(pdev, phost);
+    	USBH_HandleControl(pdev, phost);
+		if(status == USBH_OK )
+		{
+			USBH_MSC_BOTXferParam.BOTState = USBH_MSC_SEND_CBW;
+		}
+    	break;
+    default:
       break;
     }
   }
@@ -522,7 +561,7 @@ USBH_Status USBH_MSC_BOT_Abort(USB_OTG_CORE_HANDLE *pdev,
   default:
     break;
   }
-  
+  USBH_HandleControl(pdev, phost);//add byleiyq
   BOTStallErrorCount++; /* Check Continous Number of times, STALL has Occured */ 
   if (BOTStallErrorCount > MAX_BULK_STALL_COUNT_LIMIT )
   {

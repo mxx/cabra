@@ -526,6 +526,7 @@ uint32_t USB_OTG_USBH_handle_hc_n_Out_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t 
     USB_OTG_HC_Halt(pdev, num);
     pdev->host.ErrCnt[num] ++;
     pdev->host.HC_Status[num] = HC_XACTERR;
+    pdev->host.URB_State[num] = URB_ERROR;
     CLEAR_HC_INT(hcreg , xacterr);
   }
   else if (hcint.b.nyet)
@@ -585,7 +586,7 @@ uint32_t USB_OTG_USBH_handle_hc_n_Out_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t 
       else//add by leiyq
       {
 
-    	  pdev->host.URB_State[num] = URB_ERROR;
+    	pdev->host.URB_State[num] = URB_ERROR;
       }
     }
     CLEAR_HC_INT(hcreg , chhltd);    
@@ -640,7 +641,7 @@ uint32_t USB_OTG_USBH_handle_hc_n_In_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t n
     hcint.b.nak = 0;           /* NOTE: When there is a 'stall', reset also nak, 
                                   else, the pdev->host.HC_Status = HC_STALL
     will be overwritten by 'nak' in code below */
-    USB_OTG_HC_Halt(pdev, num);    
+    USB_OTG_HC_Halt(pdev, num);
   }
   else if (hcint.b.datatglerr)
   {
@@ -695,19 +696,25 @@ uint32_t USB_OTG_USBH_handle_hc_n_In_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t n
     
     if(pdev->host.HC_Status[num] == HC_XFRC)
     {
-      pdev->host.URB_State[num] = URB_DONE;      
+      pdev->host.URB_State[num] = URB_DONE;
+      pdev->host.ErrCnt[num] = 0;//addby leiyq
     }
     
     else if (pdev->host.HC_Status[num] == HC_STALL) 
     {
       pdev->host.URB_State[num] = URB_STALL;
+      pdev->host.ErrCnt[num] = 0; //addby leiyq
     }   
     
     else if((pdev->host.HC_Status[num] == HC_XACTERR) ||
             (pdev->host.HC_Status[num] == HC_DATATGLERR))
     {
-      pdev->host.ErrCnt[num] = 0;
-      pdev->host.URB_State[num] = URB_ERROR;  
+       pdev->host.URB_State[num] = URB_ERROR;//modify by leiyq
+       if(pdev->host.ErrCnt[num] > 3)
+       {
+    	   pdev->host.ErrCnt[num] = 0;
+    	   //pdev->host.URB_State[num] = URB_STALL;
+       }
       
     }
     else if(hcchar.b.eptype == EP_TYPE_INTR)
@@ -723,6 +730,10 @@ uint32_t USB_OTG_USBH_handle_hc_n_In_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t n
     UNMASK_HOST_INT_CHH (num);
     pdev->host.ErrCnt[num] ++;
     pdev->host.HC_Status[num] = HC_XACTERR;
+    if(hcchar.b.eptype == EP_TYPE_CTRL)//modify by leiyq
+   {
+    	 pdev->host.URB_State[num] = URB_ERROR;//modify by leiyq
+    }
     USB_OTG_HC_Halt(pdev, num);
     CLEAR_HC_INT(hcreg , xacterr);    
     
@@ -743,6 +754,7 @@ uint32_t USB_OTG_USBH_handle_hc_n_In_ISR (USB_OTG_CORE_HANDLE *pdev , uint32_t n
       USB_OTG_WRITE_REG32(&pdev->regs.HC_REGS[num]->HCCHAR, hcchar.d32); 
     }
     pdev->host.HC_Status[num] = HC_NAK;
+    pdev->host.URB_State[num] = URB_NOTREADY;//addby leiyq
     CLEAR_HC_INT(hcreg , nak);   
   }
   
@@ -786,7 +798,7 @@ static uint32_t USB_OTG_USBH_handle_rx_qlvl_ISR (USB_OTG_CORE_HANDLE *pdev)
     {  
       
       USB_OTG_ReadPacket(pdev, pdev->host.hc[channelnum].xfer_buff, grxsts.b.bcnt);
-      rt_kprintf(pdev->host.hc[channelnum].xfer_buff);
+    //  rt_kprintf(pdev->host.hc[channelnum].xfer_buff);
       /*manage multiple Xfer */
       pdev->host.hc[grxsts.b.chnum].xfer_buff += grxsts.b.bcnt;           
       pdev->host.hc[grxsts.b.chnum].xfer_count  += grxsts.b.bcnt;

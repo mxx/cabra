@@ -25,7 +25,7 @@
 #endif
 
 #define lcd_bk_ctrl				    GPIOB
-#define lcd_BK						(GPIO_Pin_8)
+#define lcd_BK						(GPIO_Pin_5)
 
 #define lcd_ctrl					RCC_APB2Periph_GPIOD
 #define lcd_gpio_ctrl				GPIOD
@@ -134,6 +134,7 @@ const FONT_MATRIX charmap8[15][2][8]
 		{0x00,0x08,0x0f,0x01,0x01,0x00,0x00,0x00},{0x00,0x10,0xf0,0x10,0x00,0xf0,0x10,0x00}
 	}//'h'
 };
+
 // delay us
 void lcd_delay(int n)
 {
@@ -168,7 +169,6 @@ void rt_hw_lcd_init(void)
     lcd_Reset();
     lcd_delay(30);
     rt_hw_lcd_on();
-
 }
 
 void lcd_senddata(u8 value)
@@ -295,13 +295,21 @@ void rt_hw_lcd_off(void)
 
 void lcd_write_matrix(LINE_CMD row,rt_uint8_t column,FONT_MATRIX *pt,rt_uint8_t num)
 {
+	rt_public_pin_init(1);
 	rt_uint8_t i,j;
 	rt_uint8_t  temp;
+	FONT_MATRIX *dt;
+	extern const FONT_MATRIX charmapSinal[2][24];
+    dt=pt;
+
 	for(i = 0;i<2;i++)
 	{
 		lcd_write_cmdordata(CMD, Page_Set, row-i);
 		lcd_set_column(column);
-
+		if((dt ==charmapSinal)&&(i=1))
+		{
+			pt = dt+24;
+		}
 		for (j = 0; j < num; j++)
 		{
 			lcd_write_cmdordata(DATA, (*(unsigned char*) pt++),0);
@@ -324,8 +332,8 @@ void lcd_display( void )
 }
 #endif
 
-#ifdef RT_USING_FINSH
-#include <finsh.h>
+//#ifdef RT_USING_FINSH
+//#include <finsh.h>
 static rt_uint8_t lcd_inited = 0;
 void lcd(rt_uint32_t value)
 {
@@ -353,9 +361,10 @@ void lcd_bk(rt_uint32_t value)
 }
 void lcd_clear(LINE_CMD value)
 {
+	rt_public_pin_init(1);
 	rt_hw_lcd_clear(value);
 }
-
+#if 0
 FINSH_FUNCTION_EXPORT(lcd, set lcd on[1] or off[0].)
 FINSH_FUNCTION_EXPORT(lcd_bk, set lcd backlight on[1] or off[0].)
 FINSH_FUNCTION_EXPORT(lcd_clear, set patten x.)

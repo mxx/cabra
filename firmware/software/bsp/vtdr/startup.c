@@ -67,7 +67,7 @@ void rtthread_startup(void)
 	rt_hw_board_init();
 
 	/* show version */
-	rt_show_version();
+	//rt_show_version();
 
 	/* init tick */
 	rt_system_tick_init();
@@ -97,7 +97,8 @@ void rtthread_startup(void)
 	rt_system_scheduler_init();
 
 	/* init dataflash driver */
-	//rt_hw_dataflash_init();
+	rt_hw_dataflash_init();
+
 	rt_hw_rtc_init();
 
 	/* init all device */
@@ -111,8 +112,6 @@ void rtthread_startup(void)
 	finsh_system_init();
 	finsh_set_device("uart2");
 #endif
-
-	//rt_hw_lcd_on();
 
     /* init timer thread */
     rt_system_timer_thread_init();

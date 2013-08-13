@@ -55,13 +55,13 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Select DATAFLASH Card: ChipSelect pin low  */
-#define DATAFLASH_CS_LOW()    GPIO_ResetBits(GPIOA, GPIO_Pin_4)
+#define DATAFLASH_CS_LOW()    GPIO_ResetBits(GPIOA, GPIO_Pin_3)
 /* Deselect DATAFLASH Card: ChipSelect pin high */
-#define DATAFLASH_CS_HIGH()   GPIO_SetBits(GPIOA, GPIO_Pin_4)
+#define DATAFLASH_CS_HIGH()   GPIO_SetBits(GPIOA, GPIO_Pin_3)
 /* Select SPI FLASH: ChipSelect pin low  */
-#define SPI_FLASH_CS_LOW()     GPIO_ResetBits(GPIOA, GPIO_Pin_4)
+#define SPI_FLASH_CS_LOW()     GPIO_ResetBits(GPIOA, GPIO_Pin_3)
 /* Deselect SPI FLASH: ChipSelect pin high */
-#define SPI_FLASH_CS_HIGH()    GPIO_SetBits(GPIOA, GPIO_Pin_4)
+#define SPI_FLASH_CS_HIGH()    GPIO_SetBits(GPIOA, GPIO_Pin_3)
 /* Deselect ADATAFLASH : ChipSelect pin high */
 #define ADATAFLASH_CS_HIGH()   GPIO_SetBits(GPIOB, GPIO_Pin_12)
 /* Deselect ADATAFLASH : ChipSelect pin Low */
@@ -338,7 +338,7 @@ void SPI_Config(SPI_TypeDef* SPIx)
 
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 		GPIO_Init(GPIOA, &GPIO_InitStructure);
 	}
 	else if(SPIx == SPI2)
@@ -356,7 +356,7 @@ void SPI_Config(SPI_TypeDef* SPIx)
 
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
 	}
 
@@ -389,6 +389,10 @@ void SPI_Config(SPI_TypeDef* SPIx)
 *******************************************************************************/
 void SPI_FLASH_Sector4kErase(SPI_TypeDef* SPIx ,u32 SectorAddr)
 {
+ if (SPIx==SPI2 )
+  {
+	  rt_public_pin_init(0);
+  }
   /* Send write enable instruction */
   SPI_FLASH_WriteEnable(SPIx);
   dataflash_delay(2000);
@@ -421,6 +425,10 @@ void SPI_FLASH_Sector4kErase(SPI_TypeDef* SPIx ,u32 SectorAddr)
 *******************************************************************************/
 void SPI_FLASH_SectorErase(SPI_TypeDef* SPIx ,u32 SectorAddr)
 {
+  if (SPIx==SPI2 )
+  {
+	rt_public_pin_init(0);
+  }
   /* Send write enable instruction */
   SPI_FLASH_WriteEnable(SPIx);
 
@@ -451,6 +459,10 @@ void SPI_FLASH_SectorErase(SPI_TypeDef* SPIx ,u32 SectorAddr)
 *******************************************************************************/
 void SPI_FLASH_BulkErase( SPI_TypeDef* SPIx )
 {
+	if (SPIx==SPI2 )
+	{
+		rt_public_pin_init(0);
+	}
   /* Send write enable instruction */
   SPI_FLASH_WriteEnable(SPIx);
   dataflash_delay(2000);
@@ -532,6 +544,10 @@ void SPI_FLASH_BufferWrite(SPI_TypeDef* SPIx ,u8* pBuffer, u32 WriteAddr, u16 Nu
   count = SPI_FLASH_PageSize - Addr;
   NumOfPage =  NumByteToWrite / SPI_FLASH_PageSize;
   NumOfSingle = NumByteToWrite % SPI_FLASH_PageSize;
+  if (SPIx==SPI2 )
+  {
+	  rt_public_pin_init(0);
+  }
 
   if(Addr == 0) /* WriteAddr is SPI_FLASH_PageSize aligned  */
   {
@@ -607,6 +623,10 @@ void SPI_FLASH_BufferWrite(SPI_TypeDef* SPIx ,u8* pBuffer, u32 WriteAddr, u16 Nu
 *******************************************************************************/
 void SPI_FLASH_BufferRead(SPI_TypeDef* SPIx ,u8* pBuffer, u32 ReadAddr, u16 NumByteToRead)
 {
+ if (SPIx==SPI2 )
+  {
+	  rt_public_pin_init(0);
+  }
   /* Select the FLASH: Chip Select low */
   Flah_Chip_Select(SPIx ,0);
   dataflash_delay(1000);
@@ -903,6 +923,6 @@ void rt_hw_dataflash_init()
 	{
 		rt_kprintf("dataflash init failed\n");
 	}
-	//DATAFLASH_Init(SPI2);
+	DATAFLASH_Init(SPI2);
 
 }

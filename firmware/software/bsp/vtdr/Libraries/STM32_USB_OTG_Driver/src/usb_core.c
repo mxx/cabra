@@ -731,7 +731,7 @@ void USB_OTG_DriveVbus (USB_OTG_CORE_HANDLE *pdev, uint8_t state)
   hprt0.d32 = 0;
   
   /* enable disable the external charge pump */
-  USB_OTG_BSP_DriveVBUS(pdev, state);
+ // USB_OTG_BSP_DriveVBUS(pdev, state);
   
   /* Turn on the Host port power. */
   hprt0.d32 = USB_OTG_ReadHPRT0(pdev);
@@ -1066,7 +1066,6 @@ USB_OTG_STS USB_OTG_HC_StartXfer(USB_OTG_CORE_HANDLE *pdev , uint8_t hc_num)
       }
       
       /* Write packet into the Tx FIFO. */
-      rt_kprintf(pdev->host.hc[hc_num].xfer_buff);
       USB_OTG_WritePacket(pdev, 
                           pdev->host.hc[hc_num].xfer_buff , 
                           hc_num, pdev->host.hc[hc_num].xfer_len);

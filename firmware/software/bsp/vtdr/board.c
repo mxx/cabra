@@ -117,7 +117,7 @@ void rt_hw_usb_init()
 {
 
 	 GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO , ENABLE);
 
@@ -140,9 +140,10 @@ void rt_hw_usb_init()
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
     GPIO_InitStructure.GPIO_Pin = USB_VBUS;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_SetBits(GPIOA,USB_VBUS);
+ //   GPIO_SetBits(GPIOA,USB_VBUS);
 
-    GPIO_ResetBits(GPIOB,USB_PWR_ON);
+    GPIO_ResetBits(GPIOC,USB_PWR_ON);
+  // GPIO_SetBits(GPIOC,USB_PWR_ON);
 }
 
 /**
@@ -161,12 +162,14 @@ void rt_hw_board_init()
 #endif
 
 	rt_hw_usart_init();
-	rt_hw_led_init();
+	//rt_hw_led_init();
 	rt_hw_lcd_init();
 	rt_hw_buzz_init();
 	rt_hw_usb_init();
 	rt_hw_gpio_init();
 	rt_hw_tim3_init();
+	rt_hw_dac_init();
+	rt_hw_printer_init();
 	I2C_LowLevel_Init(I2C1);
 	rt_console_set_device(CONSOLE_DEVICE);
 	 //DisplayProductVersion();

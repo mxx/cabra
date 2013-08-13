@@ -103,7 +103,7 @@ __ALIGN_BEGIN MSC_Machine_TypeDef         MSC_Machine __ALIGN_END ;
 #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 __ALIGN_BEGIN USB_Setup_TypeDef           MSC_Setup __ALIGN_END ;
 uint8_t MSCErrorCount = 0;
-
+uint8_t applicasucess;
 
 /**
   * @}
@@ -126,7 +126,7 @@ static USBH_Status USBH_MSC_Handle(USB_OTG_CORE_HANDLE *pdev ,
 static USBH_Status USBH_MSC_ClassRequest(USB_OTG_CORE_HANDLE *pdev , 
                                          void *phost);
 
-static USBH_Status USBH_MSC_BOTReset(USB_OTG_CORE_HANDLE *pdev,
+USBH_Status USBH_MSC_BOTReset(USB_OTG_CORE_HANDLE *pdev,
                               USBH_HOST *phost);
 static USBH_Status USBH_MSC_GETMaxLUN(USB_OTG_CORE_HANDLE *pdev,
                                USBH_HOST *phost);
@@ -345,7 +345,8 @@ static USBH_Status USBH_MSC_Handle(USB_OTG_CORE_HANDLE *pdev ,
       {
                /* If the Command has failed, then we need to move to Next State, after
         STALL condition is cleared by Control-Transfer */
-        USBH_MSC_BOTXferParam.MSCStateBkp = USBH_MSC_TEST_UNIT_READY; 
+         USBH_MSC_BOTXferParam.MSCStateBkp = USBH_MSC_TEST_UNIT_READY;
+        //USBH_MSC_BOTXferParam.MSCStateBkp = USBH_MSC_GET_MAX_LUN;
         
         /* a Clear Feature should be issued here */
         USBH_MSC_BOTXferParam.MSCState = USBH_MSC_CTRL_ERROR_STATE;
@@ -437,6 +438,7 @@ static USBH_Status USBH_MSC_Handle(USB_OTG_CORE_HANDLE *pdev ,
       appliStatus = pphost->usr_cb->UserApplication();
       if(appliStatus == 0)
       {
+
         USBH_MSC_BOTXferParam.MSCState = USBH_MSC_DEFAULT_APPLI_STATE;
       }
       else if (appliStatus == 1) 
@@ -470,7 +472,7 @@ static USBH_Status USBH_MSC_Handle(USB_OTG_CORE_HANDLE *pdev ,
   * @param  pdev: Selected device
   * @retval USBH_Status : Status of class request handled.
   */
-static USBH_Status USBH_MSC_BOTReset(USB_OTG_CORE_HANDLE *pdev,
+USBH_Status USBH_MSC_BOTReset(USB_OTG_CORE_HANDLE *pdev,
                               USBH_HOST *phost)
 {
   

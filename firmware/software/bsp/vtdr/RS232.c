@@ -15,6 +15,8 @@
 #define CMDLENGTH 0x20
 #define FALSE 0
 #define TRUE 1
+
+CMD_VER Verificationstatus;
 unsigned char RSCmdrxBuf[CMDLENGTH];
 unsigned char RSCmdtxBuf[CMDLENGTH];
 unsigned char RSDatarxBuf[DataLength];
@@ -33,9 +35,12 @@ extern int WritePartitionTable(PartitionTable *ptt);
 extern int IsCorrectCLOCK(CLOCK *dt);
 //unsigned char SetTimeFlag = 0;
 
+extern unsigned short CurSpeed;
+extern unsigned char CurStatus;
+extern Timeflag timeflag;
 extern unsigned char BCD2Char(unsigned char bcd);
 extern unsigned char GetOverTimeRecordIn2Days(OTDR *record);
-
+extern unsigned char Time6sCnt;
 extern CLOCK curTime;
 extern PartitionTable pTable;
 extern StructPara Parameter;
@@ -308,9 +313,9 @@ void UpLoad_DriverDistance()
 	WriteDataTxTime();
 
 		rt_device_write(&uart2_device, 0, (const void *)(&(para->InstallTime) ), 6);
+		rt_device_write(&uart2_device, 0, (const void *)(&(para->StarDistance) ), 4);
 		rt_device_write(&uart2_device, 0, (const void *)(&(para->DriverDistace) ), 4);
 
-		rt_device_write(&uart2_device, 0, (const void *)(&(para->StarDistance) ), 4);
 	//	at91_usart_write(RS232,(u_char)(>> ((2-i)*8)));
 		SendCheckSum = SendCheckSum^((unsigned char)((para->InstallTime.year) ))^((unsigned char)((para->InstallTime.month) ));
 		SendCheckSum = SendCheckSum^((unsigned char)((para->InstallTime.day) ))^((unsigned char)((para->InstallTime.hour) ));
@@ -357,14 +362,15 @@ void UpLoad_StatusInfo()
 	RSCmdtxBuf[1] = 0x7a;
 	RSCmdtxBuf[2] = 0x06;
 	RSCmdtxBuf[3] = 0x00;
-	RSCmdtxBuf[4] = 0x5d;
+	RSCmdtxBuf[4] = 0x57;
 	RSCmdtxBuf[5] = 0x00;
-	SendCheckSum = 0x55^0x7a^0x06^0x00^0x5d^0x00;
+	SendCheckSum = 0x55^0x7a^0x06^0x00^0x57^0x00;
 	rt_device_write(&uart2_device, 0, RSCmdtxBuf, 6);
 
 	WriteDataTxTime();
 	rt_device_write(&uart2_device, 0, (const void *)(&(para->signalstatus) ), 1);
 	SendCheckSum = SendCheckSum^(para->signalstatus);
+	rt_device_write(&uart2_device, 0, (const void *)(&(para->singalname) ), 80);
 	for(i = 0;i<80;i++)
 	{
 		SendCheckSum = SendCheckSum^((unsigned char) *((unsigned char *)(&(para->singalname)+i)));
@@ -382,13 +388,13 @@ void UpLoad_Type()
 		RSCmdtxBuf[1] = 0x7a;
 		RSCmdtxBuf[2] = 0x07;
 		RSCmdtxBuf[3] = 0x00;
-		RSCmdtxBuf[4] = 0x33;
+		RSCmdtxBuf[4] = 0x23;
 		RSCmdtxBuf[5] = 0x00;
-		SendCheckSum = 0x55^0x7a^0x07^0x00^0x33^0x00;
+		SendCheckSum = 0x55^0x7a^0x07^0x00^0x23^0x00;
 		rt_device_write(&uart2_device, 0, RSCmdtxBuf, 6);
 
-		rt_device_write(&uart2_device, 0, (const void *)(&(para->typedata) ), 1);
-		for(i = 0;i<33;i++)
+		rt_device_write(&uart2_device, 0, (const void *)(&(para->typedata) ), 35);
+		for(i = 0;i<35;i++)
 		{
 			SendCheckSum = SendCheckSum^((unsigned char) *((unsigned char *)(&(para->typedata)+i)));
 		}
@@ -398,66 +404,84 @@ void UpLoad_Type()
 }
 void UpLoad_BlockData( CLOCK Starttime, CLOCK Endtime,uint16_t lenth, uint16_t cmd)
 {
-	unsigned long i,j;
-	unsigned long STOPp;
+	unsigned long i,j,k;
+	unsigned long STOPp,STOPb,flag;
 	unsigned short BlockSize;
 	unsigned long startbase,endbase;
 	unsigned long startime,endtime,readtime;
-	unsigned char speed;
-	unsigned char temp_data[660];
+	unsigned char NumMaxBlockSize;
+	unsigned char temp_data[1000];
+	unsigned char Numcout = 0;
+	unsigned char Sendflag = 0;
 	CLOCK    temp_clock;
 	startime = timechange(Starttime);
 	endtime = timechange(Endtime);
-	RSCmdtxBuf[0] = 0x55;
-	RSCmdtxBuf[1] = 0x7a;
-	RSCmdtxBuf[2] = cmd;
+	temp_data[0] = 0x55;
+	temp_data[1] = 0x7a;
+	temp_data[2] = cmd;
 	switch (cmd)
 	{
 		case 0x08:
 			BlockSize = DRV_SPEED_BLOCK;
+			NumMaxBlockSize = 7;
 			STOPp = pTable.BaseData.CurPoint;
+			flag = pTable.BaseData.finshflag;
 			startbase = BASEDATA_BASE;
 			endbase = BASEDATA_END;
 			break;
 		case 0x09:
 			BlockSize = LOCATION_BLOCK;
+			NumMaxBlockSize = 1;
 			STOPp = pTable.LocationData.CurPoint;
+			flag = pTable.LocationData.finshflag;
 			startbase = LOCATION_BASE;
 			endbase = LOCATION_END;
 			break;
 		case 0x10:
 			BlockSize = DOUBLT_BLOCK;
+			NumMaxBlockSize = 4;
 			STOPp = pTable.OverSpeedRecord.CurPoint;
+			flag = pTable.OverSpeedRecord.finshflag;
 			startbase = DPD_BASE;
 			endbase = DPD_END;
 			break;
 		case 0x11:
 			BlockSize = OVERDRV_BLOCK;
+			NumMaxBlockSize = 19;
 			STOPp = pTable.DoubtPointData.CurPoint;
+			flag = pTable.DoubtPointData.finshflag;
 			startbase = OVERDRV_BASE;
 			endbase = OVERDRV_END;
 			break;
 		case 0x12:
 			BlockSize = DRV_RG_BLOCK;
+			NumMaxBlockSize = 39;
 			STOPp = pTable.DriverReRecord.CurPoint;
+			flag = pTable.DriverReRecord.finshflag;
 			startbase = DRVRG_BASE;
 			endbase = DRVRG_END;
 			break;
 		case 0x13:
 			BlockSize = POW_BLOCK;
+			NumMaxBlockSize = 141;
 			STOPp = pTable.PowerOffRunRecord.CurPoint;
+			flag = pTable.PowerOffRunRecord.finshflag;
 			startbase = POWER_BASE;
 			endbase = POWER_END;
 			break;
 		case 0x14:
 			BlockSize = PARA_BLOCK;
+			NumMaxBlockSize = 141;
 			STOPp = pTable.ModifyRecord.CurPoint;
+			flag = pTable.ModifyRecord.finshflag;
 			startbase = PARA_BASE;
 			endbase = PARA_END;
 			break;
 		case 0x15:
 			BlockSize = JN_BLOCK;
+			NumMaxBlockSize = 7;
 			STOPp = pTable.journalRecord.CurPoint;
+			flag = pTable.journalRecord.finshflag;
 			startbase = JN_BASE;
 			endbase =  JN_END;
 			break;
@@ -465,50 +489,120 @@ void UpLoad_BlockData( CLOCK Starttime, CLOCK Endtime,uint16_t lenth, uint16_t c
 			break;
 
 	}
-	RSCmdtxBuf[3] = (BlockSize>>8)&0xff;
-	RSCmdtxBuf[4] =( unsigned char )BlockSize ;
-	RSCmdtxBuf[5] = 0x00;
-	SendCheckSum = 0x55^0x7a^cmd^RSCmdtxBuf[3]^RSCmdtxBuf[4]^0x00;
-	rt_device_write(&uart2_device, 0, RSCmdtxBuf, 6);
-
-	for(i = 0;i< lenth;i++)
+	//RSCmdtxBuf[3] = (BlockSize>>8)&0xff;
+	//RSCmdtxBuf[4] =( unsigned char )BlockSize ;
+	temp_data[5] = 0x00;
+	j = 6;
+	SendCheckSum = 0x55^0x7a^cmd^0x00;
+	//rt_device_write(&uart2_device, 0, RSCmdtxBuf, 6);
+	if((flag &0xea)!=0xea)
 	{
-		do
+		Numcout = 0;
+	}
+	else
+	{
+		for(i = 0;i< lenth;i++)
 		{
-			if(STOPp > startbase)
+			do
 			{
-				STOPp = STOPp-BlockSize;
+				if(STOPp > startbase)
+				{
+					STOPp = STOPp-BlockSize;
+				}
+				else
+				{
+					STOPb = (endbase-startbase+1)/BlockSize;
+					STOPp = STOPb*BlockSize+startbase;
+				}
+				if(BlockSize == OVERDRV_BLOCK)
+				{
+					SPI_FLASH_BufferRead(SPI1 ,(uint8_t *)&temp_clock ,STOPp+18,6);
+				}
+				else
+				{
+					SPI_FLASH_BufferRead(SPI1 ,(uint8_t *)&temp_clock ,STOPp, 6);
+				}
+				readtime = timechange(temp_clock);
+
+			}while((readtime >endtime) || (readtime == endtime ));
+			if( readtime<startime )
+			{
+				break;
 			}
 			else
 			{
-				STOPp = startbase-BlockSize;
-			}
-			SPI_FLASH_BufferRead(SPI1 ,(uint8_t *)&temp_clock ,STOPp, 6);
-			readtime = timechange(temp_clock);
+				Numcout++;
+				SPI_FLASH_BufferRead(SPI1 ,(uint8_t *)&temp_data[j] ,STOPp, BlockSize);
 
-		}while((readtime >endtime) || (readtime == endtime ));
-		if( readtime<startime )
-		{
-			break;
-		}
-		else
-		{
-			SPI_FLASH_BufferRead(SPI1 ,(uint8_t *)&temp_data ,STOPp+6, BlockSize-6);
-			rt_device_write(&uart2_device, 0, &temp_clock, 6);
-			rt_device_write(&uart2_device, 0, &temp_data, (BlockSize-6));
-			SendCheckSum = SendCheckSum^(temp_clock.year);
-			SendCheckSum = SendCheckSum^(temp_clock.month);
-			SendCheckSum = SendCheckSum^(temp_clock.day);
-			SendCheckSum = SendCheckSum^(temp_clock.hour);
-			SendCheckSum = SendCheckSum^(temp_clock.minute);
-			SendCheckSum = SendCheckSum^(temp_clock.second);
-			for(j =0;j++;j<(BlockSize-6))
-			{
-				SendCheckSum = SendCheckSum^(temp_data[j]);
+				for(k =0;k<BlockSize;k++,j++)
+				{
+					SendCheckSum = SendCheckSum^(temp_data[j]);
+				}
+				if( Numcout == NumMaxBlockSize )
+				{
+					temp_data[3] = (NumMaxBlockSize*BlockSize)>>8;
+					temp_data[4] = (unsigned char )NumMaxBlockSize*BlockSize;
+					SendCheckSum = SendCheckSum^temp_data[4]^temp_data[3];
+					temp_data[j] = SendCheckSum;
+					j++;
+					rt_device_write(&uart2_device, 0, temp_data, j);
+					Sendflag = 1;
+					Numcout = 0;
+					j = 6;
+				}
 			}
-		}
 
+		}
 	}
+	if( (Sendflag != 1) ||(Numcout !=0))
+	{
+		temp_data[3] = (Numcout*BlockSize)>>8;
+		temp_data[4] = (unsigned char )Numcout*BlockSize;
+		SendCheckSum = SendCheckSum^temp_data[4]^temp_data[3];
+		temp_data[j] = SendCheckSum;
+		j++;
+		rt_device_write(&uart2_device, 0, temp_data, j);
+		j = 6;
+	}
+	//Modify_LastUploadTime();
+}
+void upload_Miledata()
+{
+	unsigned long i;
+	unsigned char temp_data[51];
+	StructPara *para = &Parameter;
+	RSCmdtxBuf[0] = 0x55;
+	RSCmdtxBuf[1] = 0x7a;
+	RSCmdtxBuf[2] = 0xe1;
+	RSCmdtxBuf[3] = 0x00;
+	RSCmdtxBuf[4] = 0x2c;
+	RSCmdtxBuf[5] = 0x00;
+	SendCheckSum = 0x55^0x7a^0x07^0x00^0x2c^0x00;
+	rt_device_write(&uart2_device, 0, RSCmdtxBuf, 6);
+
+	rt_device_write(&uart2_device, 0, (const void *)(&(para->typedata) ), 35);
+	for(i = 0;i<35;i++)
+	{
+		SendCheckSum = SendCheckSum^((unsigned char) *((unsigned char *)(&(para->typedata)+i)));
+	}
+	for(i = 0; i < 2;i++)
+	{
+		rt_device_write(&uart2_device, 0, (const void *)((para->PulseCoff) >> ((2-i)*8)), 1);
+		SendCheckSum = SendCheckSum^((unsigned char)((para->PulseCoff) >> ((2-i)*8)));
+	}
+	for(i= 0;i<2;i++)
+	{
+
+		rt_device_write(&uart2_device, 0, (const void *)(&CurSpeed), 2);
+	}
+	SendCheckSum = SendCheckSum^((unsigned char )CurSpeed)^((unsigned char )(CurSpeed >>8));
+	for(i= 0;i<4;i++)
+	{
+		rt_device_write(&uart2_device, 0, (const void *)((para->DriverDistace) >> ((4-i)*8)), 1);
+		SendCheckSum = SendCheckSum^((unsigned char)((para->DriverDistace) >> ((4-i)*8)));
+	}
+	rt_device_write(&uart2_device, 0, (const void *)(&CurStatus), 1);
+	SendCheckSum = SendCheckSum^CurStatus;
 	rt_device_write(&uart2_device, 0, &SendCheckSum, 1);
 	Modify_LastUploadTime();
 }
@@ -826,7 +920,7 @@ void UpLoad_ExVersion()
 	RSCmdtxBuf[4] = 0x02;
 	RSCmdtxBuf[5] = 0x00;
 	RSCmdtxBuf[6] = Parameter.standeryear;
-	RSCmdtxBuf[7] = Parameter.modifyNb;;
+	RSCmdtxBuf[7] = Parameter.modifyNb;
 	SendCheckSum = 0x55^0x7a^0x00^0x00^0x02^0x00^0x03^0x00;
 
 	rt_device_write(&uart2_device, 0,RSCmdtxBuf, 8);
@@ -851,15 +945,15 @@ void UpLoad_ExVersion()
 void UpLoad_DriverCode()
 {
 	unsigned long i;
-	PartitionTable *para = &pTable;
+	StructPara *para = &Parameter;
 	
 	RSCmdtxBuf[0] = 0x55;
 	RSCmdtxBuf[1] = 0x7a;
 	RSCmdtxBuf[2] = 0x01;
 	RSCmdtxBuf[3] = 0x00;
-	RSCmdtxBuf[4] = 0x15;
+	RSCmdtxBuf[4] = 0x12;
 	RSCmdtxBuf[5] = 0x00;
-	SendCheckSum = 0x55^0x7a^0x01^0x00^0x15^0x00;
+	SendCheckSum = 0x55^0x7a^0x01^0x00^0x12^0x00;
 	rt_device_write(&uart2_device, 0, RSCmdtxBuf, 6);
 	for(i = 0; i < 18;i++)
 	{
@@ -1070,8 +1164,10 @@ void UpLoad_RealTime()
 void UpLoad_PulseCoff()
 {
 	unsigned long i;
+	unsigned char temp[2];
 	StructPara *para = &Parameter;
-	
+	temp[0] = para->PulseCoff>>8;
+	temp[1] = para->PulseCoff;
 	//���ȷ���Ӧ��֡����ʼ��ͷ��������
 	RSCmdtxBuf[0] = 0x55;
 	RSCmdtxBuf[1] = 0x7a;
@@ -1082,11 +1178,10 @@ void UpLoad_PulseCoff()
 	SendCheckSum = 0x55^0x7a^0x04^0x00^0x03^0x00;
 	rt_device_write(&uart2_device, 0, RSCmdtxBuf, 6);
 	WriteDataTxTime();
-		
+	rt_device_write(&uart2_device, 0, &temp ,2);
 	for(i = 0; i < 2;i++)
 	{
-		rt_device_write(&uart2_device, 0, (const void *)((para->PulseCoff) >> ((2-i)*8)), 1);
-		SendCheckSum = SendCheckSum^((unsigned char)((para->PulseCoff) >> ((2-i)*8)));
+		SendCheckSum = SendCheckSum^((unsigned char)((para->PulseCoff) >> ((1-i)*8)));
 	}
 
 	//����У���
@@ -2021,7 +2116,7 @@ void Set_DriverAutoInfo(unsigned char *buf,unsigned short lenth)
 	if(lenth == 0x29)
 	{
 		RS232SetSuccess(0x82);
-		for (i = 0;i++;i<lenth)
+		for (i = 0;i<lenth;i++)
 		{
 			
 			ptr[i] = buf[i];
@@ -2036,7 +2131,7 @@ void Set_Installtime(unsigned char *buf,unsigned short lenth)
 	if(lenth == 0x06)
 	{
 		RS232SetSuccess(0x83);
-		for (i = 0;i++;i<lenth)
+		for (i = 0;i<lenth;i++)
 		{
 
 			ptr[i] = buf[i];
@@ -2053,7 +2148,7 @@ void Set_SingalStatus(unsigned char *buf,unsigned short lenth)
 	if(lenth == 0x50)
 	{
 		RS232SetSuccess(0x84);
-		for (i = 0;i++;i<lenth)
+		for (i = 0;i<lenth;i++)
 		{
 
 			ptr[i] = buf[i];
@@ -2069,47 +2164,80 @@ void Set_Curtime(unsigned char *buf,unsigned short lenth)
 	if(lenth == 0x06)
 	{
 		RS232SetSuccess(0xc2);
-		for (i = 0;i++;i<lenth)
+		for (i = 0;i<lenth;i++)
 		{
 
 			ptr[i]= buf[i];
 		}
+		SetCurrentDateTime(&curTime);
 			WriteParameterTable(&Parameter);
 	}
 }
 void Set_PulseCoff(unsigned char *buf,unsigned short lenth)
 {
 	unsigned long i=0;
-	unsigned char *ptr = (unsigned char *)&Parameter.PulseCoff;
-	if(lenth == 0x02)
+	if(lenth == 0x08)
 	{
 		RS232SetSuccess(0xc3);
-		for (i = 0;i++;i<lenth)
-		{
 
-			ptr[i] = buf[i];
-		}
+		Parameter.PulseCoff =buf[7]+buf[6]*256;
+
 			WriteParameterTable(&Parameter);
 	}
 }
 void Set_StartDistance(unsigned char *buf,unsigned short lenth)
 {
-	unsigned long i=0;
-	unsigned char *ptr = (unsigned char *)&Parameter.StarDistance;
-	if(lenth == 0x04)
+	unsigned long i=0,j= 1;
+	if(lenth == 4)
 	{
+		Parameter.StarDistance = 0;
 		RS232SetSuccess(0xc4);
-		for (i = 0;i++;i<lenth)
+		for (i = 4;i>0;i--)
 		{
 
-			ptr[i] = buf[i];
+			Parameter.StarDistance =j*BCD2Char(buf[i-1])+Parameter.StarDistance;
+			j= 100*j;
 		}
-			WriteParameterTable(&Parameter);
+		WriteParameterTable(&Parameter);
+	}
+}
+void EnterVercationStatus()
+{
+	Time6sCnt = 6;
+	Verificationstatus = VER_ENTER;
+	RS232SetSuccess(0xe0);
+}
+
+void EnterMileStatus()
+{
+	if( Verificationstatus )
+	{
+		Verificationstatus = VER_MIL;
 	}
 }
 
+void EnterPulsStatus()
+{
+	if( Verificationstatus )
+	{
+		Verificationstatus = VER_PLUS;
+	}
+	RS232SetSuccess(0xe2);
+}
+void EnterTimeStatus()
+{
 
-
+	if( Verificationstatus )
+	{
+		Verificationstatus = VER_TIME;
+	}
+	RS232SetSuccess(0xe3);
+}
+void GetBackNormalStatus()
+{
+	Verificationstatus = VER_NONE;
+	RS232SetSuccess(0xe4);
+}
 //*----------------------------------------------------------------------------
 //* Function Name            : Set_RealTime
 //* Object                   : ����ʵʱʱ��
@@ -2348,7 +2476,6 @@ void Reply_Schedule(void)
 	unsigned char sendchecksum = 0;
 	switch(Schedule_Result)
 	{
-		//��ѯ����ɹ�
 		case 1:
 			RSCmdrxBuf[0] = 0x55;
 			RSCmdrxBuf[1] = 0x7a;
@@ -2357,10 +2484,8 @@ void Reply_Schedule(void)
 				rt_device_write(&uart2_device, 0, &RSCmdtxBuf[i], 1);
 				sendchecksum = sendchecksum^RSCmdrxBuf[i];
 			}
-			//����У���
 			rt_device_write(&uart2_device, 0, &sendchecksum, 1);
 		break;
-		//��ѯ����ʧ��
 		case 2 : 
 			RSCmdrxBuf[0] = 0x55;
 			RSCmdrxBuf[1] = 0x7a;
@@ -2370,10 +2495,8 @@ void Reply_Schedule(void)
 				rt_device_write(&uart2_device, 0, &RSCmdtxBuf[i], 1);
 				sendchecksum = sendchecksum^RSCmdrxBuf[i];
 			}
-			//����У���
 			rt_device_write(&uart2_device, 0, &sendchecksum, 1);
 		break;
-		//���ȳɹ�
 		case 3 :
 			RSCmdrxBuf[0] = 0x55;
 			RSCmdrxBuf[1] = 0x7a;
@@ -2382,10 +2505,8 @@ void Reply_Schedule(void)
 				rt_device_write(&uart2_device, 0, &RSCmdtxBuf[i], 1);
 				sendchecksum = sendchecksum^RSCmdrxBuf[i];
 			}
-			//����У���
 			rt_device_write(&uart2_device, 0, &sendchecksum, 1);
 		break;
-		//����ʧ��
 		case 4 :
 			RSCmdrxBuf[0] = 0x55;
 			RSCmdrxBuf[1] = 0x7a;
@@ -2395,12 +2516,10 @@ void Reply_Schedule(void)
 				rt_device_write(&uart2_device, 0, &RSCmdtxBuf[i], 1);
 				sendchecksum = sendchecksum^RSCmdrxBuf[i];
 			}
-			//����У���
 			rt_device_write(&uart2_device, 0, &sendchecksum, 1);
 		break;
 	}
 	Schedule_Result = 0;
-	//��ֹUSART1��RXRDY�ж�
 #if 0
 	uart->uart_device->US_CR = 0x20;
 	uart2_device.user_data->uart_device->US_IDR = 0x01;
@@ -2425,25 +2544,25 @@ void rs232_handle_application(rt_device_t device)
 	}
 	while (uart->int_rx->getcmd )
 	{
-		Datalenth = uart->int_rx->rx_buffer[(uart->int_rx->read_index +4) &UART_RX_BUFFER_SIZE];
-		Datalenth = (uart->int_rx->rx_buffer[(uart->int_rx->read_index +3) &UART_RX_BUFFER_SIZE])<<8+Datalenth;
-		DataCmd = uart->int_rx->rx_buffer[(uart->int_rx->read_index+2)& UART_RX_BUFFER_SIZE];
-		if ((DataCmd < 0x15)&& (DataCmd > 0x07))
+		Datalenth = uart->int_rx->rx_buffer[(uart->int_rx->read_index +4) &UART_RX_BUFFER_MAX_SIZE];
+		Datalenth = ((uart->int_rx->rx_buffer[(uart->int_rx->read_index +3) &UART_RX_BUFFER_MAX_SIZE])<<8)+Datalenth;
+		DataCmd = uart->int_rx->rx_buffer[(uart->int_rx->read_index+2)& UART_RX_BUFFER_MAX_SIZE];
+		if ((DataCmd < 0x16)&& (DataCmd > 0x07))
 		{
-			Startime.year = uart->int_rx->rx_buffer[(uart->int_rx->read_index +7) &UART_RX_BUFFER_SIZE];
-			Startime.month = uart->int_rx->rx_buffer[(uart->int_rx->read_index +8) &UART_RX_BUFFER_SIZE];
-			Startime.day = uart->int_rx->rx_buffer[(uart->int_rx->read_index +9) &UART_RX_BUFFER_SIZE];
-			Startime.hour = uart->int_rx->rx_buffer[(uart->int_rx->read_index +10) &UART_RX_BUFFER_SIZE];
-			Startime.minute = uart->int_rx->rx_buffer[(uart->int_rx->read_index +11) &UART_RX_BUFFER_SIZE];
-			Startime.second = uart->int_rx->rx_buffer[(uart->int_rx->read_index +12) &UART_RX_BUFFER_SIZE];
-			Endtime.year = uart->int_rx->rx_buffer[(uart->int_rx->read_index +13) &UART_RX_BUFFER_SIZE];
-			Endtime.month = uart->int_rx->rx_buffer[(uart->int_rx->read_index +14) &UART_RX_BUFFER_SIZE];
-			Endtime.day = uart->int_rx->rx_buffer[(uart->int_rx->read_index +15) &UART_RX_BUFFER_SIZE];
-			Endtime.hour = uart->int_rx->rx_buffer[(uart->int_rx->read_index +16) &UART_RX_BUFFER_SIZE];
-			Endtime.minute = uart->int_rx->rx_buffer[(uart->int_rx->read_index +17) &UART_RX_BUFFER_SIZE];
-			Endtime.second = uart->int_rx->rx_buffer[(uart->int_rx->read_index +18) &UART_RX_BUFFER_SIZE];
-			Blocklenth = 8<<(uart->int_rx->rx_buffer[(uart->int_rx->read_index +19) &UART_RX_BUFFER_SIZE])
-					+uart->int_rx->rx_buffer[(uart->int_rx->read_index +20) &UART_RX_BUFFER_SIZE];
+			Startime.year = uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_MAX_SIZE];
+			Startime.month = uart->int_rx->rx_buffer[(uart->int_rx->read_index +7) &UART_RX_BUFFER_MAX_SIZE];
+			Startime.day = uart->int_rx->rx_buffer[(uart->int_rx->read_index +8) &UART_RX_BUFFER_MAX_SIZE];
+			Startime.hour = uart->int_rx->rx_buffer[(uart->int_rx->read_index +9) &UART_RX_BUFFER_MAX_SIZE];
+			Startime.minute = uart->int_rx->rx_buffer[(uart->int_rx->read_index +10) &UART_RX_BUFFER_MAX_SIZE];
+			Startime.second = uart->int_rx->rx_buffer[(uart->int_rx->read_index +11) &UART_RX_BUFFER_MAX_SIZE];
+			Endtime.year = uart->int_rx->rx_buffer[(uart->int_rx->read_index +12) &UART_RX_BUFFER_MAX_SIZE];
+			Endtime.month = uart->int_rx->rx_buffer[(uart->int_rx->read_index +13) &UART_RX_BUFFER_MAX_SIZE];
+			Endtime.day = uart->int_rx->rx_buffer[(uart->int_rx->read_index +14) &UART_RX_BUFFER_MAX_SIZE];
+			Endtime.hour = uart->int_rx->rx_buffer[(uart->int_rx->read_index +15) &UART_RX_BUFFER_MAX_SIZE];
+			Endtime.minute = uart->int_rx->rx_buffer[(uart->int_rx->read_index +16) &UART_RX_BUFFER_MAX_SIZE];
+			Endtime.second = uart->int_rx->rx_buffer[(uart->int_rx->read_index +17) &UART_RX_BUFFER_MAX_SIZE];
+			Blocklenth =((uart->int_rx->rx_buffer[(uart->int_rx->read_index +18) &UART_RX_BUFFER_MAX_SIZE]) <<8)
+					+uart->int_rx->rx_buffer[(uart->int_rx->read_index +19) &UART_RX_BUFFER_MAX_SIZE];
 
 		}
 		switch(DataCmd)
@@ -2456,23 +2575,54 @@ void rs232_handle_application(rt_device_t device)
 			case 0x05 : UpLoad_DriverAutoInfo();            break;
 			case 0x06 : UpLoad_StatusInfo();         break;
 			case 0x07 : UpLoad_Type();               break;
-			case 0x08 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x08);        break;
-			case 0x09 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x09);     break;
-			case 0x10 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x0A);     break;
-			case 0x11 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x0B);    	   break;
-			case 0x12 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x0c);     break;
-			case 0x13 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x0d);     break;
-			case 0x14 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x0e);    	   break;
-			case 0x15 : UpLoad_BlockData(Startime,Endtime,Blocklenth,0x0f);     break;
-			case 0x82 : Set_DriverAutoInfo(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_SIZE]),Datalenth); break;//设置车辆信息
-			case 0x83 : Set_Installtime(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_SIZE]),Datalenth); break;//设置记录仪初始安装日期
-			case 0x84 : Set_SingalStatus(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_SIZE]),Datalenth); break;//设置状态量配置信息
-			case 0xc2 : Set_Curtime(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_SIZE]),Datalenth); break;//设置记录仪的时间
-			case 0xc3 : Set_PulseCoff(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_SIZE]),Datalenth);  break;//设置记录仪的脉冲系数
-			case 0xc4 : Set_StartDistance(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_SIZE]),Datalenth); break;//设置记录仪的初始里程
+			case 0x08 : //UpLoad_BlockData(Startime,Endtime,Blocklenth,0x08);        break;
+			case 0x09 : //UpLoad_BlockData(Startime,Endtime,Blocklenth,0x09);     break;
+			case 0x10 : //UpLoad_BlockData(Startime,Endtime,Blocklenth,0x10);     break;
+			case 0x11 : //UpLoad_BlockData(Startime,Endtime,Blocklenth,0x11);    	   break;
+			case 0x12 : //UpLoad_BlockData(Startime,Endtime,Blocklenth,0x12);     break;
+			case 0x13 : //UpLoad_BlockData(Startime,Endtime,Blocklenth,0x13);     break;
+			case 0x14 : //UpLoad_BlockData(Startime,Endtime,Blocklenth,0x14);    	   break;
+			case 0x15 : UpLoad_BlockData(Startime,Endtime,Blocklenth,DataCmd);     break;
+			case 0x82 : Set_DriverAutoInfo(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_MAX_SIZE]),Datalenth); break;//设置车辆信息
+			case 0x83 : Set_Installtime(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_MAX_SIZE]),Datalenth); break;//设置记录仪初始安装日期
+			case 0x84 : Set_SingalStatus(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_MAX_SIZE]),Datalenth); break;//设置状态量配置信息
+			case 0xc2 : Set_Curtime(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_MAX_SIZE]),Datalenth); break;//设置记录仪的时间
+			case 0xc3 : Set_PulseCoff(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_MAX_SIZE]),Datalenth);  break;//设置记录仪的脉冲系数
+			case 0xc4 : Set_StartDistance(&(uart->int_rx->rx_buffer[(uart->int_rx->read_index +6) &UART_RX_BUFFER_MAX_SIZE]),Datalenth); break;//设置记录仪的初始里程
+			case 0xe0 : EnterVercationStatus(); break;//进入检定状态
+			case 0xe1 : EnterMileStatus(); break;//进入里程误差测量
+			case 0xe2 : EnterPulsStatus(); break;//进入脉冲系数测量
+			case 0xe3 : EnterTimeStatus(); break;//进入时间误差测量
+			case 0xe4 : GetBackNormalStatus(); break;//返回正常状态
 			default   : RS232UploadError();              break;
 		}
-		uart->int_rx->read_index = (Datalenth+uart->int_rx->read_index+7)& UART_RX_BUFFER_SIZE;
+		uart->int_rx->read_index = (Datalenth+uart->int_rx->read_index+7)& UART_RX_BUFFER_MAX_SIZE;
 		uart->int_rx->getcmd--;
 	}
 }
+void Ver_handle_application()
+{
+	switch( Verificationstatus )
+	{
+		case VER_ENTER:
+			break;
+		case VER_MIL:
+			  if( timeflag.Ver1sflag == 1)
+			  {
+				  timeflag.Ver1sflag = 0;
+				  upload_Miledata();
+				  //sendthe buff
+			  }
+			break;
+		case VER_PLUS:
+			//send the maichong xinhao
+			break;
+
+		case VER_TIME:
+			//send the time
+			break;
+		default:break;
+
+	}
+}
+

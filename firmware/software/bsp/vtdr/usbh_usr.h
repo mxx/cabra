@@ -45,6 +45,7 @@ extern  USBH_Usr_cb_TypeDef USR_cb;
 #define USH_USR_FS_READLIST   1
 #define USH_USR_FS_WRITEFILE  2
 #define USH_USR_FS_DRAW       3
+#define USH_USR_IDEL          4
 /**
   * @}
   */ 
@@ -89,7 +90,9 @@ void USBH_USR_DeInit(void);
 void USBH_USR_DeviceNotSupported(void);
 void USBH_USR_UnrecoveredError(void);
 int USBH_USR_MSC_Application(void);
-
+void WriteTheData(unsigned short num);
+unsigned short FilltheTextBuff(unsigned char *bufptr,unsigned char block,unsigned char *Count);
+void GettheBlock(unsigned char *Nameptr,unsigned char NameNum,unsigned long lenth);
 /**
   * @}
   */ 

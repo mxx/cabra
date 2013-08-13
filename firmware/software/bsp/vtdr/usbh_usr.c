@@ -30,6 +30,8 @@
 #include "usbh_msc_core.h"
 #include "usbh_msc_scsi.h"
 #include "usbh_msc_bot.h"
+#include <application.h>
+#include <DataManager.h>
 
 #include <rthw.h>
 #include <rtthread.h>
@@ -59,30 +61,39 @@
 /** @defgroup USBH_USR_Private_Defines
 * @{
 */ 
+#define WRITE_LENTH_MAX 1024
+#define WRITE_LENTH  1000
 /**
 * @}
 */ 
+const unsigned char Namemap16[16][18] ={
 
+
+};
 
 /** @defgroup USBH_USR_Private_Macros
 * @{
 */ 
+extern unsigned char CurStatus;
+extern StructPara Parameter;
+extern PartitionTable pTable;
+extern CLOCK curTime;
 extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
 #define NULL 0
 
 /**
 * @}
 */ 
-
+extern void Fillthefilename();
 
 /** @defgroup USBH_USR_Private_Variables
 * @{
 */ 
 uint8_t USBH_USR_ApplicationState = USH_USR_FS_INIT;
-uint16_t filenameString[5]  = {0x3a30,0xcfc9,0xc2cf,0x542e,0x5458};
+//uint16_t filenameString[]  = {0x3a30,0xcfc9,0xc2cf,0x542e,0x5458};
+//uint8_t writeTextBuff[] = "STM32 Connectivity line Host Demo application using FAT_FS   ";
 
-//FATFS fatfs;
-//FIL file;
+uint16_t filenameString[13];
 FATFS fatfs; //modify by leiyq 20120219
 FIL file;    //modify by leiyq 20120219
 uint8_t line_idx = 0;   
@@ -120,23 +131,6 @@ USBH_Usr_cb_TypeDef USR_cb =
 /** @defgroup USBH_USR_Private_Constants
 * @{
 */ 
-/*---------------  Messages ---------------*/
-const uint8_t MSG_HOST_INIT[]        = "> Host Library Initialized\n";
-const uint8_t MSG_DEV_ATTACHED[]     = "> Device Attached \n";
-const uint8_t MSG_DEV_DISCONNECTED[] = "> Device Disconnected\n";
-const uint8_t MSG_DEV_ENUMERATED[]   = "> Enumeration completed \n";
-const uint8_t MSG_DEV_HIGHSPEED[]    = "> High speed device detected\n";
-const uint8_t MSG_DEV_FULLSPEED[]    = "> Full speed device detected\n";
-const uint8_t MSG_DEV_LOWSPEED[]     = "> Low speed device detected\n";
-const uint8_t MSG_DEV_ERROR[]        = "> Device fault \n";
-
-const uint8_t MSG_MSC_CLASS[]        = "> Mass storage device connected\n";
-const uint8_t MSG_HID_CLASS[]        = "> HID device connected\n";
-const uint8_t MSG_DISK_SIZE[]        = "> Size of the disk in MBytes: \n";
-const uint8_t MSG_LUN[]              = "> LUN Available in the device:\n";
-const uint8_t MSG_ROOT_CONT[]        = "> Exploring disk flash ...\n";
-const uint8_t MSG_WR_PROTECT[]       = "> The disk is write protected\n";
-const uint8_t MSG_UNREC_ERROR[]      = "> UNRECOVERED ERROR STATE\n";
 /**
 * @}
 */
@@ -182,7 +176,7 @@ void USBH_USR_Init(void)
 */
 void USBH_USR_DeviceAttached(void)
 {
-
+	USBH_USR_ApplicationState = 0;
 }
 
 
@@ -207,7 +201,7 @@ void USBH_USR_UnrecoveredError (void)
 */
 void USBH_USR_DeviceDisconnected (void)
 {
-  
+	USBH_USR_ApplicationState = 0;
 }
 /**
 * @brief  USBH_USR_ResetUSBDevice 
@@ -404,144 +398,63 @@ void USBH_USR_OverCurrentDetected (void)
 int USBH_USR_MSC_Application(void)
 {
   FRESULT res;//modify by leiyq 20120319
-  uint8_t writeTextBuff[] = "STM32 Connectivity line Host Demo application using FAT_FS   ";
-  uint16_t bytesWritten, bytesToWrite;
+  uint16_t bytesWritten, bytesToWrite,i;
   switch(USBH_USR_ApplicationState)
   {
   case USH_USR_FS_INIT: 
-    
-    /* Initialises the File System*/
-    if ( f_mount( 0, &fatfs ) != FR_OK ) //modify by leiyq20120319
-    {
-      /* efs initialisation fails*/
-      //LOGOUT("> Cannot initialize File System.\n");
-      return(-1);
-    }
-   // LOGOUT("> File System initialized.\n");
-    //LOGOUT("> Disk capacity : %d Bytes\n", USBH_MSC_Param.MSCapacity * \
-      USBH_MSC_Param.MSPageLength); 
-    
-    if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
-    {
-     // LOGOUT((void *)MSG_WR_PROTECT);
-    }
-    
-   // USBH_USR_ApplicationState = USH_USR_FS_READLIST;//modify by leiyq 20120219
-    USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;//modify by leiyq 20120219
-
+	  TIM_Cmd(TIM3, ENABLE);
+	  USBH_USR_ApplicationState = USH_USR_IDEL;
     break;
     
   case USH_USR_FS_READLIST:
-    
-    //LOGOUT((void *)MSG_ROOT_CONT);
-    Explore_Disk("0:/", 1);
-    line_idx = 0;   
-    USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;
+	   TIM_Cmd(TIM3, DISABLE);
+	    /* Initialises the File System*/
+	    if ( f_mount( 0, &fatfs ) != FR_OK ) //modify by leiyq20120319
+	    {
+	      return(-1);
+	    }
+	    USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;//modify by leiyq 20120219
     
     break;
     
   case USH_USR_FS_WRITEFILE:
     
-	//LOGOUT( "Press Key to write file");
 
-    USB_OTG_BSP_mDelay(100);
-    
-    /*Key B3 in polling*/
-//    while((HCD_IsDeviceConnected(&USB_OTG_Core)) && \
-//      (STM_EVAL_PBGetState (BUTTON_KEY) == SET))
-//    {
-//      Toggle_Leds();
-//    }
-    /* Writes a text file, STM32.TXT in the disk*/
-    //LOGOUT("> Writing File to disk flash ...\n");
-    if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
-    {
-      
-      //LOGOUT ( "> Disk flash is write protected \n");
-      USBH_USR_ApplicationState = USH_USR_FS_DRAW;
-      break;
-    }
-    
-    /* Register work area for logical drives */
-//    f_mount(0, &fatfs);
-    
-//    if(f_open(&file, "0:STM32.TXT",FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
-//    {
-//      /* Write buffer to file */
-//      bytesToWrite = sizeof(writeTextBuff);
-//      res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);
-//
-//      if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
-//      {
-//        LOGOUT("> STM32.TXT CANNOT be writen.\n");
-//      }
-//      else
-//      {
-//        LOGOUT("> 'STM32.TXT' file created\n");
-//      }
-//
-//      /*close file and filesystem*/
-//      f_close(&file);
-//      f_mount(0, NULL);
-//    }
-//
-//    else
-//    {
-//      LOGOUT ("> STM32.TXT created in the disk\n");
-//    }
-        /*write the file to the FATfs*/ //modify by leiyq 20120219
+		USB_OTG_BSP_mDelay(100);
+		if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
+		{
+
+		  //LOGOUT ( "> Disk flash is write protected \n");
+		  USBH_USR_ApplicationState = USH_USR_FS_DRAW;
+		  break;
+		}
+
 		f_mount(0, &fatfs);
-	    res = f_open(&file, filenameString,FA_CREATE_ALWAYS | FA_WRITE);
+		Fillthefilename();
+		res = f_open(&file,( const TCHAR *)filenameString,FA_CREATE_ALWAYS | FA_WRITE);
 		if(res == FR_OK)
 		{
 			/* Write buffer to file */
-			bytesToWrite = sizeof(writeTextBuff);
-			res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);
-			if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
-			{
-			 //LOGOUT("> STM32.TXT CANNOT be writen.\n");
-				rt_kprintf("> STM32.TXT CANNOT be writen.\n");
-			}
-			else
-			{
-			 //LOGOUT("> 'STM32.TXT' file created\n");
-				rt_kprintf("> 'STM32.TXT' file created\n");
-			}
+			for(i= 1;i<200;i++)
+			WriteTheData(1);
+			USBH_USR_ApplicationState = USH_USR_FS_DRAW;
 
-		 /*close file and filesystem*/
-			f_close(&file);
-			f_mount(0, NULL);
 		}
 		else
 		{
 			//LOGOUT ("> STM32.TXT created in the disk\n");
+			USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;
 			rt_kprintf("> STM32.TXT created in the disk\n");
 		}
-		USBH_USR_ApplicationState = USH_USR_FS_DRAW;
-
-   // LOGOUT( "To start Image slide show Press Key.");
-
+		f_close(&file);
+		f_mount(0, NULL);
   
     break;
     
   case USH_USR_FS_DRAW:
-    
+	  USBH_USR_ApplicationState = USH_USR_IDEL;
+	  TIM_Cmd(TIM3, ENABLE);
     /*Key B3 in polling*/
-//    while((HCD_IsDeviceConnected(&USB_OTG_Core)) && \
-//      (STM_EVAL_PBGetState (BUTTON_KEY) == SET))
-//    {
-//      Toggle_Leds();
-//    }
-  
-//    while(HCD_IsDeviceConnected(&USB_OTG_Core))
-//    {
-//      if ( f_mount( 0, &fatfs ) != FR_OK )
-//      {
-//        /* fat_fs initialisation fails*/
-//        return(-1);
-//      }
-//      return Image_Browser("0:/");
-//    }
     break;
   default: break;
   }
@@ -556,91 +469,416 @@ int USBH_USR_MSC_Application(void)
 */
 static uint8_t Explore_Disk (char* path , uint8_t recu_level)
 {
-
-//  FRESULT res;
-//  FILINFO fno;
-//  DIR dir;
-//  char *fn;
-//  char tmp[14];
-//
-//  res = f_opendir(&dir, path);
-//  if (res == FR_OK) {
-//    while(HCD_IsDeviceConnected(&USB_OTG_Core))
-//    {
-//      res = f_readdir(&dir, &fno);
-//      if (res != FR_OK || fno.fname[0] == 0)
-//      {
-//        break;
-//      }
-//      if (fno.fname[0] == '.')
-//      {
-//        continue;
-//      }
-//
-//      fn = fno.fname;
-//      strcpy(tmp, fn);
-//
-//      line_idx++;
-//      if(line_idx > 9)
-//      {
-//        line_idx = 0;
-//
-//
-//        LOGOUT("Press Key to continue...");
-//
-//
-//        /*Key B3 in polling*/
-////        while((HCD_IsDeviceConnected(&USB_OTG_Core)) && \
-////          (STM_EVAL_PBGetState (BUTTON_KEY) == SET))
-//        {
-//          Toggle_Leds();
-//
-//        }
-//      }
-//
-//      if(recu_level == 1)
-//      {
-//    	  LOGOUT("   |__");
-//      }
-//      else if(recu_level == 2)
-//      {
-//    	  LOGOUT("   |   |__");
-//      }
-//      if((fno.fattrib & AM_MASK) == AM_DIR)
-//      {
-//        strcat(tmp, "\n");
-//        LOGOUT((void *)tmp);
-//      }
-//      else
-//      {
-//        strcat(tmp, "\n");
-//        LOGOUT((void *)tmp);
-//      }
-//
-//      if(((fno.fattrib & AM_MASK) == AM_DIR)&&(recu_level == 1))
-//      {
-//        Explore_Disk(fn, 2);
-//      }
-//    }
-//  }
-//  return res;
 	return 0;
 }
 
-/**
-* @brief  Toggle_Leds
-*         Toggle leds to shows user input state
-* @param  None
-* @retval None
-*/
-static void Toggle_Leds(void)
+unsigned char BCD2ASCLL(unsigned char data, unsigned char type)
 {
-  static uint32_t i;
-  if (i++ == 0x10000)
-  {
-    i = 0;
-  }  
+	unsigned char ret;
+	if(type)
+	{
+		ret = (data & 0xf0) >> 4;
+	}
+	else
+		ret = data & 0x0f;
+	ret = ret+0x30;
+	return ret;
 }
+//DXXXXXX_XXXX_XXXXXXXX
+//uint16_t filenameString[]  = {0x3a30,0xcfc9,0xc2cf,0x542e,0x5458};
+void Fillthefilename()
+{
+	filenameString[0]= 0x3a30;
+	filenameString[1]= BCD2ASCLL(curTime.year,1) +(BCD2ASCLL(curTime.year,0)<<8);
+	filenameString[2]= BCD2ASCLL(curTime.month,1)+(BCD2ASCLL(curTime.month,0)<<8);
+	filenameString[3]= BCD2ASCLL(curTime.day,1)	+(BCD2ASCLL(curTime.day,0)<<8);
+	filenameString[4]= 0x005f+(BCD2ASCLL(curTime.hour,1)<<8);
+	filenameString[5]= BCD2ASCLL(curTime.hour,0)+(BCD2ASCLL(curTime.minute,1)<<8);
+	filenameString[6]= BCD2ASCLL(curTime.minute,0)+0x5f00;
+	filenameString[7]= (Parameter.AutoInfodata.AutoCode[1]<<8)+Parameter.AutoInfodata.AutoCode[0];
+	filenameString[8]= (Parameter.AutoInfodata.AutoCode[3]<<8)+Parameter.AutoInfodata.AutoCode[2];
+	filenameString[9]= (Parameter.AutoInfodata.AutoCode[5]<<8)+Parameter.AutoInfodata.AutoCode[4];;
+	filenameString[10]= (Parameter.AutoInfodata.AutoCode[7]<<8)+Parameter.AutoInfodata.AutoCode[6];
+	filenameString[11]= 0x562e;
+	filenameString[12]= 0x5244;
+
+}
+void WriteTheData(unsigned short num)
+{
+#if 0
+		FRESULT res;//modify by leiyq 20120319
+		uint16_t bytesWritten, bytesToWrite;
+		bytesToWrite = sizeof(writeTextBuff);
+		res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);
+
+		if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
+		{
+			//rt_kprintf("> STM32.TXT CANNOT be writen.\n");
+			res= 0;
+			//f_close(&file);
+		}
+		f_lseek(&file,(bytesToWrite+2)*(num+1));
+
+		/*close file and filesystem*/
+		//f_close(&file);
+		//f_mount(0, NULL);
+#else
+		unsigned char writeTextBuff[WRITE_LENTH_MAX];
+		unsigned char Wcount,i;
+		uint16_t bytesWritten, bytesToWrite;
+		FRESULT res;//modify by leiyq 20120319
+		bytesToWrite = FilltheTextBuff(writeTextBuff,0,&Wcount);
+		res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);
+		if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
+		{
+			rt_kprintf("> STM32.TXT CANNOT be writen.\n");
+		}
+		f_lseek(&file,bytesToWrite);
+		for(i = 0x08;i<0x16;i++)
+		{
+			if((i==0x08) ||(i=0x09 )||(i<0x16&&i>0x0f))
+			{
+				Wcount =0;
+				do
+				{
+					bytesToWrite = FilltheTextBuff(writeTextBuff,i,&Wcount);
+					res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);
+					if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
+					{
+						rt_kprintf("> STM32.TXT CANNOT be writen.\n");
+					}
+					f_lseek(&file,bytesToWrite);
+				}while(Wcount);
+			}
+		}
+		/*close file and filesystem*/
+		f_close(&file);
+		f_mount(0, NULL);
+
+#endif
+}
+void GettheBlock(unsigned char *Nameptr,unsigned char NameNum,unsigned long lenth)
+{
+	unsigned char i;
+	if(NameNum >0x09)
+	{
+		Nameptr[0] = NameNum+6;
+	}
+	else
+	{
+		Nameptr[0] = NameNum;
+	}
+	for (i = 1;i<19;i++)
+	{
+		Nameptr[i] = (unsigned char )Namemap16[NameNum][i-1];
+	}
+	for (i = 19;i<23;i++)
+	{
+		Nameptr[i] = (unsigned char )(lenth>>((22-i)*8));
+	}
+	switch(NameNum)
+	{
+		case 0:
+			Nameptr[i] = Parameter.standeryear;
+			Nameptr[i+1] = Parameter.modifyNb;
+			break;
+		case 1:
+			for(i = 23;i<41;i++)
+			{
+				Nameptr[i] = pTable.DriverLisenseCode[i-23];
+			}
+			break;
+		case 2:
+			for(i = 23;i<29;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&curTime+i-23);
+			}
+			break;
+		case 3:
+			for(i = 23;i<29;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&curTime+i-23);
+			}
+			for(i = 29;i<35;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&Parameter.InstallTime+i-29);
+			}
+			for(i = 35;i<39;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&Parameter.DriverDistace+i-35);
+			}
+			for(i = 39;i<43;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&Parameter.StarDistance+i-39);
+			}
+			break;
+		case 4:
+			for(i = 23;i<29;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&curTime+i-23);
+			}
+			for(i = 29;i<31;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&Parameter.PulseCoff+i-29);
+			}
+			break;
+		case 5:
+			for(i = 23;i<64;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&Parameter.AutoInfodata+i-23);
+			}
+			break;
+		case 6:
+			for(i = 23;i<29;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&curTime+i-23);
+			}
+			Nameptr[29] = CurStatus;
+			for(i = 30;i<110;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&Parameter.singalname+i-30);
+			}
+
+			break;
+		case 7:
+			for(i = 23;i<29;i++)
+			{
+				Nameptr[i] = *((unsigned char *)&Parameter.typedata+i-23);
+			}
+			break;
+		default:
+			break;
+
+
+	}
+
+}
+void FilltheBlock(unsigned char *buf)
+{
+	unsigned char i;
+	buf[0] = 0;
+	buf[1] = 16;
+	GettheBlock(&buf[2],0,2);
+	GettheBlock(&buf[27],1,18);
+	GettheBlock(&buf[68],2,6);
+	GettheBlock(&buf[97],3,20);
+	GettheBlock(&buf[140],4,8);
+	GettheBlock(&buf[171],5,41);
+	GettheBlock(&buf[235],6,87);
+	GettheBlock(&buf[345],7,35);
+}
+unsigned short FillthedataBlock(unsigned char *buf,unsigned char block,unsigned char *count)
+{
+	static unsigned long readnum;
+	static unsigned long readaddr;
+	unsigned short renum;
+	unsigned short BlockSize;
+	unsigned long STOPp,STOPb,startbase,endbase;
+	unsigned long flag;
+	switch (block)
+	{
+		case 0x08:
+			BlockSize = DRV_SPEED_BLOCK;
+			STOPp = pTable.BaseData.CurPoint;
+			flag = pTable.BaseData.finshflag;
+			startbase = BASEDATA_BASE;
+			endbase = BASEDATA_END;
+			break;
+		case 0x09:
+			BlockSize = LOCATION_BLOCK;
+			STOPp = pTable.LocationData.CurPoint;
+			flag = pTable.LocationData.finshflag;
+			startbase = LOCATION_BASE;
+			endbase = LOCATION_END;
+			break;
+		case 0x10:
+			BlockSize = DOUBLT_BLOCK;
+			STOPp = pTable.OverSpeedRecord.CurPoint;
+			flag = pTable.OverSpeedRecord.finshflag;
+			startbase = DPD_BASE;
+			endbase = DPD_END;
+			break;
+		case 0x11:
+			BlockSize = OVERDRV_BLOCK;
+			STOPp = pTable.DoubtPointData.CurPoint;
+			flag = pTable.BaseData.finshflag;
+			startbase = OVERDRV_BASE;
+			endbase = OVERDRV_END;
+			break;
+		case 0x12:
+			BlockSize = DRV_RG_BLOCK;
+			STOPp = pTable.DriverReRecord.CurPoint;
+			flag = pTable.DriverReRecord.finshflag;
+			startbase = DRVRG_BASE;
+			endbase = DRVRG_END;
+			break;
+		case 0x13:
+			BlockSize = POW_BLOCK;
+			STOPp = pTable.PowerOffRunRecord.CurPoint;
+			flag = pTable.PowerOffRunRecord.finshflag;
+			startbase = POWER_BASE;
+			endbase = POWER_END;
+			break;
+		case 0x14:
+			BlockSize = PARA_BLOCK;
+			STOPp = pTable.ModifyRecord.CurPoint;
+			flag = pTable.ModifyRecord.finshflag;
+			startbase = PARA_BASE;
+			endbase = PARA_END;
+			break;
+		case 0x15:
+			BlockSize = JN_BLOCK;
+			STOPp = pTable.journalRecord.CurPoint;
+			flag = pTable.journalRecord.finshflag;
+			startbase = JN_BASE;
+			endbase =  JN_END;
+			break;
+		default:
+			break;
+
+	}
+	if( flag == 0xeaea)
+	{
+		if((*count)==0)
+		{
+			readaddr = STOPp;
+			if(readaddr > startbase)
+			{
+				readaddr = readaddr-BlockSize;
+			}
+			else
+			{
+				readaddr = (endbase-startbase+1)/BlockSize;
+				readaddr = readaddr*BlockSize+startbase;
+			}
+			readnum = (endbase -startbase+1)/BlockSize;
+			readnum = readnum*BlockSize;
+			GettheBlock(buf,block,readnum);
+			renum = WRITE_LENTH;
+			if(readnum%renum)
+			{
+				*count = readnum/renum;
+			}
+			else
+			{
+				*count = readnum/renum-1;
+			}
+			readnum = readnum-renum;
+			SPI_FLASH_BufferRead(SPI1 ,&buf[23] ,readaddr, renum);
+			renum = renum+23;
+
+		}
+		else
+		{
+			if(readaddr > startbase)
+			{
+				readaddr = readaddr-BlockSize;
+			}
+			else
+			{
+				readaddr = (endbase-startbase+1)/BlockSize;
+				readaddr = readaddr*BlockSize+startbase;
+			}
+			(*count)--;
+			if((*count)!= 1)
+			{
+				renum = WRITE_LENTH;
+				readnum = readnum-renum;
+			}
+			else
+			{
+				renum = readnum;
+			}
+			SPI_FLASH_BufferRead(SPI1 ,buf ,STOPp, renum);
+		}
+	}
+	else
+	{
+		if((*count)==0)
+		{
+			readaddr = STOPp;
+			readnum = (STOPp -startbase)/BlockSize;
+			readnum = readnum*BlockSize;
+			if(readnum  == 0)
+			{
+				renum = 0;
+				GettheBlock(buf,block,0);
+				return renum;
+			}
+			else
+			{
+				readaddr = readaddr-BlockSize;
+				GettheBlock(buf,block,readnum);
+				if(readnum%WRITE_LENTH)
+				{
+					*count = readnum/WRITE_LENTH;
+					if((*count)!= 0)
+					{
+						renum = WRITE_LENTH;
+						readnum = readnum-renum;
+					}
+					else
+					{
+						renum = readnum;
+					}
+
+				}
+				else
+				{
+					*count = readnum/renum-1;
+					renum = WRITE_LENTH;
+					readnum = readnum-renum;
+				}
+				SPI_FLASH_BufferRead(SPI1 ,&buf[23] ,STOPp, renum);
+				renum = renum+23;
+			}
+
+		}
+		else
+		{
+			readaddr = readaddr-BlockSize;
+			(*count)--;
+			if((*count)!= 1)
+			{
+				renum = WRITE_LENTH;
+				readnum = readnum-renum;
+			}
+			else
+			{
+				renum = readnum;
+			}
+			SPI_FLASH_BufferRead(SPI1 ,buf ,STOPp, renum);
+		}
+	}
+	return renum;
+
+}
+
+unsigned short FilltheTextBuff(unsigned char *bufptr,unsigned char block,unsigned char *Count)
+{
+	unsigned short writenum =0;
+	switch (block)
+	{
+		case 0:
+			FilltheBlock(bufptr);
+			writenum = 403;
+			break;
+		case 0x08:
+		case 0x09:
+		case 0x10:
+		case 0x11:
+		case 0x12:
+		case 0x13:
+		case 0x14:
+		case 0x15:
+			writenum = FillthedataBlock(bufptr,block,Count);
+			break;
+		default:
+			break;
+	}
+	return writenum;
+}
+
 /**
 * @brief  USBH_USR_DeInit
 *         Deint User state and associated variables

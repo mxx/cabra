@@ -7,7 +7,14 @@
 #define RS232_h
 #include "application.h"
 /* Functions Prototyping */
-
+typedef enum
+{
+	VER_NONE,
+	VER_ENTER,
+	VER_MIL,
+	VER_PLUS,
+	VER_TIME
+}CMD_VER;
 //����ݲɼ���ص�����
 extern void UpLoad_DriverCode();          
 extern void UpLoad_RealTime();          

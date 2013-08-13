@@ -64,11 +64,10 @@ void rt_hw_board_init(void);
 
 #define BUZZ_PIN			(GPIO_Pin_2)
 
-//GPIO PB
-#define USB_PWR_ON                      (GPIO_Pin_0)
-#define USB_OC                          (GPIO_Pin_1)
-
+//GPIO PC
+#define USB_PWR_ON                      (GPIO_Pin_9)
 //GPIO PA
+#define USB_OC                          (GPIO_Pin_8)
 #define USB_VBUS                        (GPIO_Pin_9)
 #define USB_DM                          (GPIO_Pin_11)
 #define USB_DP                          (GPIO_Pin_12)

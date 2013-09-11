@@ -22,6 +22,7 @@ uint8_t uart3flag;
 uint8_t uartcount = 0;
 extern struct rt_device uart2_device;
 extern struct rt_device uart3_device;
+extern struct rt_device uart4_device;
 typedef enum UART2_STATUS
 {
 	Get_sync_head,
@@ -358,15 +359,15 @@ void leidebug()
 {
 	return;
 }
-
+static unsigned char gprmcbuf[400];
 /* ISR for serial interrupt */
 void rt_hw_serial_isr(rt_device_t device)
 {
 	struct stm32_serial_device* uart = (struct stm32_serial_device*) device->user_data;
-    static unsigned char checksum;
+    static unsigned char checksum = 0;
     static uint16_t lenth;
-    static unsigned char gprmcbuf[400];
-    static unsigned char isgprmc;
+   // static unsigned char gprmcbuf[400];
+    static unsigned char isgprmc=0;
     static unsigned short gprmccnt = 0;
 
 	if(USART_GetITStatus(uart->uart_device, USART_IT_RXNE) != RESET)
@@ -388,6 +389,7 @@ void rt_hw_serial_isr(rt_device_t device)
 			{
 				uartcount++;
 				uart->int_rx->rx_buffer[uart->int_rx->save_index] = uart->uart_device->DR & 0xff;
+				rt_device_write(&uart2_device, 0,&(uart->int_rx->rx_buffer[uart->int_rx->save_index]), 1);
 				checksum = checksum^(uart->int_rx->rx_buffer[uart->int_rx->save_index]);
 				switch (Uart2PackStatus )
 				{
@@ -406,6 +408,7 @@ void rt_hw_serial_isr(rt_device_t device)
 						if((uart->int_rx->rx_buffer[uart->int_rx->save_index])== 0x75)
 						{
 							Uart2PackStatus = Get_the_Command;
+							//rt_device_write(&uart2_device, 0,&(uart->int_rx->rx_buffer[uart->int_rx->save_index]), 1);
 						}
 						else
 						{
@@ -421,7 +424,9 @@ void rt_hw_serial_isr(rt_device_t device)
 							&&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0x85 )
 							||((uart->int_rx->rx_buffer[uart->int_rx->save_index])>0xc1
 							&&(uart->int_rx->rx_buffer[uart->int_rx->save_index])<0xc5 ))
+						{
 							Uart2PackStatus = Get_the_lenth_high;
+						}
 						else
 						{
 							uart->int_rx->getcmd = 0x7f;
@@ -480,7 +485,7 @@ void rt_hw_serial_isr(rt_device_t device)
 				}
 
 			}
-		    if((&uart3_device)== device)
+			if((&uart3_device)== device)
 		    {
 		    	if((uart->uart_device->DR & 0xff) == '$')
 		    	{
@@ -492,9 +497,20 @@ void rt_hw_serial_isr(rt_device_t device)
 		    	 }
 		    	 else if((uart->uart_device->DR & 0xff)==',')
 		    	 {
+		    		 if((isgprmc == 1)&&(SectionID== FIELD_NIGHT))
+					 {
+		    			   //get the time
+						 GetGPSLocation3(gprmcbuf,gprmccnt);
+					 }
+		    		 else if((isgprmc == 2) &&(SectionID == FIELD_SEVEN ))
+		    		 {
+		    				GetGPSSpeed(gprmcbuf,gprmccnt);
+
+		    		 }
 		    	           SectionID++;
 		    	           gprmccnt = 0;
 		    	           uart3flag =2;
+
 		    	 }
 
 		    	 else
@@ -533,7 +549,7 @@ void rt_hw_serial_isr(rt_device_t device)
 								 uart3flag =1;
 								 if(isgprmc == 1)
 								 {
-										 if(gprmccnt == 10 )
+										 if(gprmccnt == 10  )
 										 {
 											 //get the time
 											 GetTheGPSTime(gprmcbuf);
@@ -546,9 +562,8 @@ void rt_hw_serial_isr(rt_device_t device)
 									 if(gprmccnt == 9 )
 									 {
 										 //get the time
-										 GetGPSLocation1(gprmcbuf);
+										GetGPSLocation1(gprmcbuf);
 									 }
-									 GetGPSLocation1(gprmcbuf);
 								 }
 								 break;
 							 case FIELD_THREE://提取出纬度
@@ -562,10 +577,6 @@ void rt_hw_serial_isr(rt_device_t device)
 										 GetGPSLocation2(gprmcbuf);
 									 }
 								 }
-								 if(isgprmc == 2)
-								 {
-									 //get the speed
-								 }
 								  break;
 							 case FIELD_FIVE://提取出经度
 							 	  break;
@@ -575,25 +586,22 @@ void rt_hw_serial_isr(rt_device_t device)
 									 if(gprmccnt == 2 )
 									 {
 										 //get the singal
+										 GettheSinaldata(gprmcbuf);
 									 }
 								}
 								break;
 							 case FIELD_NIGHT://提取高度
-								 if(isgprmc == 1)
-								 {
-									 if(gprmccnt == 7 )
-									 {
-										 //get the time
-										 GetGPSLocation3(gprmcbuf);
-									 }
-								 }
-
 								  break;
 								  default:
 								  break;
 						}
 				 }
-		   }
+		    }
+			if((&uart4_device )== device)
+			{
+				gprmcbuf[gprmccnt] = uart->uart_device->DR & 0xff;
+				gprmccnt++;
+			}
 
 			/* enable interrupt */
 			rt_hw_interrupt_enable(level);

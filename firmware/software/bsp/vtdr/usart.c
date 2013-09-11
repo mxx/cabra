@@ -70,6 +70,18 @@ struct stm32_serial_device uart3 =
 struct rt_device uart3_device;
 #endif
 
+#ifdef RT_USING_UART4
+struct stm32_serial_int_rx uart4_int_rx;
+struct stm32_serial_device uart4 =
+{
+	UART4,
+	&uart4_int_rx,
+	RT_NULL
+};
+struct rt_device uart4_device;
+#endif
+
+
 #define USART1_DR_Base  0x40013804
 #define USART2_DR_Base  0x40004404
 #define USART3_DR_Base  0x40004804
@@ -106,6 +118,12 @@ struct rt_device uart3_device;
 #define UART3_TX_DMA		DMA1_Channel2
 #define UART3_RX_DMA		DMA1_Channel3
 
+#define UART4_GPIO_RX		GPIO_Pin_11
+#define UART4_GPIO_TX		GPIO_Pin_10
+#define UART4_GPIO			GPIOC
+#define RCC_APBPeriph_UART4	RCC_APB1Periph_UART4
+
+
 static void RCC_Configuration(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
@@ -141,6 +159,11 @@ static void RCC_Configuration(void)
 
 	/* DMA clock enable */
 	//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+#endif
+#ifdef RT_USING_UART4
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 #endif
 }
 
@@ -186,6 +209,18 @@ static void GPIO_Configuration(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(UART3_GPIO, &GPIO_InitStructure);
 #endif
+#ifdef RT_USING_UART4
+	/* Configure USART3 Rx as input floating */
+	GPIO_InitStructure.GPIO_Pin = UART4_GPIO_RX;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(UART4_GPIO, &GPIO_InitStructure);
+
+	/* Configure USART3 Tx as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = UART4_GPIO_TX;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(UART4_GPIO, &GPIO_InitStructure);
+#endif
 }
 
 static void NVIC_Configuration(void)
@@ -220,6 +255,13 @@ static void NVIC_Configuration(void)
 //	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 //	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 //	NVIC_Init(&NVIC_InitStructure);
+#endif
+#ifdef RT_USING_UART4
+	/* Enable the USART2 Interrupt */
+	NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 #endif
 }
 
@@ -328,13 +370,6 @@ void rt_hw_usart_init()
 	USART_ClockInit(USART3, &USART_ClockInitStructure);
 
 	//uart3_dma_tx.dma_channel= UART3_TX_DMA;
-
-	/* register uart3 */
-#if 0
-	rt_hw_serial_register(&uart3_device, "uart3",
-		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_DMA_TX,
-		&uart3);
-#endif
 	rt_hw_serial_register(&uart3_device, "uart3",
 		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
 		&uart3);
@@ -344,5 +379,28 @@ void rt_hw_usart_init()
 
 	/* enable interrupt */
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+#endif
+
+#ifdef RT_USING_UART4
+	USART_InitStructure.USART_BaudRate = 115200;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+	USART_ClockInitStructure.USART_Clock = USART_Clock_Disable;
+	USART_ClockInitStructure.USART_CPOL = USART_CPOL_Low;
+	USART_ClockInitStructure.USART_CPHA = USART_CPHA_2Edge;
+	USART_ClockInitStructure.USART_LastBit = USART_LastBit_Disable;
+	USART_Init(UART4, &USART_InitStructure);
+	USART_ClockInit(UART4, &USART_ClockInitStructure);
+
+	/* register uart2 */
+	rt_hw_serial_register(&uart4_device, "uart4",
+		RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX | RT_DEVICE_FLAG_STREAM,
+		&uart4);
+
+	/* Enable USART2 DMA Rx request */
+	USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
 #endif
 }

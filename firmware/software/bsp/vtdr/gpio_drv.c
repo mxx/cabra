@@ -120,17 +120,39 @@ void rt_hw_gpio_init(void)
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_15 |GPIO_Pin_14;
     GPIO_Init(GPIOD, &GPIO_InitStructure);
 
+    //////gps power control///////////////
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_11;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_OD;
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+    GPIO_ResetBits(GPIOD,GPIO_Pin_11);//da kai gps dianyu
+
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_12;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+    ////////////gprs pin initial/////////////
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2|GPIO_Pin_14;
     GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+    GPIO_SetBits(GPIOD,GPIO_Pin_14);
+    GPIO_SetBits(GPIOD,GPIO_Pin_13);
+    lcd_delay(10);
+    GPIO_ResetBits(GPIOD,GPIO_Pin_13);
+
+
 
     rt_hw_EXTI_cfg();
 }

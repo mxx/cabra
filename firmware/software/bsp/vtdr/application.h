@@ -293,7 +293,7 @@ typedef struct{
 typedef struct{
 	unsigned char longtitude[4];//经度
 	unsigned char latitude[4];//纬度
-	unsigned char altitude[2];
+	short  altitude;
 }SizeData;
 typedef struct{
 	unsigned char  DriverLisenseCode[18];

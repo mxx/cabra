@@ -16,11 +16,13 @@
 #define FALSE 0
 #define TRUE 1
 
+extern unsigned char paramodifystatus;
+extern ParaModifyBlock modifydata;
 CMD_VER Verificationstatus;
 unsigned char RSCmdrxBuf[CMDLENGTH];
 unsigned char RSCmdtxBuf[CMDLENGTH];
 unsigned char RSDatarxBuf[DataLength];
-unsigned char LargeDataBuffer[32*1024];//[360*65];
+unsigned char LargeDataBuffer[8*1024];//[360*65];
 unsigned long DataLengthReceived;
 unsigned char CheckSum;
 unsigned char SendCheckSum;
@@ -2564,6 +2566,12 @@ void rs232_handle_application(rt_device_t device)
 			Blocklenth =((uart->int_rx->rx_buffer[(uart->int_rx->read_index +18) &UART_RX_BUFFER_MAX_SIZE]) <<8)
 					+uart->int_rx->rx_buffer[(uart->int_rx->read_index +19) &UART_RX_BUFFER_MAX_SIZE];
 
+		}
+		else if(((DataCmd>0x81)&&(DataCmd<0x85))
+				||((DataCmd>0xc1)&&(DataCmd<0xc5)))
+		{
+			paramodifystatus = 1;
+			modifydata.modifystatus = DataCmd;
 		}
 		switch(DataCmd)
 		{

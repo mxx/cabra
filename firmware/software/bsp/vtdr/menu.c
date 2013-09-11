@@ -549,7 +549,7 @@ void WriteDataToUDiskMenu()
 void DisplayAutoCode()
 {
 	lcd_clear(lineall);
-	unsigned short hz ;
+	unsigned short hz = 0;
 	unsigned char j=0,col=0,type,count=0;
 	unsigned char buf=Parameter.AutoInfodata.AutoCode[0];
 	type = 0;
@@ -565,6 +565,7 @@ void DisplayAutoCode()
 				type = HAN_ZI+type;
 				col++;
 				count = 0;
+				hz = 0;
 			}
 			else
 			{
@@ -602,10 +603,9 @@ void DisplayAutoCode()
 void DisplayAutoCodesort()
 {
 	lcd_clear(lineall);
-		unsigned short hz ;
+		unsigned short hz= 0 ;
 		unsigned char j=0,col=0,type,count;
 		unsigned char buf=Parameter.AutoInfodata.AutoSort[0];
-		hz = buf;
 		type = 0;
 		while((buf!='\0')&&(col<20)&&(j<12))
 		{
@@ -618,6 +618,7 @@ void DisplayAutoCodesort()
 					type = HAN_ZI+type;
 					col++;
 					count = 0;
+					hz = 0;
 				}
 				else
 				{
@@ -2342,7 +2343,7 @@ void DisplayNormalUI()
 	lcd_write_matrix(line1,113,BCD2LCM(radionum,1),NUM);
 	lcd_write_matrix(line1,119,BCD2LCM(radionum,0),NUM);
 
-//line3
+//line2
 	lcd_write_matrix(line2,0,(FONT_MATRIX *)distance_li,HAN_ZI);
 	lcd_write_matrix(line2,12,(FONT_MATRIX *)distance_cheng,HAN_ZI);
 	lcd_write_matrix(line2,24,(FONT_MATRIX *)charater_twopoint,NUM);
@@ -2407,9 +2408,9 @@ void DisplayNormalUI()
 			lcd_write_matrix(line4,72,(FONT_MATRIX *)charater_slash,NUM);
 			lcd_write_matrix(line4,78,BCD2LCM(curTime.day,1),NUM);
 			lcd_write_matrix(line4,84,BCD2LCM(curTime.day,0),NUM);
-			lcd_write_matrix(line2,90,(FONT_MATRIX *)bank,12);
-			lcd_write_matrix(line2,102,(FONT_MATRIX *)bank,12);
-			lcd_write_matrix(line2,114,(FONT_MATRIX *)bank,12);
+			lcd_write_matrix(line4,90,(FONT_MATRIX *)bank,12);
+			lcd_write_matrix(line4,102,(FONT_MATRIX *)bank,12);
+			lcd_write_matrix(line4,114,(FONT_MATRIX *)bank,12);
 
 		}
 	}

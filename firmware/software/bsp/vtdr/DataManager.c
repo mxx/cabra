@@ -1,8 +1,8 @@
 //*----------------------------------------------------------------------------
-//*      閿熸枻鎷疯嵔閿熸枻鎷烽敓鏂ゆ嫹鏄犻敓鏂ゆ嫹閿燂拷
+//*      锟斤拷荽锟斤拷锟斤拷映锟斤拷锟�
 //*----------------------------------------------------------------------------
 //* File Name           : DataManager.c
-//* Object              : 閿熸枻鎷峰綍閿熻閲囩》鎷烽敓鏂ゆ嫹閿熷姭璁规嫹鐘舵�閿熸枻鎷疯幐鎷囬敓鏂ゆ嫹閿熼叺鎲嬫嫹閿熸枻鎷�
+//* Object              : 锟斤拷录锟角采硷拷锟斤拷锟劫讹拷状态锟斤拷莸拇锟斤拷锟酵憋拷锟斤拷
 //*
 //* 1.0 24/02/03 PANHUI : Creation
 //*----------------------------------------------------------------------------
@@ -25,6 +25,8 @@ extern unsigned char Time30mincnt1;
 extern unsigned char Time30mincnt2;
 extern unsigned char Time30mincnt3;
 extern unsigned char Time30mincnt4;
+extern unsigned char Time20sCnt1;
+extern unsigned char Time20sCnt2;
 extern unsigned char DisplayMin;
 
 extern unsigned long CurSpeed;
@@ -37,14 +39,14 @@ extern unsigned long Curspeed1min;
 extern unsigned long Curspeed1s;
 PartitionTable pTable;
 StructPara Parameter;
-extern unsigned long PulseTotalNumber;	/*閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽┒閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹*/
+extern unsigned long PulseTotalNumber;	/*锟斤拷锟斤拷锟斤拷驶锟斤拷锟斤拷锟斤拷锟斤拷*/
 
 unsigned char TimeChange;	//时锟斤拷浠拷锟街�
 unsigned short DriveMinuteLimit;       //疲锟酵硷拷驶锟斤拷驶时锟斤拷锟斤拷锟斤拷
 unsigned short RestMinuteLimit;        //疲锟酵硷拷驶锟斤拷锟斤拷锟斤拷息时锟斤拷锟斤拷锟斤拷
 unsigned char AlarmFlag;
 
-DoubtDataBlock ddb;			//閿熸枻鎷峰墠閿熺即纰夋嫹閿熸枻鎷疯彉閿燂拷
+DoubtDataBlock ddb;			//锟斤拷前锟缴碉拷锟斤拷菘锟�
 BaseDataBlock basedata;
 LocationBlock Locationdata;
 SizeData location;
@@ -56,41 +58,44 @@ JournalBlock journaldata;
 CLOCK startdriverclk;
 CLOCK enddriverclk;
 
-unsigned char InRecordCycle=0;		//閿熻鍑ゆ嫹閿熻妭纭锋嫹褰曢敓鏂ゆ嫹鑾ㄩ敓鏂ゆ嫹閿熸枻鎷�
+unsigned char InRecordCycle=0;		//锟角凤拷锟节硷拷录锟斤拷莨锟斤拷锟斤拷
 unsigned char speeddel;
 Datastatus Datastatusdata;
-unsigned char InFlashWriting=0;	//閿熸枻鎷稦LASH鍐欓敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹
-unsigned long Tick02NB;				//閿熸枻鎷烽敓鏂ゆ嫹鍋滈敓鏂ゆ嫹涔嬮敓鏂ゆ嫹0.2s閿熶茎闈╂嫹閿熸枻鎷�
-OTDR_end otdrEND;			//鐤查敓閰电》鎷烽┒閿熸枻鎷峰綍閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹
-unsigned long AddupSpeed = 0;		//1閿熸枻鎷烽敓鏂ゆ嫹閿熷姭璁规嫹閿熸纭锋嫹
-unsigned short SpeedNb = 0;		//1閿熸枻鎷烽敓鏂ゆ嫹閿熷姭璁规嫹鍊奸敓鏂ゆ嫹閿熸枻鎷�
-unsigned char PowerOnTime=0;		//閿熻緝纰夋嫹閿熸枻鎷烽敓缁炴唻鎷烽敓锟�unsigned char OTRecordType=0;		//閿熸枻鎷烽敓鏂ゆ嫹鐤查敓閰电》鎷烽┒閿熸枻鎷峰綍閿熸枻鎷烽敓鏂ゆ嫹
-unsigned long LastDistance;			//閿熻緝杈炬嫹鐤查敓閰电》鎷烽┒閿熸枻鎷峰綍閿熸纭锋嫹閿熸枻鎷烽敓锟�unsigned char STATUS1min;			//1閿熸枻鎷烽敓鏂ゆ嫹鐘舵�閿熸枻鎷�
+unsigned char InFlashWriting=0;	//锟斤拷FLASH写锟斤拷锟斤拷锟斤拷
+unsigned long Tick02NB;				//锟斤拷锟斤拷停锟斤拷之锟斤拷0.2s锟侥革拷锟斤拷
+OTDR_end otdrEND;			//疲锟酵硷拷驶锟斤拷录锟斤拷锟斤拷锟斤拷锟斤拷
+unsigned long AddupSpeed = 0;		//1锟斤拷锟斤拷锟劫讹拷锟桔硷拷
+unsigned short SpeedNb = 0;		//1锟斤拷锟斤拷锟劫讹拷值锟斤拷锟斤拷
+unsigned char PowerOnTime=0;		//锟较碉拷锟斤拷锟绞憋拷锟�
+unsigned char OTRecordType=0;		//锟斤拷锟斤拷疲锟酵硷拷驶锟斤拷录锟斤拷锟斤拷
+unsigned long LastDistance;			//锟较达拷疲锟酵硷拷驶锟斤拷录锟桔硷拷锟斤拷锟�
+unsigned char STATUS1min;			//1锟斤拷锟斤拷状态锟斤拷
 unsigned char DriverStatus = 0;
 unsigned char DriverRegstatus = 0;
 unsigned char powerstatus = 0;
 unsigned char paramodifystatus = 0;
 unsigned char JournalRecordstatus = 0;
 unsigned char DoubltPointstatus = 0;
-DRIVER CurrentDriver;		//閿熸枻鎷峰墠鍙搁敓鏂ゆ嫹
-DRIVER RecordDriver;		//閿熸枻鎷峰綍鍙搁敓鏂ゆ嫹
-Record_CLOCK PowerOnDT;     //閿熻緝纰夋嫹閿熸枻鎷烽敓鏂ゆ嫹鏃堕敓鏂ゆ嫹
+DRIVER CurrentDriver;		//锟斤拷前司锟斤拷
+DRIVER RecordDriver;		//锟斤拷录司锟斤拷
+Record_CLOCK PowerOnDT;     //锟较碉拷锟斤拷锟斤拷时锟斤拷
 RecordData_end rec_end;
 unsigned char FinishFlag=0;
 
 extern unsigned char LargeDataBuffer[];
-unsigned short *DoubtData_4k = (unsigned short *)(&(LargeDataBuffer[12*1024]));//[2*1024];
-unsigned char *OTDR_4k = &(LargeDataBuffer[16*1024]);//[4*1024];
-unsigned short *BaseData_4k = (unsigned short *)(&(LargeDataBuffer[20*1024]));//[2*1024];
-unsigned char *Location_4k = &(LargeDataBuffer[28*1024]);
-unsigned char *temp_4k=&(LargeDataBuffer[32*1024]);
+//unsigned short *DoubtData_4k = (unsigned short *)(&(LargeDataBuffer[12*1024]));//[2*1024];
+//unsigned char *OTDR_4k = &(LargeDataBuffer[16*1024]);//[4*1024];
+unsigned short *BaseData_4k = (unsigned short *)(&(LargeDataBuffer[4*1024]));//[2*1024];
+//unsigned char *Location_4k = &(LargeDataBuffer[28*1024]);
+unsigned char *temp_4k=&(LargeDataBuffer[0]);
 
 //*----------------------------------------------------------------------------
 //* Function Name       : Task_GetData
-//* Object              : 閿熺殕纭锋嫹閿熸枻鎷烽敓锟�//* Input Parameters    : none
+//* Object              : 锟皆硷拷锟斤拷锟�
+//* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 void SelfCheck()
 {
@@ -110,11 +115,11 @@ void SelfCheck()
 
 //*----------------------------------------------------------------------------
 //* Function Name       : StrCmp
-//* Object              : 閿熼ズ鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熻鍑ゆ嫹閿熻鍑ゆ嫹閿熸枻鎷峰悓
-//* Input Parameters    : 閿熸枻鎷峰唹绯婚敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹鍧�敓绲猼r1,str2,閿熸枻鎷烽敓鏂ゆ嫹length
-//* Output Parameters   : 1閿熸枻鎷烽敓鏂ゆ嫹閿熻鍑ゆ嫹閿熸枻鎷峰悓閿熸枻鎷�閿熸枻鎷烽敓鏂ゆ嫹閿熻鍑ゆ嫹鍚�
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟饺斤拷锟斤拷锟斤拷锟街凤拷锟角凤拷锟斤拷同
+//* Input Parameters    : 锟斤拷冉系锟斤拷锟斤拷锟斤拷址锟絪tr1,str2,锟斤拷锟斤拷length
+//* Output Parameters   : 1锟斤拷锟斤拷锟街凤拷锟斤拷同锟斤拷0锟斤拷锟斤拷锟街凤拷同
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 char StrCmp(unsigned char *str1, unsigned char *str2, short length)
 {
@@ -132,11 +137,11 @@ char StrCmp(unsigned char *str1, unsigned char *str2, short length)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : BCD2Char
-//* Object              : BCD閿熸枻鎷疯浆閿熸枻鎷蜂负鍗侀敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹
-//* Input Parameters    : bcd閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷峰啓杞敓鏂ゆ嫹閿熸枻鎷稡CD閿熸枻鎷�
-//* Output Parameters   : 杞敓鏂ゆ嫹閿熸枻鎷烽敓缁烆噯鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : BCD锟斤拷转锟斤拷为十锟斤拷锟斤拷锟斤拷
+//* Input Parameters    : bcd锟斤拷锟斤拷锟斤拷写转锟斤拷锟斤拷BCD锟斤拷
+//* Output Parameters   : 转锟斤拷锟斤拷锟绞拷锟斤拷锟斤拷锟�
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 unsigned char BCD2Char(unsigned char bcd)
 {
@@ -166,9 +171,11 @@ time_t timechange(CLOCK time)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : WriteParameterTable
-//* Object              : 鍐欓敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* Input Parameters    : none
-//* Output Parameters   : 閿熻鍑ゆ嫹鏅掗敓锟�//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 写锟斤拷锟斤拷锟�
+//* Input Parameters    : none
+//* Output Parameters   : 锟角凤拷晒锟�
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int WriteParameterTable(StructPara *para)
 {
@@ -187,9 +194,11 @@ int WriteParameterTable(StructPara *para)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : WritePartitionTable
-//* Object              : 鍐欓敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* Input Parameters    : none
-//* Output Parameters   : 閿熻鍑ゆ嫹鏅掗敓锟�//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 写锟斤拷锟斤拷锟�
+//* Input Parameters    : none
+//* Output Parameters   : 锟角凤拷晒锟�
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int WritePartitionTable(PartitionTable *ptt)
 {
@@ -198,7 +207,7 @@ int WritePartitionTable(PartitionTable *ptt)
 
 	SPI_FLASH_Sector4kErase(SPI1,PartitionTable_BASE);
 	
-	//閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鍙揪鎷烽敓绱絃ASH
+	//锟斤拷锟斤拷锟斤拷锟叫达拷锟紽LASH
 	if(ptt->TotalDistance==0xffffffff)
 		ptt->TotalDistance = 0;
 	data = (unsigned long *)(ptt);
@@ -210,10 +219,11 @@ int WritePartitionTable(PartitionTable *ptt)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : IsPartitionTableCorrect
-//* Object              : 閿熸枻鎷峰閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* Input Parameters    : none
-//* Output Parameters   : 鍐欓敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹娆犻敓缂寸櫢鎷�
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟斤拷始锟斤拷锟斤拷锟斤拷锟�
+//* Input Parameters    : none
+//* Output Parameters   : 写锟斤拷锟斤拷锟斤拷欠锟缴癸拷
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int IsPartitionTableCorrect()
 {
@@ -242,22 +252,23 @@ int IsPartitionTableCorrect()
 
 	if((pTable.BaseData.CurPoint < BASEDATA_BASE)||(pTable.BaseData.CurPoint > BASEDATA_END))
 		return(-3);
-	/////////////閿熸枻鎷锋鎸囬敓鏂ゆ嫹閿熸澃鍑ゆ嫹/////////////////////////////
+	/////////////锟斤拷止指锟斤拷锟杰凤拷/////////////////////////////
 
-	//閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鍙揪鎷烽敓绱絃ASH
+	//锟斤拷锟斤拷锟斤拷锟叫达拷锟紽LASH
 	return (1);
 	
 
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : InitializeTable
-//* Object              : 閿熸枻鎷峰閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* Input Parameters    : unsigned char parti閿熸枻鎷烽敓鏂ゆ嫹閿熻鍑ゆ嫹閿熸枻鎷烽敓閾版仮闈╂嫹閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
-//                        unsigned char para閿熸枻鎷烽敓鏂ゆ嫹閿熻鍑ゆ嫹閿熸枻鎷烽敓閾版仮闈╂嫹閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
-//                        unsigned char change_set閿熸枻鎷烽敓鏂ゆ嫹閿熻鍑ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鐭鎷烽敓鐙″彿锝忔嫹
-//                                             閿熸枻鎷烽敓鏂ゆ嫹閿熸纭锋嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
-//* Output Parameters   : 閿熸枻鎷峰閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓閰佃鎷烽敓鏂ゆ嫹閿熸枻鎷锋瑺閿熺即鐧告嫹
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟斤拷始锟斤拷锟斤拷锟斤拷锟�
+//* Input Parameters    : unsigned char parti锟斤拷锟斤拷锟角凤拷锟斤拷锟铰恢革拷锟斤拷锟斤拷锟�
+//                        unsigned char para锟斤拷锟斤拷锟角凤拷锟斤拷锟铰恢革拷锟斤拷锟斤拷锟�
+//                        unsigned char change_set锟斤拷锟斤拷锟角凤拷锟斤拷锟斤拷锟斤拷锟矫筹拷锟狡号ｏ拷
+//                                             锟斤拷锟斤拷锟桔硷拷锟斤拷锟斤拷锟斤拷锟斤拷锟�
+//* Output Parameters   : 锟斤拷始锟斤拷锟斤拷锟斤拷锟酵诧拷锟斤拷锟斤拷欠锟缴癸拷
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int InitializeTable()
 {
@@ -287,7 +298,7 @@ int InitializeTable()
 	
 	if(pTable.Available !=PartitionTableFlag)
 	{
-		//鍒濆鍖杙Table
+		//初始化pTable
 		pTable.Available = PartitionTableFlag;
 		pTable.DoubtPointData.BaseAddr = DPD_BASE;
 		pTable.DoubtPointData.EndAddr = DPD_END;
@@ -320,6 +331,7 @@ int InitializeTable()
 		pTable.journalRecord.BaseAddr = JN_BASE;
 		pTable.journalRecord.EndAddr = JN_END;
 		pTable.journalRecord.CurPoint = JN_BASE;
+		Parameter.PulseCoff = 5500;
 
 		if( !WritePartitionTable(&pTable) )
 			return(0);
@@ -334,16 +346,18 @@ void InitialValue()
 	curTime.minute = 0x40;
 	curTime.year = 0x13;
 	curTime.month = 0x05;
+	SetCurrentDateTime(&curTime);
 	CurSpeed =124;
+	Parameter.PulseCoff =4800;
 	//AlarmFlag =1;
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : UpdateParameterPartition
-//* Object              : 閿熸枻鎷烽敓閾拌鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
+//* Object              : 锟斤拷锟铰诧拷锟斤拷锟斤拷锟斤拷锟�
 //* Input Parameters    : none
-//* Output Parameters   : 閿熼摪璇ф嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹娆犻敓缂寸櫢鎷�
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Output Parameters   : 锟铰诧拷锟斤拷锟斤拷锟斤拷锟斤拷欠锟缴癸拷
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int UpdateParameterPartition()
 {
@@ -353,16 +367,16 @@ int UpdateParameterPartition()
 	unsigned long *p;
 	int i,size;
 	
-	//閿熸枻鎷烽敓鏂ゆ嫹FLASH
+	//锟斤拷锟斤拷FLASH
 	SPI_FLASH_Sector4kErase(SPI1,*p);
-	//鍒烽敓閾拌鎷烽敓鏂ゆ嫹閿燂拷
+	//刷锟铰诧拷锟斤拷锟�
 	p = (unsigned long *)PARAMETER_BASE;
 	data = (unsigned long *)(&Parameter);
 	size=sizeof(StructPara);
 	
 	SPI_FLASH_BufferWrite( SPI1 ,(u8 *)data, *p, size);
 	
-	//鍒烽敓閾板嚖鎷烽敓鏂ゆ嫹閿燂拷
+	//刷锟铰凤拷锟斤拷锟�
 	p = (unsigned long *)PartitionTable_BASE;
 	data = (unsigned long *)(&pTable);
 	size=sizeof(PartitionTable);
@@ -372,11 +386,14 @@ int UpdateParameterPartition()
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : Update4k
-//* Object              : FLASH閿熸枻鎷�K閿熸枻鎷烽敓鏂ゆ嫹閿熻妭瀛橈紝閿熸枻鎷烽敓鏂ゆ嫹鍓�k閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓楗哄嚖鎷烽敓鏂ゆ嫹娆犻敓锟�//                        閿熸枻鎷锋寚閿熸枻鎷蜂箣鍓嶉敓鏂ゆ嫹閿熸枻鎷烽敓鍙揪鎷烽敓绱絃ASH
-//* Input Parameters    : p閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷峰墠閿熸枻鎷烽敓琛楅潻鎷烽敓锟�//*                       Buffer閿熸枻鎷烽敓鏂ゆ嫹閿熻妭杈炬嫹閿熷彨杈炬嫹閿熸枻鎷风閿燂拷k閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷锋閿熻锟�//*                       type閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹
+//* Object              : FLASH锟斤拷4K锟斤拷锟斤拷锟节存，锟斤拷锟斤拷前4k锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟饺凤拷锟斤拷欠锟�
+//                        锟斤拷指锟斤拷之前锟斤拷锟斤拷锟叫达拷锟紽LASH
+//* Input Parameters    : p锟斤拷锟斤拷锟斤拷前锟斤拷锟街革拷锟�
+//*                       Buffer锟斤拷锟斤拷锟节达拷锟叫达拷锟斤拷碌锟�k锟斤拷锟斤拷锟斤拷椎锟街�
+//*                       type锟斤拷锟斤拷锟斤拷锟斤拷
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int Update4k(unsigned long p,unsigned char *Buffer,unsigned char type)
 {
@@ -387,18 +404,14 @@ int Update4k(unsigned long p,unsigned char *Buffer,unsigned char type)
 	if(type == UpdateFlashOnce)
 		return(1); 
 		
-	//閿熸枻鎷烽敓鏂ゆ嫹FLASH
+	//锟斤拷锟斤拷FLASH
 	SPI_FLASH_Sector4kErase(SPI1,sector_addr);
-	//鎸囬敓鏂ゆ嫹涔嬪墠閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熷彨杈炬嫹閿熺唇LASH
+	//指锟斤拷之前锟斤拷锟斤拷锟斤拷锟斤拷锟叫达拷锟紽LASH
 	if(type == UpdateFlashTimes)
 	{
-		i=0;
-		while(sector_addr<p)
-		{
-			SPI_FLASH_BufferWrite( SPI1 ,(u8 *)(&Buffer[i]), sector_addr, 2);
-			sector_addr++;
-			i++;
-		}
+
+			SPI_FLASH_BufferWrite( SPI1 ,(u8 *)(&Buffer[i]), sector_addr, p-sector_addr);
+
 	}
 	return(1);
 }
@@ -420,11 +433,11 @@ int erase4kflash(unsigned long p ,unsigned long num)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : WriteDoubtDataToFlash
-//* Object              : 鍐欎竴閿熸枻鎷烽敓缂寸鎷烽敓鏂ゆ嫹鑾搁敓绱絃ASH閿熸枻鎷�
+//* Object              : 写一锟斤拷锟缴碉拷锟斤拷莸锟紽LASH锟斤拷
 //* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : curTime
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : curTime
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 
 
@@ -441,10 +454,12 @@ unsigned Char2BCD(unsigned char ch)
 #endif
 //*----------------------------------------------------------------------------
 //* Function Name       : IfOneAfterAotherDay
-//* Object              : 閿熷彨璁规嫹閿熻鍑ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* Input Parameters    : time閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹纰岄敓缁炴唻鎷烽敓琛楅潻鎷烽敓锟�//*                       end閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷蜂竴閿熸枻鎷风柌閿熼叺纭锋嫹褰曢敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷锋寚閿熸枻鎷�
-//* Output Parameters   : 0閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓瑙掞綇鎷�閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷�
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟叫讹拷锟角凤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟�
+//* Input Parameters    : time锟斤拷锟斤拷锟斤拷锟斤拷碌锟绞憋拷锟街革拷锟�
+//*                       end锟斤拷锟斤拷锟斤拷一锟斤拷疲锟酵硷拷录锟斤拷锟斤拷锟斤拷锟斤拷指锟斤拷
+//* Output Parameters   : 0锟斤拷锟斤拷锟斤拷锟角ｏ拷1锟斤拷锟斤拷锟斤拷
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int IfOneAfterAotherDay(CLOCK *time,OTDR_end *end)
 {
@@ -505,11 +520,12 @@ int IfOneAfterAotherDay(CLOCK *time,OTDR_end *end)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : JudgeTimeSpace
-//* Object              : 閿熷彨璁规嫹鏃堕敓鏂ゆ嫹閿熸枻鎷�
-//* Input Parameters    : time閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹纰岄敓缁炴唻鎷烽敓琛楅潻鎷烽敓锟�//*                       end閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷蜂竴閿熸枻鎷风柌閿熼叺纭锋嫹褰曢敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷锋寚閿熸枻鎷�
-//* Output Parameters   : 鏃堕敓鏂ゆ嫹閿熸枻鎷峰�閿熸枻鎷烽敓鏂ゆ嫹閿熸帴锝忔嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹20閿熸枻鎷烽敓鏂ゆ嫹鏃堕敓鏂ゆ嫹閿熸枻鎷稦F
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟叫讹拷时锟斤拷锟斤拷
+//* Input Parameters    : time锟斤拷锟斤拷锟斤拷锟斤拷碌锟绞憋拷锟街革拷锟�
+//*                       end锟斤拷锟斤拷锟斤拷一锟斤拷疲锟酵硷拷录锟斤拷锟斤拷锟斤拷锟斤拷指锟斤拷
+//* Output Parameters   : 时锟斤拷锟斤拷值锟斤拷锟斤拷锟接ｏ拷锟斤拷锟斤拷锟斤拷锟斤拷20锟斤拷锟斤拷时锟斤拷锟斤拷FF
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 unsigned char JudgeTimeSpace(CLOCK *time,OTDR_end *end)
 {
@@ -541,12 +557,12 @@ unsigned char JudgeTimeSpace(CLOCK *time,OTDR_end *end)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : AddPointer
-//* Object              : 閿熸枻鎷烽敓鏂ゆ嫹鎸囬敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹鍋忛敓鏂ゆ嫹閿熸枻鎷�
-//* Input Parameters    : pt閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓缁撴瀯
-//*                       inc閿熸枻鎷烽敓鏂ゆ嫹閿熸纭锋嫹鍊�
-//* Output Parameters   : 閿熸枻鎷烽敓鏂ゆ嫹閿熶茎鏂ゆ嫹閿燂拷
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟斤拷锟斤拷指锟斤拷锟斤拷锟斤拷偏锟斤拷锟斤拷
+//* Input Parameters    : pt锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟结构
+//*                       inc锟斤拷锟斤拷锟桔硷拷值
+//* Output Parameters   : 锟斤拷锟斤拷锟侥斤拷锟�
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 unsigned long AddPointer(StructPT *pt, int inc)
 {
@@ -567,12 +583,12 @@ unsigned long AddPointer(StructPT *pt, int inc)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : Get_otdrEND
-//* Object              : 閿熸枻鎷峰彇鐤查敓閰电》鎷烽┒閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鎹疯鎷烽敓鎻潻鎷烽敓鏂ゆ嫹閿熸枻鎷疯幖閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
+//* Object              : 锟斤拷取疲锟酵硷拷驶锟斤拷锟斤拷锟斤拷锟捷诧拷锟揭革拷锟斤拷锟斤拷莼锟斤拷锟斤拷锟�
 //* Input Parameters    : none
 //* Output Parameters   : none
 //* Global Parameters   : otdrEND,InFlashWriting
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int Get_otdrEND(OTDR_start *start,OTDR_end *end)
 {
@@ -582,14 +598,16 @@ int Get_otdrEND(OTDR_start *start,OTDR_end *end)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : Write4kToFlashOTDR
-//* Object              : 閿熼ズ璇ф嫹閿熸枻鎷烽敓鏂ゆ嫹鍐�k閿熻妭杈炬嫹閿熸枻鎷疯幐閿熺唇LASH閿熸枻鎷�
-//* Input Parameters    : p閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷峰墠閿熸枻鎷烽敓琛楅潻鎷烽敓锟�//*                       Buffer閿熸枻鎷烽敓鏂ゆ嫹閿熻妭杈炬嫹閿熷彨杈炬嫹閿熸枻鎷风閿燂拷k閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷锋閿熻锟�//* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟饺诧拷锟斤拷锟斤拷写4k锟节达拷锟斤拷莸锟紽LASH锟斤拷
+//* Input Parameters    : p锟斤拷锟斤拷锟斤拷前锟斤拷锟街革拷锟�
+//*                       Buffer锟斤拷锟斤拷锟节达拷锟叫达拷锟斤拷碌锟�k锟斤拷锟斤拷锟斤拷椎锟街�
+//* Output Parameters   : none
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int Write4kToFlashOTDR(unsigned short *p,unsigned short *Buffer)
 {
-	//閿熸枻鎷烽敓鏂ゆ嫹FLASH
+	//锟斤拷锟斤拷FLASH
 	if(!flash_sst39_erase_sector((unsigned long *)DATAFLASH_BASE,(unsigned long *)p))
 		return (0);
 
@@ -597,16 +615,18 @@ int Write4kToFlashOTDR(unsigned short *p,unsigned short *Buffer)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : Write4kToFlash
-//* Object              : 鍐�k閿熻妭杈炬嫹閿熸枻鎷疯幐閿熺唇LASH閿熸枻鎷�
-//* Input Parameters    : p閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷峰墠閿熸枻鎷烽敓琛楅潻鎷烽敓锟�//*                       Buffer閿熸枻鎷烽敓鏂ゆ嫹閿熻妭杈炬嫹閿熷彨杈炬嫹閿熸枻鎷风閿燂拷k閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷锋閿熻锟�//* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 写4k锟节达拷锟斤拷莸锟紽LASH锟斤拷
+//* Input Parameters    : p锟斤拷锟斤拷锟斤拷前锟斤拷锟街革拷锟�
+//*                       Buffer锟斤拷锟斤拷锟节达拷锟叫达拷锟斤拷碌锟�k锟斤拷锟斤拷锟斤拷椎锟街�
+//* Output Parameters   : none
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int Write4kToFlash(unsigned short *p,unsigned short *Buffer)
 {
 	unsigned short *inside_p,*flash_p;
 	unsigned short data;
-	inside_p = (unsigned short *)((unsigned long)p & 0x00fff);//4k閿熻妭纰夋嫹鍧�寚閿熸枻鎷�
+	inside_p = (unsigned short *)((unsigned long)p & 0x00fff);//4k锟节碉拷址指锟斤拷
 	flash_p = p;
 	while((unsigned long)inside_p<0x01000)
 	{
@@ -620,11 +640,11 @@ int Write4kToFlash(unsigned short *p,unsigned short *Buffer)
 
 //*----------------------------------------------------------------------------
 //* Function Name       : WriteAverageSpeed
-//* Object              : 鍐欎竴閿熸枻鎷峰钩閿熸枻鎷烽敓鍔鎷烽敓鏂ゆ嫹鑾搁敓绱絃ASH閿熸枻鎷�
-//* Input Parameters    : V閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷峰啓閿熸枻鎷烽敓鐙℃枻鎷烽敓鏂ゆ嫹淇ｉ敓琛楋拷
+//* Object              : 写一锟斤拷平锟斤拷锟劫讹拷锟斤拷莸锟紽LASH锟斤拷
+//* Input Parameters    : V锟斤拷锟斤拷锟斤拷写锟斤拷锟狡斤拷锟斤拷俣锟街�
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 void WriteAverageSpeed(unsigned char v)
 {
@@ -637,8 +657,8 @@ void WriteAverageSpeed(unsigned char v)
 	pos++;	
 
 	if(pos==0x01000)
-	{//閿熷彨浼欐嫹閿熸枻鎷烽敓鏂ゆ嫹涓�敓鏂ゆ嫹4k
-		//閿熸枻鎷烽敓閾扮鎷峰潃鎸囬敓鏂ゆ嫹
+	{//锟叫伙拷锟斤拷锟斤拷一锟斤拷4k
+		//锟斤拷锟铰碉拷址指锟斤拷
 		p=(unsigned char *)(OTDR_4k);
 		last_pos = pTable.RunRecord360h.CurPoint&0xfffff000;
 		pos = (pTable.RunRecord360h.CurPoint&0xff000) + 0x01000;
@@ -648,9 +668,9 @@ void WriteAverageSpeed(unsigned char v)
 			pos += (unsigned long)DATAFLASH_BASE;
 		pTable.RunRecord360h.CurPoint = pos;
 	
-		//鍐欓敓鏂ゆ嫹鍓�k閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷稦LASH閿熸枻鎷�
+		//写锟斤拷前4k锟斤拷锟斤拷锟斤拷FLASH锟斤拷
 		Write4kToFlashOTDR((unsigned short *)last_pos,(unsigned short *)OTDR_4k);
-		//閿熸枻鎷烽敓閾颁紮鎷烽敓鏂ゆ嫹閿熸枻鎷�
+		//锟斤拷锟铰伙拷锟斤拷锟斤拷
 		//Update4k((unsigned short *)pos,(unsigned short *)OTDR_4k,UpdateFlashOnce);
 	}
 	else
@@ -660,12 +680,12 @@ void WriteAverageSpeed(unsigned char v)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : FinishOTDRToFlash
-//* Object              :閿熸枻鎷烽敓鏂ゆ嫹鍓嶉敓鏂ゆ嫹褰�60灏忔椂骞抽敓鏂ゆ嫹閿熷姭璁规嫹閿熸枻鎷烽┒閿熸枻鎷峰綍閿熸枻鎷风粺閿熸枻鎷风柌閿熼叺纭锋嫹椹堕敓鑺傝揪鎷�
-//                       閿熸枻鎷烽敓鑺ュ埌FLASH閿熸枻鎷�
+//* Object              :锟斤拷锟斤拷前锟斤拷录360小时平锟斤拷锟劫讹拷锟斤拷驶锟斤拷录锟斤拷统锟斤拷疲锟酵硷拷驶锟节达拷
+//                       锟斤拷锟芥到FLASH锟斤拷
 //* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 void FinishOTDRToFlash()
 {
@@ -673,7 +693,7 @@ void FinishOTDRToFlash()
 	otdrEND.driver = RecordDriver;
 	if((InRecordCycle&(1<<DOUBLTPOINT))!=0)
 	{
-		//閿熸枻鎷峰綍閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷疯幐閿燂拷
+		//锟斤拷录锟斤拷锟斤拷锟斤拷莸锟�
 		otdrEND.dt.type = 0xeaea;
 		otdrEND.dt.year = curTime.year;
 		otdrEND.dt.month = curTime.month;
@@ -682,8 +702,8 @@ void FinishOTDRToFlash()
 		otdrEND.dt.minute = curTime.minute;
 		otdrEND.dt.second = curTime.second;
 		otdrEND.TotalDistance = PulseTotalNumber - otdrEND.TotalDistance;
-		//if(OTRecordType == MergeLastData)
-		//	otdrEND.TotalDistance += LastDistance;
+		if(OTRecordType == MergeLastData)
+			otdrEND.TotalDistance += LastDistance;
 	}
 	
 	WriteOTDREndData(&otdrEND);
@@ -698,12 +718,12 @@ void FinishOTDRToFlash()
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : ModifyUnknownDriver
-//* Object              : 姣忛敓鏂ゆ嫹閿熸枻鎷烽┒閿熸枻鎷峰綍閿熸枻鎷烽敓鏂ゆ嫹鏃堕敓鏂ゆ嫹閿熸枻鎷峰綍閿熷彨纭锋嫹褰曢敓鏂ゆ嫹鏈煡鍙搁敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熻棄鍗￠敓鏂ゆ嫹
-//						  閿熸枻鎷烽敓鏂ゆ嫹閿熻顎拝鎷烽敓渚ョ》鎷峰綍閿熺潾闈╂嫹閿熸枻鎷峰徃閿熸枻鎷烽敓鏂ゆ嫹
+//* Object              : 每锟斤拷锟斤拷驶锟斤拷录锟斤拷锟斤拷时锟斤拷锟斤拷录锟叫硷拷录锟斤拷未知司锟斤拷锟斤拷锟斤拷锟藉卡锟斤拷
+//						  锟斤拷锟斤拷锟街撅拷锟侥硷拷录锟睫革拷锟斤拷司锟斤拷锟斤拷
 //* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : none
+//* 锟睫改碉拷全锟街憋拷锟斤拷      : none
 //*----------------------------------------------------------------------------
 void ModifyUnknownDriver()
 {
@@ -721,7 +741,8 @@ void ModifyUnknownDriver()
 	PowerOffDT.minute = curTime.minute;
 	PowerOffDT.second = curTime.second;
 	
-	//閿熺即纰夋嫹閿熼摪锟�	dpp=pTable.DoubtPointData.CurPoint;
+	//锟缴碉拷锟铰�
+	dpp=pTable.DoubtPointData.CurPoint;
 	do
 	{
 		if(dpp==pTable.DoubtPointData.BaseAddr)
@@ -747,19 +768,20 @@ void ModifyUnknownDriver()
 			data = (unsigned short)(RecordDriver.DriverCode>>16);
 			SPI_FLASH_BufferWrite( SPI1 ,(u8 *)&data, dpp+2, 2);
 		}
-		i++;//2003.11.11,panhui(閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹)
+		i++;//2003.11.11,panhui(锟斤拷锟斤拷锟斤拷锟斤拷)
 	}while((cmp1>0)&&(cmp2>=0)&&(i<97));
 	
-	//360灏忔椂骞抽敓鏂ゆ嫹閿熷姭搴︾》鎷峰綍
+	//360小时平锟斤拷锟劫度硷拷录
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : WriteBaseDataToFlash
-//* Object              : 閿熸枻鎷烽敓鏂ゆ嫹椹堕敓鏂ゆ嫹褰曞啓閿熸枻鎷烽敓鏂ゆ嫹閿熺唇LASH
-//* Input Parameters    : buf閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷疯幖閿熸枻鎷烽敓鏂ゆ嫹閿熻闈╂嫹閿燂拷
-//                        len閿熸枻鎷烽敓鏂ゆ嫹unsigned short閿熸枻鎷烽敓鏂ゆ嫹鑾╅敓鏂ゆ嫹閿燂拷
-//						  type閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* Output Parameters   : if data write TRUE or FALSE
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟斤拷锟斤拷驶锟斤拷录写锟斤拷锟斤拷锟紽LASH
+//* Input Parameters    : buf锟斤拷锟斤拷锟斤拷莼锟斤拷锟斤拷锟街革拷锟�
+//                        len锟斤拷锟斤拷unsigned short锟斤拷锟斤拷莩锟斤拷锟�
+//						  type锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟�
+//* Output Parameters   : if data write TRUE or FALSE
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int WriteBaseDataToFlash(unsigned short *buf,unsigned char len,unsigned char type)
 {
@@ -816,7 +838,7 @@ void WritelocationData2Flash(CMD_LOCATION type)
 		{
 			Location_4k[i] = (unsigned char )*((unsigned char * )(&location+i));
 		}
-		//Location_4k[i] = Curspeed1min;
+		Location_4k[i] = Curspeed1min;
 		SPI_FLASH_BufferWrite(SPI1,Location_4k , p, 10);
 		pTable.LocationData.BakPoint = p+11;
 	}
@@ -839,6 +861,7 @@ void WriteDriverRegData2Flash()
 {
 	unsigned long p,i;
 	p = pTable.DriverReRecord.CurPoint;
+	DataManager.c:822:4:
 	erase4kflash(p,50);
 	SPI_FLASH_BufferWrite(SPI1,(unsigned char *)driverregisterdata , p, 50);
 
@@ -866,24 +889,23 @@ void WriteRecordData2Flash(StructPT ptbl ,unsigned char *buff,unsigned long num)
 	unsigned long star_addr;
 	unsigned long p;
 	p = ptbl.CurPoint;
-	//erase4kflash(p,num);
 
 		if(((p&0x00000fff)+num)<0x1000)
 		{
 			Update4k(p,temp_4k,UpdateFlashTimes);
 			SPI_FLASH_BufferWrite(SPI1,(unsigned char *)buff , p, num);
 			num_addr =4096-(p&0x00000fff)-num;
-			SPI_FLASH_BufferWrite(SPI1,(unsigned char *)&temp_4k[p+num] , p+num, num_addr);
+			SPI_FLASH_BufferWrite(SPI1,(unsigned char *)&temp_4k[num] , p+num, num_addr);
 		}
 		else
 		{
 			Update4k(p,temp_4k,UpdateFlashTimes);
-			num_addr = 4096-(p&0x00000fff);
+		    num_addr = 4096-(p&0x00000fff);
 			SPI_FLASH_BufferWrite(SPI1,(unsigned char *)buff , p,num_addr);
-			Update4k((p+num)&0x00000fff,temp_4k,UpdateFlashTimes);
-			SPI_FLASH_BufferWrite(SPI1,(unsigned char *)&buff[num_addr] , (p+num)&0x00000fff,num-num_addr);
+			Update4k((p+num)&0xfffff000,temp_4k,UpdateFlashTimes);
+			SPI_FLASH_BufferWrite(SPI1,(unsigned char *)&buff[num_addr] , (p+num)&0xfffff000,num-num_addr);
 			bnum_addr = 4096 +num_addr-num;
-			star_addr = (p+num)&0x00000fff +num-num_addr;
+			star_addr = (p+num)&0xfffff000 +num-num_addr;
 			SPI_FLASH_BufferWrite(SPI1,(unsigned char *)&temp_4k[num-num_addr] , star_addr,bnum_addr);
 		}
 		MovePtablePtr(ptbl,num);
@@ -892,11 +914,11 @@ void WriteRecordData2Flash(StructPT ptbl ,unsigned char *buff,unsigned long num)
 
 //*----------------------------------------------------------------------------
 //* Function Name       : BaseDataHandler
-//* Object              : 閿熸枻鎷烽敓鏂ゆ嫹缁嗛敓鏂ゆ嫹鑽介敓鏂ゆ嫹?閿熸枻鎷烽敓閾帮拷
+//* Object              : 锟斤拷锟斤拷细锟斤拷荽锟斤拷?锟斤拷锟铰�
 //* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : PowerOnTime,STATUS1min,TimeChange,InRecordCycle,curTime
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : PowerOnTime,STATUS1min,InRecordCycle
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : PowerOnTime,STATUS1min,TimeChange,InRecordCycle,curTime
+//* 锟睫改碉拷全锟街憋拷锟斤拷      : PowerOnTime,STATUS1min,InRecordCycle
 //*----------------------------------------------------------------------------
 void ValueStatusHandler()
 {
@@ -939,7 +961,7 @@ void ValueStatusHandler()
 			if((AlarmFlag&ALARM_OVER_TIME)!= ALARM_OVER_TIME)
 				AlarmFlag |= ALARM_OVER_TIME;
 		}
-		if((timenowmin-timedriverstartmin)>240)
+		if((timenowmin-timedriverstartmin)>15)
 		{
 			DriverStatus |= DRIVING_OVERTIME;
 		}
@@ -954,7 +976,7 @@ void ValueStatusHandler()
 		//DriverStatus &= ~DRIVING_STAR;
 		timedriverstartmin = timechange(startdriverclk);
 		timestopmin = timechange(curTime);
-		if( (timenowmin-timestopmin)>20)//并且同一个驾驶人
+		if( (timenowmin-timestopmin)>10)//并且同一个驾驶人
 		{
 			DriverStatus &= ~DRIVING_STAR;
 			DriverStatus |= DRIVING_STOP_DRIVER;//连续驾驶结束
@@ -964,23 +986,31 @@ void ValueStatusHandler()
 
 		}
 	}
-	//鐤戠偣鏁版嵁鍒ゆ柇澶勭悊鐘舵�鍙樺寲
-	if((Datastatusdata.locationchagestatus == 1)&&(DriverStatus & DRIVING_STAR ))//鎴栬�璁板綍浠柇鐢�
+	//疑点数据判断处理状态变化
+	if(((Datastatusdata.locationchagestatus == 1)&&(DriverStatus & DRIVING_STAR ))//或者记录仪断电
+		||(DriverStatus & DRIVING_STOP))
 	{
-		DoubltPointstatus = DBRECORD_END;
+		if( DoubltPointstatus == DBRECORD_START )
+		{
+			DoubltPointstatus = DBRECORD_END;
+		}
 	}
 	else if((DriverStatus & DRIVING_STAR ))
 	{
-		DoubltPointstatus = DBRECORD_START;
+		if(DoubltPointstatus != DBRECORD_START)
+		{
+			DoubltPointstatus = DBRECORD_START;
+		}
 	}
 	else
 	{
+		if(DoubltPointstatus != NONE_DB)
 		DoubltPointstatus= NONE_DB;
 	}
-	//鍙告満鐧昏鐘舵�鍙樺寲
+	//司机登记状态变化
 	IckaHandler();
 
-	//鏃ュ織鐘舵�杞崲
+	//日志状态转换
 	if(CurSpeed >40 )
 	{
 		if(Datastatusdata.keepthespeed == 0)
@@ -1020,19 +1050,21 @@ void AlarmHandler()
 {
 	if(((AlarmFlag&ALARM_OVER_TIME)== ALARM_OVER_TIME)&&(Time30mincnt1 ==0))
 	{
-		Time30mincnt1 = 6;
+		Time30mincnt1 = 5;
+		Time20sCnt1 =20;
 	}
 	if(((AlarmFlag&ALARM_NOT_RE)== ALARM_NOT_RE)&&(Time30mincnt2 ==0))
 	{
-		Time30mincnt2 = 6;
+		Time30mincnt2 = 5;
+		Time20sCnt2 =20;
 	}
 	if(((AlarmFlag&ALARM_OVER_SPEED)== ALARM_OVER_SPEED)&&(Time30mincnt3 ==0))
 	{
-		Time30mincnt3 = 6;
+		Time30mincnt3 = 5;
 	}
 	if(((AlarmFlag&ALARM_SPEED_ABOR)== ALARM_SPEED_ABOR)&&(Time30mincnt4 ==0))
 	{
-		Time30mincnt4 = 6;
+		Time30mincnt4 = 5;
 	}
 
 }
@@ -1043,17 +1075,17 @@ void BaseDataHandler()
 	if(DriverStatus & DRIVING_STAR )
 	{
 
-		//STATUS1min = 0;//2003.10.23,panhui
-		//STATUS1min |= CurStatus;
-		if(TimeChange & (0x01<<SECOND_CHANGE))//閿熸枻鎷蜂竴閿熸枻鎷烽敓鏂ゆ嫹
+		STATUS1min = 0;//2003.10.23,panhui
+		STATUS1min |= CurStatus;
+		if(TimeChange & (0x01<<SECOND_CHANGE))//锟斤拷一锟斤拷锟斤拷
 		{
 			TimeChange &= ~(0x01<<SECOND_CHANGE);
 			if (curTime.second == 0)
 			{
 
-				if(( InRecordCycle&(1<<BASEDATA))==BASEDATA)
+				if( InRecordCycle&(1<<BASEDATA))
 				{
-					//basedata.speed[59] = (unsigned char)Curspeed1s;
+					basedata.speed[59] = (unsigned char)Curspeed1s;
 					basedata.status[59] = (unsigned char)CurStatus;
 					WriteRecordData2Flash(pTable.BaseData,(unsigned char *)(&basedata),sizeof(BaseDataBlock));
 				}
@@ -1067,25 +1099,25 @@ void BaseDataHandler()
 			}
 			else
 			{
-				//basedata.speed[curTime.second-1] = (unsigned char)Curspeed1s;
-				basedata.status[curTime.second-1] = (unsigned char)CurStatus;
+				basedata.speed[BCD2Char(curTime.second)-1] = (unsigned char)Curspeed1s;
+				basedata.status[BCD2Char(curTime.second)-1] = (unsigned char)CurStatus;
 
 			}
 
-			//STATUS1min = 0;
+			STATUS1min = 0;
 		}
 	}
 	else
 	{
-		if(( InRecordCycle&(1<<BASEDATA))==BASEDATA)
+		if(InRecordCycle&(1<<BASEDATA))
 		{
 			if(TimeChange & (0x01<<SECOND_CHANGE))
 			{
 				TimeChange &= ~(0x01<<SECOND_CHANGE);
 				if (curTime.second != 0)
 				{
-					basedata.speed[curTime.second] = 0xff;
-					basedata.status[curTime.second] = 0xff;
+					basedata.speed[BCD2Char(curTime.second)] = 0xff;
+					basedata.status[BCD2Char(curTime.second)] = 0xff;
 				}
 				else
 				{
@@ -1106,13 +1138,13 @@ void LocationHandler()
 	int i,pt;
 	if((DriverStatus & DRIVING_STAR ))
 	{
-		if(TimeChange & (0x01<<MINUTE_CHANGE))//閿熸枻鎷蜂竴閿熸枻鎷烽敓鏂ゆ嫹
+		if(TimeChange & (0x01<<MINUTE_CHANGE))//锟斤拷一锟斤拷锟斤拷
 		{
 			TimeChange &= ~(0x01<<MINUTE_CHANGE);
 			if (curTime.minute == 0)
 			{
 
-				if(( InRecordCycle&(1<<LOCATIONDATA))==LOCATIONDATA)
+				if( InRecordCycle&(1<<LOCATIONDATA))
 				{
 					for(i = 0;i<10;i++)
 					{
@@ -1145,7 +1177,7 @@ void LocationHandler()
 	}
 	else
 	{
-		if(( InRecordCycle&(1<<LOCATIONDATA))==LOCATIONDATA)
+		if( InRecordCycle&(1<<LOCATIONDATA))
 		{
 			if(TimeChange & (0x01<<MINUTE_CHANGE))
 			{
@@ -1183,6 +1215,14 @@ void OverDriverHandler()
 		overdriverdata.startdrivertime.hour =startdriverclk.hour;
 		overdriverdata.startdrivertime.minute =startdriverclk.minute;
 		overdriverdata.startdrivertime.second =startdriverclk.second;
+		for(i = 0;i<18;i++)
+		{
+			overdriverdata.DriverLisenseCode[i] = Parameter.DriverLisenseCode[i];
+		}
+		for(i = 0;i<10;i++)
+		{
+			*((unsigned char *)&overdriverdata.startlocation+i)=*((unsigned char *)&location+i);
+		}
 
 	    if (DriverStatus & DRIVING_STOP_DRIVER )
 		{
@@ -1192,6 +1232,10 @@ void OverDriverHandler()
 			overdriverdata.enddrivertime.hour =enddriverclk.hour;
 			overdriverdata.enddrivertime.minute =enddriverclk.minute;
 			overdriverdata.enddrivertime.second =enddriverclk.second;
+			for(i = 0;i<10;i++)
+			{
+				*((unsigned char *)&overdriverdata.endlocation+i)=*((unsigned char *)&location+i);
+			}
 			WriteRecordData2Flash(pTable.OverSpeedRecord,(unsigned char *)&overdriverdata,50);//write the data
 		}
 
@@ -1200,37 +1244,40 @@ void OverDriverHandler()
 
 //*----------------------------------------------------------------------------
 //* Function Name       : RunRecord360Handler
-//* Object              :360灏忔椂骞抽敓鏂ゆ嫹閿熷姭璁规嫹閿熸枻鎷烽┒閿熸枻鎷峰綍閿熸枻鎷风粺閿熸枻鎷风柌閿熼叺纭锋嫹椹�
+//* Object              :360小时平锟斤拷锟劫讹拷锟斤拷驶锟斤拷录锟斤拷统锟斤拷疲锟酵硷拷驶
 //* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : CurSpeed,curTime
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : CurSpeed,curTime
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
-//0.2绉掕窇涓�亶
+//0.2秒跑一遍
 void DoubltPointHandler()
 {
 	unsigned char i,cnt;
-	static unsigned DBcnt = 0;
+	static unsigned DBcnt = 100;
 	unsigned char *ptr ;
+	static unsigned char ddbspeed[100];
+	static unsigned char ddbstatus[100];
 	switch(DoubltPointstatus)
 	{
 		case DBRECORD_START:
-			ddb.data[DBcnt].speed = CurSpeed;
-			ddb.data[DBcnt].status = CurStatus;
-			DBcnt++;
-			if(DBcnt == 100)
-				DBcnt = 0;
+			if(DBcnt == 0)
+						DBcnt = 100;
+			DBcnt--;
+			ddbspeed[DBcnt] = CurSpeed;
+			ddbstatus[DBcnt] = CurStatus;
+
 			break;
 		case DBRECORD_END:
-			for(i= 0;i++;i<100)
+			for(i= 0;i<100;i++)
 			{
 				cnt = DBcnt+i;
 				if(cnt>99)
 				{
 					cnt = cnt-100;
 				}
-				ddb.data[i].speed= ddb.data[cnt].speed;
-				ddb.data[i].status= ddb.data[cnt].status;
+				ddb.data[i].speed= ddbspeed[DBcnt];
+				ddb.data[i].status= ddbstatus[DBcnt];
 			}
 			ptr = (unsigned char *)&ddb.StopTime;
 			for(i = 0;i++;i<6)
@@ -1243,6 +1290,7 @@ void DoubltPointHandler()
 				ptr[i]= (unsigned char )*((unsigned char * )&location+i);
 			}
 			WriteRecordData2Flash(pTable.DoubtPointData,(unsigned char *)&ddb,234);
+			DoubltPointstatus = NONE_DB;
 		break;
 		default:
 			break;
@@ -1278,6 +1326,7 @@ void DrvierRegisterHandler()
 
 			}
 			WriteRecordData2Flash(pTable.DriverReRecord,(unsigned char *)&driverregisterdata,25);
+			DriverRegstatus = 0;
 		}
 }
 
@@ -1288,11 +1337,13 @@ void PowerHandle()
 
 	if((powerstatus & POWER_ON)||(DriverRegstatus & POWER_OFF))
 	{
+		powerdata.powerstatus =powerstatus ;
+		powerstatus = 0;
 		for(i=0;i++;i<6)
 		{
 			ptr[i] = (unsigned char )*((unsigned char * )(&curTime+i));
 		}
-		powerdata.powerstatus = paramodifystatus;
+
 		WriteRecordData2Flash(pTable.PowerOffRunRecord,(unsigned char *)&modifydata,7);
 	}
 
@@ -1304,17 +1355,17 @@ void ModifyHandle()
 	unsigned char *ptr = (unsigned char *)&modifydata.modifytime;
 	if(paramodifystatus)
 	{
+		paramodifystatus = 0;
 		for(i=0;i++;i<6)
 		{
 			ptr[i] = (unsigned char )*((unsigned char * )(&curTime+i));
 		}
-		modifydata.modifystatus = powerstatus;
 		WriteRecordData2Flash(pTable.ModifyRecord,(unsigned char *)&modifydata,7);
 	}
 
 }
 
-//姝ゅ嚱鏁颁竴绉掗挓鎵ц涓�
+//此函数一秒钟执行一次
 void JournalHandle()
 {
 	unsigned char i;
@@ -1322,8 +1373,8 @@ void JournalHandle()
 	unsigned char *ptr;
 	switch(JournalRecordstatus)
 	{
-		case NORMAL://璁板綍姝ｅ父鏁版嵁
-		case ABORT://璁板綍寮傚父鏁版嵁
+		case NORMAL://记录正常数据
+		case ABORT://记录异常数据
 			journaldata.speedstatus = JournalRecordstatus;
 			JournalRecordstatus = NONE_OPR;
 			ptr = (unsigned char *)&journaldata.jouranlendtime;
@@ -1333,7 +1384,7 @@ void JournalHandle()
 			}
 			WriteRecordData2Flash(pTable.journalRecord,(unsigned char *)&journaldata,133);
 		break;
-		case RECORD_STARTTIME://婊¤冻閫熷害>40,骞朵笖寮傚父涓庢甯镐氦鏇�
+		case RECORD_STARTTIME://满足速度>40,并且异常与正常交替
 			ptr = (unsigned char *)&journaldata.journalstartime;
 			for(i = 0;i++;i<6)
 			{
@@ -1344,7 +1395,7 @@ void JournalHandle()
 			JNcnt = 1;
 			JournalRecordstatus = RECORD_DATA;
 			break;
-		case RECORD_DATA://婊¤冻閫熷害>40,骞朵笖璇樊鐜囬檺鏁板�淇濇寔鍦ㄤ竴涓按骞�
+		case RECORD_DATA://满足速度>40,并且误差率限数值保持在一个水平
 			journaldata.rspeed[JNcnt] = RsSpeed;
 			journaldata.speed[JNcnt]  = CurSpeed;
 			if(JNcnt== 59)
@@ -1360,31 +1411,33 @@ void JournalHandle()
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : FinishAllRecord
-//* Object              : 閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鍙》鎷峰綍
+//* Object              : 锟斤拷锟斤拷锟斤拷锟叫硷拷录
 //* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : PowerOnTime,STATUS1min,TimeChange,InRecordCycle,curTime
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : PowerOnTime,STATUS1min,InRecordCycle
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : PowerOnTime,STATUS1min,TimeChange,InRecordCycle,curTime
+//* 锟睫改碉拷全锟街憋拷锟斤拷      : PowerOnTime,STATUS1min,InRecordCycle
 //*----------------------------------------------------------------------------
 void FinishAllRecord()
 {
 	if(FinishFlag)
 	{
-		//閿熸枻鎷烽┒閿熸枻鎷峰綍閿熸枻鎷烽敓鏂ゆ嫹閿熷彨杈炬嫹閿熺禌ataflash
+		//锟斤拷驶锟斤拷录锟斤拷锟斤拷锟叫达拷锟絛ataflash
 		WriteBaseDataToFlash((unsigned short *)(&rec_end),(sizeof(RecordData_end))/2,END);
-		RecordDriver = CurrentDriver;//閿熻闈╂嫹閿熸枻鎷峰綍鍙搁敓鏂ゆ嫹
+		RecordDriver = CurrentDriver;//锟街革拷锟斤拷录司锟斤拷
 		FinishFlag = 0;
 	}
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : GetOTDRDataFromFlash
-//* Object              : 閿熸帴闈╂嫹鐗￠敓琛楀嚖鎷烽敓楗侯摨nc閿熸枻鎷烽敓楗虹鎷风柌閿熼叺纭锋嫹椹堕敓鏂ゆ嫹閿燂拷
-//*                       閿熸枻鎷烽敓鏂ゆ嫹璇洪敓绱筓F閿熸枻鎷�
-//* Input Parameters    : p閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷风墶閿熻锟�//*                       inc閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷疯帺閿熸枻鎷烽緥閿熸枻鎷烽敓鎹峰嚖鎷烽敓楗哄嚖鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鎹风殑鍑ゆ嫹閿熸枻鎷�
-//*                       娉ㄩ敓瑙ｏ細inc閿熸枻鎷烽敓鏂ゆ嫹涓洪敓鏂ゆ嫹閿熸枻鎷烽敓鑴氱》鎷烽敓锟�//*                       buf閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷�
+//* Object              : 锟接革拷牡锟街凤拷锟饺nc锟斤拷锟饺碉拷疲锟酵硷拷驶锟斤拷锟�
+//*                       锟斤拷锟斤拷诺锟紹UF锟斤拷
+//* Input Parameters    : p锟斤拷锟斤拷锟斤拷牡锟街�
+//*                       inc锟斤拷锟斤拷锟斤拷莩锟斤拷龋锟斤拷锟捷凤拷锟饺凤拷锟斤拷锟斤拷锟捷的凤拷锟斤拷
+//*                       注锟解：inc锟斤拷锟斤拷为锟斤拷锟斤拷锟脚硷拷锟�
+//*                       buf锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 void GetOTDRDataFromFlash(unsigned short *p, int inc,unsigned char *buf)
 {
@@ -1397,9 +1450,11 @@ void GetOTDRDataFromFlash(unsigned short *p, int inc,unsigned char *buf)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : IsCorrectCLOCK
-//* Object              : 閿熷彨璁规嫹鏃堕敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹娆犻敓鏂ゆ嫹閿熼ズ锟�//* Input Parameters    : 鏃堕敓鏂ゆ嫹鎸囬敓鏂ゆ嫹
-//* Output Parameters   : 閿熻鍑ゆ嫹閿熸枻鎷蜂竴閿熸枻鎷烽敓鏂ゆ嫹纭敓鏂ゆ嫹鏃堕敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟叫讹拷时锟斤拷锟斤拷锟斤拷欠锟斤拷锟饺�
+//* Input Parameters    : 时锟斤拷指锟斤拷
+//* Output Parameters   : 锟角凤拷锟斤拷一锟斤拷锟斤拷确锟斤拷时锟斤拷锟斤拷锟�
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int IsCorrectCLOCK(CLOCK *dt)
 {
@@ -1427,9 +1482,11 @@ int IsCorrectCLOCK(CLOCK *dt)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : IsCorrectClock
-//* Object              : 閿熷彨璁规嫹鏃堕敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹娆犻敓鏂ゆ嫹閿熼ズ锟�//* Input Parameters    : 鏃堕敓鏂ゆ嫹鎸囬敓鏂ゆ嫹
-//* Output Parameters   : 閿熻鍑ゆ嫹閿熸枻鎷蜂竴閿熸枻鎷烽敓鏂ゆ嫹纭敓鏂ゆ嫹鏃堕敓鏂ゆ嫹閿熸枻鎷烽敓锟�//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟叫讹拷时锟斤拷锟斤拷锟斤拷欠锟斤拷锟饺�
+//* Input Parameters    : 时锟斤拷指锟斤拷
+//* Output Parameters   : 锟角凤拷锟斤拷一锟斤拷锟斤拷确锟斤拷时锟斤拷锟斤拷锟�
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int IsCorrectClock(Record_CLOCK *dt)
 {
@@ -1457,13 +1514,13 @@ int IsCorrectClock(Record_CLOCK *dt)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : GetOTDR
-//* Object              : 閿熸枻鎷峰彇閿熸枻鎷峰墠閿熸枻鎷风柌閿熼叺纭锋嫹椹堕敓鏂ゆ嫹褰�
-//* Input Parameters    : p閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷峰墠鎸囬敓鏂ゆ嫹;
-//*                       s閿熸枻鎷烽敓鏂ゆ嫹鐤查敓閰电》鎷烽┒閿熸枻鎷峰綍閿熸枻鎷峰閿熸枻鎷烽敓锟�
-//*                       e閿熸枻鎷烽敓鏂ゆ嫹鐤查敓閰电》鎷烽┒閿熸枻鎷峰綍閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓锟�
-//* Output Parameters   : 閿熻鍑ゆ嫹閿熸枻鎷蜂竴閿熸枻鎷风柌閿熼叺纭锋嫹椹堕敓鏂ゆ嫹褰�
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     :
+//* Object              : 锟斤拷取锟斤拷前锟斤拷疲锟酵硷拷驶锟斤拷录
+//* Input Parameters    : p锟斤拷锟斤拷锟斤拷前指锟斤拷;
+//*                       s锟斤拷锟斤拷疲锟酵硷拷驶锟斤拷录锟斤拷始锟斤拷锟�
+//*                       e锟斤拷锟斤拷疲锟酵硷拷驶锟斤拷录锟斤拷锟斤拷锟斤拷锟�
+//* Output Parameters   : 锟角凤拷锟斤拷一锟斤拷疲锟酵硷拷驶锟斤拷录
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      :
+//* 锟睫改碉拷全锟街憋拷锟斤拷      :
 //*----------------------------------------------------------------------------
 int GetOTDR( unsigned long p, OTDR_start *s, OTDR_end *e )
 {
@@ -1491,11 +1548,11 @@ int GetOTDR( unsigned long p, OTDR_start *s, OTDR_end *e )
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : ComputeDistance100m
-//* Object              : 閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熼叺绛规嫹閿熸枻鎷风郴閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷蜂綅涓洪敓鏂ゆ嫹閿熸枻鎷�
-//* Input Parameters    : pulseNb閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
-//* Output Parameters   : 閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷�-5804009閿熸枻鎷�
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
+//* Object              : 锟斤拷锟斤拷锟斤拷锟斤拷锟酵筹拷锟斤拷系锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷位为锟斤拷锟斤拷
+//* Input Parameters    : pulseNb锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟�
+//* Output Parameters   : 锟斤拷锟斤拷锟斤拷0-5804009锟斤拷
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : none
+//* 锟睫改碉拷全锟街憋拷锟斤拷      : none
 //*----------------------------------------------------------------------------
 unsigned long ComputeDistance100m(unsigned long pulseNb)
 {
@@ -1506,13 +1563,13 @@ unsigned long ComputeDistance100m(unsigned long pulseNb)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : CompareDateTime
-//* Object              : 閿熼ズ鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹鏃堕敓鏂ゆ嫹鎷囬敓鍙拷
-//* Input Parameters    : dt1閿熸枻鎷烽敓鏂ゆ嫹鏃堕敓鏂ゆ嫹1閿熸枻鎷穌t2閿熸枻鎷烽敓鏂ゆ嫹鏃堕敓鏂ゆ嫹2
-//* Output Parameters   : 1 閿熸枻鎷烽敓鏂ゆ嫹 dt1 > dt2;
-//                       -1 閿熸枻鎷烽敓鏂ゆ嫹 dt1 < dt2;
-//                        0 閿熸枻鎷烽敓鏂ゆ嫹 dt1 = dt2;
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
+//* Object              : 锟饺斤拷锟斤拷锟斤拷时锟斤拷拇锟叫�
+//* Input Parameters    : dt1锟斤拷锟斤拷时锟斤拷1锟斤拷dt2锟斤拷锟斤拷时锟斤拷2
+//* Output Parameters   : 1 锟斤拷锟斤拷 dt1 > dt2;
+//                       -1 锟斤拷锟斤拷 dt1 < dt2;
+//                        0 锟斤拷锟斤拷 dt1 = dt2;
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : none
+//* 锟睫改碉拷全锟街憋拷锟斤拷      : none
 //*----------------------------------------------------------------------------
 int CompareDateTime(Record_CLOCK dt1,Record_CLOCK dt2)
 {
@@ -1566,11 +1623,11 @@ int CompareDateTime(Record_CLOCK dt1,Record_CLOCK dt2)
 }
 //*----------------------------------------------------------------------------
 //* Function Name       : DataPointerSeek
-//* Object              : 閿熸枻鎷烽敓琛楅潻鎷锋數銊庯拷
+//* Object              : 锟斤拷锟街革拷攵ㄎ�
 //* Input Parameters    : none
 //* Output Parameters   : none
-//* 閿熸枻鎷烽敓鐭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
-//* 閿熺潾鏀圭鎷峰叏閿熻鎲嬫嫹閿熸枻鎷�     : none
+//* 锟斤拷锟矫碉拷全锟街憋拷锟斤拷      : none
+//* 锟睫改碉拷全锟街憋拷锟斤拷      : none
 //*----------------------------------------------------------------------------
 void DataPointerSeek()
 {
@@ -1582,7 +1639,7 @@ void DataPointerSeek()
 	int i;
 	DataPoint = pTable.BaseData.CurPoint;
 	p = (unsigned char *)DataPoint;
-	//閿熸枻鎷烽敓鎻鎷峰墠鎸囬敓鏂ゆ嫹浣嶉敓鏂ゆ嫹閿熻鍑ゆ嫹閿熸枻鎷疯瘨閿熻锟�
+	//锟斤拷锟揭碉拷前指锟斤拷位锟斤拷锟角凤拷锟斤拷诒锟街�
 	for(i=0;i<RecordFlagByte;i++)
 	{
 		if(*p!=0xff)
@@ -1592,14 +1649,14 @@ void DataPointerSeek()
 		else
 			p++;
 	}
-	if(i==RecordFlagByte)//閿熸枻鎷峰織閿熸枻鎷烽敓鑺傦綇鎷烽敓鏂ゆ嫹閿熸枻鎷锋寚閿熻瀹氫綅閿熸枻鎷�
+	if(i==RecordFlagByte)//锟斤拷志锟斤拷锟节ｏ拷锟斤拷锟斤拷指锟诫定位锟斤拷
 		return;
 		
-	//閿熸枻鎷烽敓閾拌鎷蜂綅閿熸枻鎷烽敓鏂ゆ嫹鑾搁敓琛楅潻鎷烽敓锟�
-	do
+	//锟斤拷锟铰讹拷位锟斤拷锟斤拷莸锟街革拷锟�
+	do 
 	{
 		if((*p == 0xff)&&(((unsigned long)p&1)==0))
-		{//閿熸枻鎷烽敓鏂ゆ嫹閿熸彮纰夋嫹閿熸枻鎷峰織
+		{//锟斤拷锟斤拷锟揭碉拷锟斤拷志
 			i=0;
 			do
 			{
@@ -1609,10 +1666,10 @@ void DataPointerSeek()
 					p++;
 				i++;
 			}while((*p==0xff)&&(i<RecordFlagByte));
-			if(i == RecordFlagByte)//閿熸彮纰夋嫹閿熸枻鎷烽敓鏂ゆ嫹鎸囬敓鏂ゆ嫹浣嶉敓鏂ゆ嫹
+			if(i == RecordFlagByte)//锟揭碉拷锟斤拷锟斤拷指锟斤拷位锟斤拷
 			{
-				//閿熶粙鐪嬮敓鏂ゆ嫹蹇椾箣鍓嶉敓瑙掑嚖鎷烽敓鍙枻鎷烽敓鏂ゆ嫹閿熻缍欵AE
-				//1)閿熷彨璁规嫹閿熻鍑ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹涓敓鍙揪鎷烽敓绲榚ae閿熸枻鎷峰織閿熶茎鍑ゆ嫹閿熸枻鎷风郴閿熸枻鎷峰綍
+				//锟介看锟斤拷志之前锟角凤拷锟叫斤拷锟斤拷锟街続EAE
+				//1)锟叫讹拷锟角凤拷锟斤拷锟斤拷丫锟叫达拷锟絘eae锟斤拷志锟侥凤拷锟斤拷系锟斤拷录
 				DataPoint = (unsigned long)p;
 				DataPoint -= (RecordFlagByte+2);
 				if(DataPoint<pTable.BaseData.BaseAddr)
@@ -1620,14 +1677,14 @@ void DataPointerSeek()
 				f1 = *((unsigned char *)DataPoint);
 				f2 = *((unsigned char *)(DataPoint+1));
 				if((f1==0xae)&&(f2==0xae))
-				{//閿熸枻鎷烽敓鏂ゆ嫹绯婚敓鏂ゆ嫹褰曢敓鏂ゆ嫹閿熸枻鎷锋寚閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
+				{//锟斤拷锟斤拷系锟斤拷录锟斤拷锟斤拷指锟斤拷锟斤拷锟�
 					pTable.BaseData.CurPoint = (unsigned long)p;
 					pTable.BaseData.CurPoint = AddPointer(&(pTable.BaseData),-2);
 					update = 1;
 					break;
 				}
 				
-				//2)閿熷彨璁规嫹閿熻鍑ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熻緝纰夋嫹閿熼摪锟�
+				//2)锟叫讹拷锟角凤拷锟斤拷锟斤拷锟较碉拷锟铰�
 				DataPoint = (unsigned long)p;
 				DataPoint -= RecordFlagByte*2;
 				if(DataPoint<pTable.BaseData.BaseAddr)
@@ -1635,19 +1692,20 @@ void DataPointerSeek()
 				f1 = *((unsigned char *)DataPoint);
 				f2 = *((unsigned char *)(DataPoint+1));
 					
-				//閿熸枻鎷烽敓鏂ゆ嫹閿熻鎾呮嫹閿熺粸鍢変紮鎷烽敓锟�				/////////*******2003.10.06 panhui*********////////
+				//锟斤拷锟斤拷锟街撅拷锟绞嘉伙拷锟�
+				/////////*******2003.10.06 panhui*********////////
 				DataPoint = (unsigned long)p;
 				DataPoint -= RecordFlagByte;
 				if(DataPoint<pTable.BaseData.BaseAddr)
 					DataPoint = pTable.BaseData.EndAddr - (pTable.BaseData.BaseAddr - DataPoint)+1;
-				if((f1==0xae)&&(f2==0xae))//閿熸枻鎷烽敓閾扮》鎷烽敓鏂ゆ嫹閿熸嵎锝忔嫹閿熸枻鎷锋寚閿熸枻鎷烽敓鏂ゆ嫹閿燂拷
+				if((f1==0xae)&&(f2==0xae))//锟斤拷锟铰硷拷锟斤拷锟捷ｏ拷锟斤拷指锟斤拷锟斤拷锟�
 					pTable.BaseData.CurPoint = DataPoint;
 				else
-				{//閿熸枻鎷烽敓鏂ゆ嫹绯婚敓锟芥湭閿熸枻鎷烽敓鐭》鎷峰啓閿熸枻鎷烽敓鏂ゆ嫹閿熻缍欵AE
-					//鍐欓敓鏂ゆ嫹钀侀敓鏂ゆ嫹閿熸枻鎷峰織
+				{//锟斤拷锟斤拷系锟�未锟斤拷锟矫硷拷写锟斤拷锟斤拷锟街続EAE
+					//写锟斤拷萁锟斤拷锟斤拷志
 					data = 0xaeae;
 					SPI_FLASH_BufferWrite(SPI1,(u8 *)(&data),(unsigned long )DataPoint,2);
-					//閿熸枻鎷烽敓閾板嚖鎷烽敓鏂ゆ嫹閿燂拷
+					//锟斤拷锟铰凤拷锟斤拷锟�
 					pTable.BaseData.CurPoint = (unsigned long)p;
 				}
 				/////////*******2003.10.06 panhui*********////////
@@ -1656,7 +1714,7 @@ void DataPointerSeek()
 			}
 		}
 		else
-		{//鏈敓鎻鎷烽敓鏂ゆ嫹蹇楅敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熺嫛璁规嫹鎸囬敓鏂ゆ嫹
+		{//未锟揭碉拷锟斤拷志锟斤拷锟斤拷锟斤拷锟狡讹拷指锟斤拷
 			if((unsigned long)p == pTable.BaseData.EndAddr)
 				p = (unsigned char *)pTable.BaseData.BaseAddr;
 			else
@@ -1666,7 +1724,7 @@ void DataPointerSeek()
 	
 	if(update)
 	{
-		//閿熸枻鎷烽敓閾拌鎷蜂綅閿熺即纰夋嫹閿熸枻鎷疯幐閿熻闈╂嫹閿燂拷
+		//锟斤拷锟铰讹拷位锟缴碉拷锟斤拷莸锟街革拷锟�
 		Record_CLOCK LastDT,CurDT;
 		unsigned char *dp;
 		DataPoint = pTable.DoubtPointData.CurPoint;
@@ -1699,7 +1757,7 @@ void DataPointerSeek()
 			//////////modified by panhui 2003.10.20////////////
 			if(DataPoint > (pTable.DoubtPointData.EndAddr-110))
 				DataPoint = pTable.DoubtPointData.BaseAddr;
-			//////////閿熸埅鐨囩鎷�鍙伴敓鏂ゆ嫹//////////////////////////////
+			//////////锟截皇碉拷3台锟斤拷//////////////////////////////
 			LastDT = CurDT;
 				
 		}while(DataPoint != pTable.DoubtPointData.CurPoint);	

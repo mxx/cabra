@@ -72,58 +72,22 @@ static struct rt_thread led_thread;
 //static struct rt_thread usb_thread;//modify by leiyq 20130215
 u8 testwritebuff[10];
 u8 testreadbuff[10];
+unsigned char status2;
 unsigned long  jonhbak;
 static void led_thread_entry(void* parameter)
 {
     unsigned int i;
     unsigned long jonh;
     unsigned char num=0;
+    extern struct rt_device uart4_device;
     while (1)
     {
-        rt_hw_led_on(0);
         rt_thread_delay( 1); /* sleep 0.5 second and switch to other thread */
-       // testreadbuff=I2C_Master_BufferWrite(I2C1,3,0,1,&testwritebuff);
-
-#if 0
-        SPI_FLASH_BulkErase(SPI1);
-        for (jonh = 0;jonh<0x100000;jonh=jonh+512)
-        {
-			for (i = 0;i<512;i++ )
-			{
-				if (i< 256)
-				{
-					testwritebuff[i] = i;
-				}
-				else
-				{
-					testwritebuff[i] = i-256;
-				}
-			}
-			SPI_FLASH_BufferWrite(SPI1,&testwritebuff,jonh,512);
-	        SPI_FLASH_BufferRead(SPI1,&testreadbuff,jonh,512);
-	        if (strcmp(testwritebuff,testreadbuff)== 0)
-	        {
-	               	rt_hw_led_off(0);
-	               	jonhbak = jonh;
-
-	        }
-	        else
-	        	break;
-        }
-        rt_hw_led_on(0);
-        jonhbak = jonh;
-
-
-        SPI_FLASH_Sector4kErase(SPI1,0);
-        for(i = 0;i<10;i++)
-        {
-        	testwritebuff[i] = i+1;
-        }
-        SPI_FLASH_BufferWrite(SPI1,testwritebuff,0,10);
-        SPI_FLASH_BufferRead(SPI1,testreadbuff,0,10);
-#endif
         KepPressHandler();
         rs232_handle_application(&uart2_device);
+       //rt_device_write(&uart4_device, 0,"AT+CIPMUX?\r\n", 12);
+
+
     }
 
 }
@@ -141,13 +105,13 @@ static void usb_thread_entry(void* parameter)
 		/* dectect the usb plugin *///second
 		USBH_Process( &USB_OTG_Core, &USB_Host);
 		rt_thread_delay(1);
-
 	}
 
 
 }
 void rt_init_thread_entry(void* parameter)
 {
+	unsigned char bddd[18];
    // rt_hw_buzz_on();
     rt_thread_delay(10);
     rt_hw_buzz_off();
@@ -174,11 +138,12 @@ void rt_init_thread_entry(void* parameter)
 		rt_hw_led_init();
 		Time3_enalble();
 		rt_hw_tim3_init();
-		GPIO_SetBits(GPIOE,GPIO_Pin_2);
+		GPIO_SetBits(GPIOE,GPIO_Pin_2);//da kai speek
 		InitialValue();
-		InitializeTable();
+	    InitializeTable();
 		DisplayNormalUI();
-
+		GPIO_SetBits(GPIOD,GPIO_Pin_12);//da kai gps dianyu
+		GPIO_SetBits(GPIOD,GPIO_Pin_13);//da kai gprs dinayuan
 	while(1) {
         GetSpeedandTime();
         ValueStatusHandler();
@@ -186,11 +151,11 @@ void rt_init_thread_entry(void* parameter)
         BaseDataHandler();
         LocationHandler();
         OverDriverHandler();
-        DoubltPointHandler();
+        //DoubltPointHandler();
         DrvierRegisterHandler();
         PowerHandle();
         ModifyHandle();
-        JournalHandle();
+       // JournalHandle();
 		rt_thread_delay(1);
 	}
 }

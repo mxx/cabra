@@ -154,12 +154,8 @@ void GetSpeedandTime(void)
 		timeflag.Time200msflag = 0;
 		LastPN20ms = CurPN;
 		CurSpeed = ComputeSpeed(pulse);
-		temp = BCD2Char(Parameter.DriverDistace)+100*BCD2Char(Parameter.DriverDistace>>8);
-		temp = 10000*BCD2Char(Parameter.DriverDistace>>16)+temp;
-		temp = 1000000*BCD2Char(Parameter.DriverDistace>>24)+temp;
-		temp = pulse*10/Parameter.PulseCoff+temp;
-		Parameter.DriverDistace = Char2BCD(temp%100)+Char2BCD((temp%10000)/100)*256+Char2BCD((temp%1000000)/10000)*65536
-								+Char2BCD((temp%100000000)/1000000)*16777216;
+		DoubltPointHandler();
+
 	}
 	if(timeflag.Time1sflag == 1)
 	{
@@ -176,6 +172,7 @@ void GetSpeedandTime(void)
 		LastPN1s = CurPN;
 		timeflag.Time1sflag = 0;
 		Curspeed1s = ComputeSpeed(pulse)/5;
+		JournalHandle();
 	}
 	if(timeflag.Time1minflag == 1)
 	{
@@ -187,6 +184,13 @@ void GetSpeedandTime(void)
 		timeflag.Time1minflag = 0;
 		TimeChange |= (0x01<<MINUTE_CHANGE);
 		Curspeed1min = ComputeSpeed(pulse)/300;
+		temp = BCD2Char(Parameter.DriverDistace)+100*BCD2Char(Parameter.DriverDistace>>8);
+		temp = 10000*BCD2Char(Parameter.DriverDistace>>16)+temp;
+		temp = 1000000*BCD2Char(Parameter.DriverDistace>>24)+temp;
+		temp = Curspeed1min/6+temp;
+		Parameter.DriverDistace = Char2BCD(temp%100)+Char2BCD((temp%10000)/100)*256+Char2BCD((temp%1000000)/10000)*65536
+								+Char2BCD((temp%100000000)/1000000)*16777216;
+
 
 	}
 
@@ -252,12 +256,11 @@ void Time3_irg_handler()
 				  }
 	    		  if(Time20sCnt2)
 				  {
-					  Time10sCnte--;
+	    			  Time20sCnt2--;
 				  }
 	    		  if(timecnt.Time1sCnt >59)
 	    		  {
 	    			  timeflag.Time1minflag = 1;
-
 	    			  timecnt.Time1sCnt = 0;
 					  if(Time30mincnt4)//alarm status handle
 					  {
@@ -265,9 +268,6 @@ void Time3_irg_handler()
 						  {
 							  Time30mincnt4--;
 						  }
-
-
-						}
 					  }
 	    			  timecnt.Time5minCnt++;
 	    			  if(timecnt.Time5minCnt>4)
@@ -279,6 +279,7 @@ void Time3_irg_handler()
 							  {
 								  Time30mincnt1--;
 								  Time20sCnt1 =20;
+
 								  if(Time30mincnt1 == 0)
 								  {
 									  playVolWarm1();
@@ -332,6 +333,7 @@ void Time3_irg_handler()
 	      }
 
 	  }
+}
 //////////////////////////////////////////////
 //////////////////////////////////////////////
 ///GPS data////////////////////////////////
@@ -342,6 +344,10 @@ unsigned char ASCII2char(unsigned char number)
 	if((number <58)&&(number>47))
 	{
 		number = number-48;
+	}
+	else
+	{
+		number = 0;
 	}
 	return number;
 }
@@ -359,11 +365,11 @@ void GetTheGPSTime(unsigned char *tbuf)
 	unsigned char i,dtime;
 	unsigned char *pbuf;
 	unsigned char *buf;
-	pbuf = &GPStime.day;
-	buf = &curTime.day;
+	pbuf = &GPStime.hour;
+	buf = &curTime.hour;
 	for(i= 0;i<3;i++)
 	{
-		*(pbuf+i+1) = 10*ASCII2char(*tbuf)+ ASCII2char(*tbuf);
+		*(pbuf+i) = 16*ASCII2char(tbuf[i*2])+ ASCII2char(tbuf[i*2+1]);
 	}
 	nwtime =CountTime(curTime);
 	gtime = CountTime(GPStime);
@@ -379,24 +385,23 @@ void GetTheGPSTime(unsigned char *tbuf)
 	{
 		for(i= 0;i<3;i++)
 		{
-			*(buf+i-1) = (*(pbuf+i-1));
+			*(buf+i) = (*(pbuf+i));
 		}
 		//set the time
-		SetCurrentDateTime(curTime);
+		SetCurrentDateTime(&curTime);
 	}
 
 }
 void GetGPSLocation1(unsigned char *tbuf)
 {
-	unsigned char i,j= 1;
+	unsigned char i;
 	unsigned long *pbuf = (unsigned long *)&location.longtitude;
 	*pbuf = 0;
 	for(i= 0;i<9;i++)
 	{
 		if(i!=4)
 		{
-			*pbuf =ASCII2char(*tbuf)+j*(*pbuf);
-			j= j*10;
+			*pbuf =ASCII2char(tbuf[i])+10*(*pbuf);
 		}
 	}
 
@@ -410,32 +415,49 @@ void GetGPSLocation2(unsigned char *tbuf)
 	{
 		if(i!=5)
 		{
-			*pbuf =ASCII2char(*tbuf)+j*(*pbuf);
-			j= j*10;
+			*pbuf =ASCII2char(tbuf[i])+10*(*pbuf);
 		}
 	}
 
 }
-void GetGPSLocation3(unsigned char *tbuf)
+void GetGPSLocation3(unsigned char *tbuf,unsigned short lenth)
 {
-	unsigned char i,j= 1;
-	unsigned short *pbuf = (unsigned short *)&location.latitude;
+	unsigned char i,k=0;
+	unsigned short *pbuf = (unsigned short *)&location.altitude;
 	*pbuf = 0;
-	for(i= 0;i<7;i++)
+	if(tbuf[0] == '-')
 	{
-		if(i!=5)
-		{
-			*pbuf =ASCII2char(*tbuf)+j*(*pbuf);
-			j= j*10;
-		}
+				k = 1;
+    }
+	for(i= k;i<lenth;i++)
+	{
+		  if(tbuf[i] !='.')
+		  {
+			*pbuf =ASCII2char(tbuf[i])+10*(*pbuf);
+		  }
+	}
+	if(k== 1)
+	{
+		*pbuf = 0-*pbuf;
 	}
 
 }
-unsigned char GettheSinaldata(unsigned char *tbuf)
+//精度1km/h
+void GetGPSSpeed(unsigned char *tbuf,unsigned lenth)
 {
-		unsigned char tempdata;
-		tempdata = 10*ASCII2char(tbuf[0])+ASCII2char(tbuf[1]);
-		return tempdata;
+	unsigned char i;
+	RsSpeed = 0;
+	for(i = 0;i<lenth;i++)
+	{
+		if(tbuf[i] == '.')
+			break;
+		RsSpeed = ASCII2char(tbuf[i])+10*RsSpeed;
+	}
+}
+void GettheSinaldata(unsigned char *tbuf)
+{
+
+	radionum = 10*ASCII2char(tbuf[0])+ASCII2char(tbuf[1]);
 
 }
 //////////////////////////////////////////////////////
@@ -553,7 +575,7 @@ void IckaHandler()
 	if((GPIO_ReadInputDataBit(GPIOD,GPIO_Pin_4) == 1)&&(Datastatusdata.keeprestatus ==0))
 	{
 		insertcount++;
-		if(insertcount == 1000)
+		if(insertcount == 100)
 		{
 			insertcount = 0;
 			Datastatusdata.keeprestatus = 1;
